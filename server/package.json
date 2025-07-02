@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "dev": "nodemon server.js",
-    "start": "node server.js"
+    "start": "node server.js",
+    "client": "cd ../client && npm run dev",
+    "both": "concurrently \"npm run dev\" \"npm run client\""
   },
   "keywords": [],
   "author": "",
@@ -14,7 +16,10 @@
   "dependencies": {
     "cors": "^2.8.5",
     "dotenv": "^17.0.0",
-    "express": "^5.1.0",
+    "express": "^5.1.0"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.0",
     "nodemon": "^3.1.10"
   }
 }
