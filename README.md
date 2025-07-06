@@ -13,6 +13,3 @@
 - Vite
 - GLSL
 - SocketIO
-
-### ⚠️ Notes
-- Dont worry about the `package.json` in the root of the project its just there for convenience.
