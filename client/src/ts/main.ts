@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import Stats from "stats-gl";
 import { Pane } from "tweakpane";
+import { CSS2DRenderer } from "three/examples/jsm/Addons.js";
 
 const scene = new THREE.Scene();
 
@@ -26,6 +27,14 @@ renderer3D.toneMappingExposure = 1;
 renderer3D.shadowMap.enabled = true;
 renderer3D.shadowMap.type = THREE.PCFSoftShadowMap;
 document.body.appendChild(renderer3D.domElement);
+
+const renderer2D = new CSS2DRenderer();
+renderer2D.setSize(window.innerWidth, window.innerHeight);
+renderer2D.domElement.style.position = "absolute";
+renderer2D.domElement.style.top = "0%";
+renderer2D.domElement.style.left = "0%";
+renderer2D.domElement.style.pointerEvents = "none";
+document.body.appendChild(renderer2D.domElement);
 
 const geometry = new THREE.BoxGeometry(1, 1, 1);
 const material = new THREE.MeshStandardMaterial({ color: "#00ff00" });
@@ -53,6 +62,7 @@ window.addEventListener("resize", () => {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
   renderer3D.setSize(window.innerWidth, window.innerHeight);
+  renderer2D.setSize(window.innerWidth, window.innerHeight);
 });
 
 const stats = new Stats({
@@ -67,6 +77,7 @@ pane.expanded = false;
 function animate() {
   requestAnimationFrame(animate);
   renderer3D.render(scene, camera);
+  renderer2D.render(scene, camera);
   stats.update();
   cube.rotation.x += 0.01;
   cube.rotation.y += 0.01;
