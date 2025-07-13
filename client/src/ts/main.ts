@@ -1,7 +1,8 @@
 import * as THREE from "three";
 import Stats from "stats-gl";
 import { Pane } from "tweakpane";
-import { CSS2DRenderer } from "three/examples/jsm/Addons.js";
+import { CSS2DRenderer, RGBELoader } from "three/examples/jsm/Addons.js";
+import { citrusOrchard } from "./utils/assetPaths";
 
 const scene = new THREE.Scene();
 
@@ -42,7 +43,7 @@ const cube = new THREE.Mesh(geometry, material);
 cube.castShadow = true;
 scene.add(cube);
 
-const geo = new THREE.PlaneGeometry(10, 10);
+const geo = new THREE.PlaneGeometry(100, 100);
 const mat = new THREE.MeshStandardMaterial({ color: "#00ffff" });
 const gr = new THREE.Mesh(geo, mat);
 gr.receiveShadow = true;
@@ -50,8 +51,11 @@ gr.position.set(0, -1, 0);
 gr.rotation.set(-Math.PI / 2, 0, 0);
 scene.add(gr);
 
-const ambi = new THREE.AmbientLight("#00ff00", 0.8);
-scene.add(ambi);
+const hdriLoader = new RGBELoader();
+hdriLoader.load(citrusOrchard, (texture) => {
+  texture.mapping = THREE.EquirectangularReflectionMapping;
+  scene.background = texture;
+});
 
 const point = new THREE.PointLight("#ffffff", 100);
 point.position.set(0, 5, 0);
