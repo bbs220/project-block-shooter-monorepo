@@ -1,41 +1,19 @@
 import * as THREE from "three";
-import Stats from "stats-gl";
-import { Pane } from "tweakpane";
-import { CSS2DRenderer, RGBELoader } from "three/examples/jsm/Addons.js";
+import { RGBELoader } from "three/examples/jsm/Addons.js";
 import { citrusOrchard } from "./utils/assetPaths";
+import addScene from "./core/coreScene";
+import addCamera from "./core/coreCamera";
+import addRenderer3D from "./core/coreRenderer";
+import addRenderer2D from "./other/otherRenderer";
+import { framesMonitor } from "./helpers/debugOptions";
 
-const scene = new THREE.Scene();
+const scene = addScene();
 
-const camera = new THREE.PerspectiveCamera(
-  60,
-  window.innerWidth / window.innerHeight,
-  0.01,
-  3000
-);
-camera.position.set(0, 1, 6);
+const camera = addCamera();
 
-const gameCanvas = document.getElementById("gameCanvas") as HTMLCanvasElement;
+const renderer3D = addRenderer3D();
 
-const renderer3D = new THREE.WebGLRenderer({
-  canvas: gameCanvas,
-  alpha: true,
-  antialias: true,
-});
-renderer3D.setPixelRatio(window.devicePixelRatio);
-renderer3D.setSize(window.innerWidth, window.innerHeight);
-renderer3D.toneMapping = THREE.AgXToneMapping;
-renderer3D.toneMappingExposure = 1;
-renderer3D.shadowMap.enabled = true;
-renderer3D.shadowMap.type = THREE.PCFSoftShadowMap;
-document.body.appendChild(renderer3D.domElement);
-
-const renderer2D = new CSS2DRenderer();
-renderer2D.setSize(window.innerWidth, window.innerHeight);
-renderer2D.domElement.style.position = "absolute";
-renderer2D.domElement.style.top = "0%";
-renderer2D.domElement.style.left = "0%";
-renderer2D.domElement.style.pointerEvents = "none";
-document.body.appendChild(renderer2D.domElement);
+const renderer2D = addRenderer2D();
 
 const geometry = new THREE.BoxGeometry(1, 1, 1);
 const material = new THREE.MeshStandardMaterial({ color: "#00ff00" });
@@ -69,20 +47,19 @@ window.addEventListener("resize", () => {
   renderer2D.setSize(window.innerWidth, window.innerHeight);
 });
 
-const stats = new Stats({
-  trackGPU: true,
-  trackHz: true,
-});
-document.body.appendChild(stats.dom);
+function clean3DRender() {
+  renderer3D.render(scene, camera);
+}
 
-const pane = new Pane({ title: "⚙️ Settings" });
-pane.expanded = false;
+function clean2DRender() {
+  renderer2D.render(scene, camera);
+}
 
 function animate() {
   requestAnimationFrame(animate);
-  renderer3D.render(scene, camera);
-  renderer2D.render(scene, camera);
-  stats.update();
+  clean3DRender();
+  clean2DRender();
+  framesMonitor.update();
   cube.rotation.x += 0.01;
   cube.rotation.y += 0.01;
   cube.rotation.z += 0.01;
