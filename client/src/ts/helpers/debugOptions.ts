@@ -5,6 +5,7 @@ const framesMonitor = new Stats({
   trackGPU: true,
   trackHz: true,
   trackCPT: true,
+  horizontal: false,
 });
 document.body.appendChild(framesMonitor.dom);
 

@@ -6,6 +6,7 @@ import addCamera from "./core/coreCamera";
 import addRenderer3D from "./core/coreRenderer";
 import addRenderer2D from "./other/otherRenderer";
 import { framesMonitor } from "./helpers/debugOptions";
+import addOrbitLook from "./controls/orbitLook";
 
 const scene = addScene();
 
@@ -40,11 +41,14 @@ point.position.set(0, 5, 0);
 point.castShadow = true;
 scene.add(point);
 
+const orbitLock = addOrbitLook(camera, renderer3D);
+
 window.addEventListener("resize", () => {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
   renderer3D.setSize(window.innerWidth, window.innerHeight);
   renderer2D.setSize(window.innerWidth, window.innerHeight);
+  orbitLock.gizmo.update();
 });
 
 function clean3DRender() {
@@ -59,6 +63,8 @@ function animate() {
   requestAnimationFrame(animate);
   clean3DRender();
   clean2DRender();
+  orbitLock.orbitCtrls.update();
+  orbitLock.gizmo.render();
   framesMonitor.update();
   cube.rotation.x += 0.01;
   cube.rotation.y += 0.01;
