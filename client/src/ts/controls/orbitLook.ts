@@ -13,7 +13,6 @@ function addOrbitLook(
     className: "debugGizmo",
   });
   gizmo.attachControls(orbitCtrls);
-  console.log("attached orbit controls");
   return { orbitCtrls, gizmo };
 }
 

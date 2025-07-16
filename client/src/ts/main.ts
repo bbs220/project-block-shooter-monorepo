@@ -7,6 +7,8 @@ import addRenderer3D from "./core/coreRenderer";
 import addRenderer2D from "./other/otherRenderer";
 import { framesMonitor } from "./helpers/debugOptions";
 import addOrbitLook from "./controls/orbitLook";
+import groundMesh from "./testScene/ground";
+import cubeMesh from "./testScene/cube";
 
 const scene = addScene();
 
@@ -16,19 +18,9 @@ const renderer3D = addRenderer3D();
 
 const renderer2D = addRenderer2D();
 
-const geometry = new THREE.BoxGeometry(1, 1, 1);
-const material = new THREE.MeshStandardMaterial({ color: "#00ff00" });
-const cube = new THREE.Mesh(geometry, material);
-cube.castShadow = true;
-scene.add(cube);
+scene.add(cubeMesh);
 
-const geo = new THREE.PlaneGeometry(100, 100);
-const mat = new THREE.MeshStandardMaterial({ color: "#00ffff" });
-const gr = new THREE.Mesh(geo, mat);
-gr.receiveShadow = true;
-gr.position.set(0, -1, 0);
-gr.rotation.set(-Math.PI / 2, 0, 0);
-scene.add(gr);
+scene.add(groundMesh);
 
 const hdriLoader = new RGBELoader();
 hdriLoader.load(citrusOrchard, (texture) => {
