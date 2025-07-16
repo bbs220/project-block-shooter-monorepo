@@ -15,6 +15,7 @@ body {
 }
 
 .debugGizmo {
+  display: block;
   position: absolute;
   left: 100px !important;
   top: 5px !important;

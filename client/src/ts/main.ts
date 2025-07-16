@@ -34,12 +34,9 @@ const hdriLoader = new RGBELoader();
 hdriLoader.load(citrusOrchard, (texture) => {
   texture.mapping = THREE.EquirectangularReflectionMapping;
   scene.background = texture;
+  scene.environment = texture;
+  scene.backgroundBlurriness = 0;
 });
-
-const point = new THREE.PointLight("#ffffff", 100);
-point.position.set(0, 5, 0);
-point.castShadow = true;
-scene.add(point);
 
 const orbitLock = addOrbitLook(camera, renderer3D);
 
@@ -66,8 +63,5 @@ function animate() {
   orbitLock.orbitCtrls.update();
   orbitLock.gizmo.render();
   framesMonitor.update();
-  cube.rotation.x += 0.01;
-  cube.rotation.y += 0.01;
-  cube.rotation.z += 0.01;
 }
 animate();
