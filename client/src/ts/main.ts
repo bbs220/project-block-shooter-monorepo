@@ -8,7 +8,7 @@ import addRenderer2D from "./other/otherRenderer";
 import { framesMonitor } from "./helpers/debugOptions";
 import addOrbitLook from "./controls/orbitLook";
 import groundMesh from "./testScene/ground";
-import cubeMesh from "./testScene/cube";
+import ballMesh from "./testScene/ball";
 
 const scene = addScene();
 
@@ -18,7 +18,7 @@ const renderer3D = addRenderer3D();
 
 const renderer2D = addRenderer2D();
 
-scene.add(cubeMesh);
+scene.add(ballMesh);
 
 scene.add(groundMesh);
 
