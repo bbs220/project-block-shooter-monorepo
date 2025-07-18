@@ -9,6 +9,6 @@ const framesMonitor = new Stats({
 });
 document.body.appendChild(framesMonitor.dom);
 
-const inspectorUI = new Pane({ title: "⚙️ Settings", expanded: false });
+const inspectorUI = new Pane({ title: "⚙️ Settings", expanded: true });
 
 export { inspectorUI, framesMonitor };
