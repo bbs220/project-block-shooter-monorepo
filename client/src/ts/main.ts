@@ -9,6 +9,7 @@ import { framesMonitor } from "./helpers/debugOptions";
 import addOrbitLook from "./controls/orbitLook";
 import groundMesh from "./testScene/ground";
 import ballMesh from "./testScene/ball";
+import { progressManager } from "./helpers/loadingScreen";
 
 const scene = addScene();
 
@@ -22,7 +23,7 @@ scene.add(ballMesh);
 
 scene.add(groundMesh);
 
-const hdriLoader = new RGBELoader();
+const hdriLoader = new RGBELoader(progressManager);
 hdriLoader.load(citrusOrchard, (texture) => {
   texture.mapping = THREE.EquirectangularReflectionMapping;
   scene.background = texture;

@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { darkTile } from "../utils/assetPaths";
 import { inspectorUI } from "../helpers/debugOptions";
+import { progressManager } from "../helpers/loadingScreen";
 
 const anisotrophicValue = 16;
 
@@ -8,13 +9,16 @@ const groundSize = 32;
 
 const tilingValue = groundSize;
 
-const darkTexture = new THREE.TextureLoader().load(darkTile, (texture) => {
-  texture.wrapS = THREE.RepeatWrapping;
-  texture.wrapT = THREE.RepeatWrapping;
-  texture.repeat.set(tilingValue, tilingValue);
-  texture.anisotropy = anisotrophicValue;
-  texture.colorSpace = THREE.SRGBColorSpace;
-});
+const darkTexture = new THREE.TextureLoader(progressManager).load(
+  darkTile,
+  (texture) => {
+    texture.wrapS = THREE.RepeatWrapping;
+    texture.wrapT = THREE.RepeatWrapping;
+    texture.repeat.set(tilingValue, tilingValue);
+    texture.anisotropy = anisotrophicValue;
+    texture.colorSpace = THREE.SRGBColorSpace;
+  }
+);
 
 const groundGeometry = new THREE.PlaneGeometry(groundSize, groundSize);
 const groundMaterial = new THREE.MeshStandardMaterial({
