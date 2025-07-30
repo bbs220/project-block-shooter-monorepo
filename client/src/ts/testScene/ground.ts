@@ -27,7 +27,7 @@ const groundMaterial = new THREE.MeshStandardMaterial({
 });
 const groundMesh = new THREE.Mesh(groundGeometry, groundMaterial);
 groundMesh.receiveShadow = true;
-groundMesh.position.set(0, -1, 0);
+groundMesh.position.set(0, 0, 0);
 groundMesh.scale.set(1, 1, 1);
 groundMesh.rotation.set(-Math.PI / 2, 0, 0);
 
@@ -36,6 +36,7 @@ const groundFolder = inspectorUI.addFolder({
   expanded: false,
 });
 
+groundFolder.addBinding(groundMesh, "visible", { label: "Visible" });
 groundFolder.addBinding(groundMaterial, "wireframe", { label: "Wireframe" });
 
 const positionFolder = groundFolder.addFolder({
@@ -84,8 +85,9 @@ rotationFolder.addBinding(groundMesh.rotation, "z", {
 
 const scaleFolder = groundFolder.addFolder({ title: "Scale", expanded: false });
 
-scaleFolder.addBinding(groundMesh.scale, "x", { min: 1, max: 10, label: "X" });
-scaleFolder.addBinding(groundMesh.scale, "y", { min: 1, max: 10, label: "Y" });
+scaleFolder.addBinding(groundMesh.scale, "x", { min: 1, max: 100, label: "X" });
+scaleFolder.addBinding(groundMesh.scale, "y", { min: 1, max: 100, label: "Y" });
+scaleFolder.addBinding(groundMesh.scale, "z", { min: 1, max: 100, label: "Z" });
 
 const resetButton = groundFolder.addButton({
   title: "Reset Ground Transform",

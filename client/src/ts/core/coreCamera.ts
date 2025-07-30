@@ -7,7 +7,7 @@ function addCamera() {
     0.01,
     3000
   );
-  camera.position.set(0, 1, 6);
+  camera.position.set(0, 2, 4);
   return camera;
 }
 

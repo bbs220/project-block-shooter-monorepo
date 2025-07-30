@@ -1,15 +1,15 @@
 import * as THREE from "three";
 import { RGBELoader } from "three/examples/jsm/Addons.js";
-import { citrusOrchard } from "./utils/assetPaths";
-import addScene from "./core/coreScene";
+import addOrbitLook from "./controls/orbitLook";
 import addCamera from "./core/coreCamera";
 import addRenderer3D from "./core/coreRenderer";
-import addRenderer2D from "./other/otherRenderer";
+import addScene from "./core/coreScene";
 import { framesMonitor } from "./helpers/debugOptions";
-import addOrbitLook from "./controls/orbitLook";
-import groundMesh from "./testScene/ground";
-import ballMesh from "./testScene/ball";
 import { progressManager } from "./helpers/loadingScreen";
+import addRenderer2D from "./other/otherRenderer";
+import ballMesh from "./testScene/ball";
+import groundMesh from "./testScene/ground";
+import { citrusOrchard } from "./utils/assetPaths";
 
 const scene = addScene();
 
