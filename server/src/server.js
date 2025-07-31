@@ -1,17 +1,17 @@
-import express, { Application, Request, Response } from "express";
-import dotenv from "dotenv";
-import cors from "cors";
+const express = require("express");
+const dotenv = require("dotenv");
+const cors = require("cors");
 
-dotenv.config();
+dotenv.config({ debug: true });
 
-const app: Application = express();
+const app = express();
 const PORT = process.env.PORT;
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 
-app.get("/", (req: Request, res: Response) => {
+app.get("/", (req, res) => {
   res.status(200).json({ message: "⭐ api is alive" });
 });
 
