@@ -2,9 +2,12 @@
   "name": "server",
   "version": "1.0.0",
   "description": "game server",
-  "main": "./src/server.ts",
+  "main": "./src/server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "nodemon ./src/server.js",
+    "client": "cd ../client && npm run dev",
+    "start": "node ./src/server.js",
+    "both": " concurrently \"npm run dev\" \"npm run client\""
   },
   "keywords": [],
   "author": "",
