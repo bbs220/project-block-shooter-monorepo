@@ -7,7 +7,7 @@ import addScene from "./core/coreScene";
 import { framesMonitor } from "./helpers/debugOptions";
 import { progressManager } from "./helpers/loadingScreen";
 import addRenderer2D from "./other/otherRenderer";
-import ballMesh from "./testScene/ball";
+import buildingsMesh from "./testScene/buildings";
 import groundMesh from "./testScene/ground";
 import { citrusOrchard } from "./utils/assetPaths";
 
@@ -19,7 +19,7 @@ const renderer3D = addRenderer3D();
 
 const renderer2D = addRenderer2D();
 
-scene.add(ballMesh);
+scene.add(buildingsMesh);
 
 scene.add(groundMesh);
 
@@ -31,6 +31,8 @@ hdriLoader.load(citrusOrchard, (texture) => {
   scene.backgroundBlurriness = 0;
 });
 
+// this is for debugging view
+// it comes with a gizmo
 const orbitLock = addOrbitLook(camera, renderer3D);
 
 window.addEventListener("resize", () => {
