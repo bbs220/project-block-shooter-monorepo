@@ -7,7 +7,6 @@ function addScene() {
     title: "🌎 Scene",
     expanded: false,
   });
-  sceneFolder.addBinding(scene, "castShadow", { label: "Shadows" });
 
   return scene;
 }

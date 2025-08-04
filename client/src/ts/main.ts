@@ -4,7 +4,7 @@ import addOrbitLook from "./controls/orbitLook";
 import addCamera from "./core/coreCamera";
 import addRenderer3D from "./core/coreRenderer";
 import addScene from "./core/coreScene";
-import { framesMonitor } from "./helpers/debugOptions";
+import { framesMonitor, inspectorUI } from "./helpers/debugOptions";
 import { progressManager } from "./helpers/loadingScreen";
 import addRenderer2D from "./other/otherRenderer";
 import buildingsMesh from "./testScene/buildings";
@@ -35,6 +35,9 @@ hdriLoader.load(citrusOrchard, (texture) => {
 // it comes with a gizmo
 const orbitLock = addOrbitLook(camera, renderer3D);
 
+const debugClock = new THREE.Clock();
+debugClock.autoStart = true;
+
 window.addEventListener("resize", () => {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
@@ -51,12 +54,35 @@ function clean2DRender() {
   renderer2D.render(scene, camera);
 }
 
+const switchControls = {
+  value: true,
+};
+
+const controlsFolder = inspectorUI.addFolder({
+  title: "🕹️ Controls",
+  expanded: false,
+});
+
+const orbitToggle = controlsFolder.addBinding(switchControls, "value", {
+  label: "Debug",
+});
+
+orbitToggle.on("change", (ev) => {
+  const isEnabled = ev.value;
+  orbitLock.orbitCtrls.enabled = isEnabled;
+  orbitLock.gizmo.enabled = isEnabled;
+});
+
 function animate() {
   requestAnimationFrame(animate);
   clean3DRender();
   clean2DRender();
-  orbitLock.orbitCtrls.update();
-  orbitLock.gizmo.render();
+  if (orbitLock.orbitCtrls.enabled) {
+    orbitLock.orbitCtrls.update();
+  }
+  if (orbitLock.gizmo.enabled) {
+    orbitLock.gizmo.render();
+  }
   framesMonitor.update();
 }
 animate();
