@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { RGBELoader } from "three/examples/jsm/Addons.js";
-import addOrbitLook from "./controls/orbitLook";
+// import addOrbitLook from "./controls/orbitLook";
 import addCamera from "./core/coreCamera";
 import addRenderer3D from "./core/coreRenderer";
 import addScene from "./core/coreScene";
@@ -33,7 +33,7 @@ hdriLoader.load(citrusOrchard, (texture) => {
 
 // this is for debugging view
 // it comes with a gizmo
-const orbitLock = addOrbitLook(camera, renderer3D);
+// const orbitLock = addOrbitLook(camera, renderer3D);
 
 const debugClock = new THREE.Clock();
 debugClock.autoStart = true;
@@ -43,7 +43,7 @@ window.addEventListener("resize", () => {
   camera.updateProjectionMatrix();
   renderer3D.setSize(window.innerWidth, window.innerHeight);
   renderer2D.setSize(window.innerWidth, window.innerHeight);
-  orbitLock.gizmo.update();
+  // orbitLock.gizmo.update();
 });
 
 function clean3DRender() {
@@ -55,7 +55,7 @@ function clean2DRender() {
 }
 
 const switchControls = {
-  value: true,
+  value: false,
 };
 
 const controlsFolder = inspectorUI.addFolder({
@@ -69,20 +69,22 @@ const orbitToggle = controlsFolder.addBinding(switchControls, "value", {
 
 orbitToggle.on("change", (ev) => {
   const isEnabled = ev.value;
-  orbitLock.orbitCtrls.enabled = isEnabled;
-  orbitLock.gizmo.enabled = isEnabled;
+  console.log(`orbit controls is ${isEnabled ? "enabled" : "disabled"}`);
+
+  // orbitLock.orbitCtrls.enabled = isEnabled;
+  // orbitLock.gizmo.enabled = isEnabled;
 });
 
 function animate() {
   requestAnimationFrame(animate);
   clean3DRender();
   clean2DRender();
-  if (orbitLock.orbitCtrls.enabled) {
-    orbitLock.orbitCtrls.update();
-  }
-  if (orbitLock.gizmo.enabled) {
-    orbitLock.gizmo.render();
-  }
+  // if (orbitLock.orbitCtrls.enabled) {
+  //   orbitLock.orbitCtrls.update();
+  // }
+  // if (orbitLock.gizmo.enabled) {
+  //   orbitLock.gizmo.render();
+  // }
   framesMonitor.update();
 }
 animate();
