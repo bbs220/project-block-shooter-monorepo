@@ -7,8 +7,8 @@ const buildingMaterial = new THREE.MeshStandardMaterial({
   wireframe: false,
 });
 
-const gridX = 10;
-const gridZ = 10;
+const gridX = 50;
+const gridZ = 50;
 const buildingCount = gridX * gridZ;
 const spacing = 1;
 

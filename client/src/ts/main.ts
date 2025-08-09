@@ -10,6 +10,7 @@ import addRenderer2D from "./other/otherRenderer";
 import buildingsMesh from "./testScene/buildings";
 import groundMesh from "./testScene/ground";
 import { citrusOrchard } from "./utils/assetPaths";
+import addPointerLook from "./controls/pointerLook";
 
 const scene = addScene();
 
@@ -35,8 +36,11 @@ hdriLoader.load(citrusOrchard, (texture) => {
 // it comes with a gizmo
 // const orbitLock = addOrbitLook(camera, renderer3D);
 
+const pointerLock = addPointerLook(camera, renderer3D);
+
+camera.position.set(0, 0.5, 1);
+
 const debugClock = new THREE.Clock();
-debugClock.autoStart = true;
 
 window.addEventListener("resize", () => {
   camera.aspect = window.innerWidth / window.innerHeight;
@@ -75,16 +79,24 @@ orbitToggle.on("change", (ev) => {
   // orbitLock.gizmo.enabled = isEnabled;
 });
 
+// function runOrbitLock() {
+//   if (orbitLock.orbitCtrls.enabled) {
+//     orbitLock.orbitCtrls.update();
+//   }
+//   if (orbitLock.gizmo.enabled) {
+//     orbitLock.gizmo.render();
+//   }
+// }
+
 function animate() {
   requestAnimationFrame(animate);
   clean3DRender();
   clean2DRender();
-  // if (orbitLock.orbitCtrls.enabled) {
-  //   orbitLock.orbitCtrls.update();
-  // }
-  // if (orbitLock.gizmo.enabled) {
-  //   orbitLock.gizmo.render();
-  // }
+  const delta = debugClock.getDelta();
+
+  // runOrbitLock();
+  pointerLock.runControls(delta);
+
   framesMonitor.update();
 }
 animate();

@@ -5,7 +5,7 @@ import { progressManager } from "../helpers/loadingScreen";
 
 const anisotrophicValue = 16;
 
-const groundSize = 10;
+const groundSize = 50;
 
 const tilingValue = groundSize;
 
