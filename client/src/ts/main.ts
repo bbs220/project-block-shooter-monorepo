@@ -38,7 +38,7 @@ hdriLoader.load(citrusOrchard, (texture) => {
 
 const pointerLock = addPointerLook(camera, renderer3D);
 
-camera.position.set(0, 0.5, 1);
+camera.position.set(0, 0.5, 0);
 
 const debugClock = new THREE.Clock();
 
