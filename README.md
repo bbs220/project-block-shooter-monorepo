@@ -13,3 +13,13 @@
 - Vite
 - GLSL
 - SocketIO
+
+### ⚙️ Local use
+1. Client
+ - cd `client` and then `npm install`
+ - For running **client** only `npm run dev`
+  
+2. Server
+ - cd `server` and then `npm install`
+ - For running **server** only `npm run dev`
+ - For runnning **server** and **client** both `npm run both`
