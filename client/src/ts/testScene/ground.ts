@@ -94,7 +94,7 @@ const resetButton = groundFolder.addButton({
 });
 
 resetButton.on("click", () => {
-  groundMesh.position.set(0, -1, 0);
+  groundMesh.position.set(0, 0, 0);
   groundMesh.rotation.set(-Math.PI / 2, 0, 0);
   groundMesh.scale.set(1, 1, 1);
   groundFolder.refresh();

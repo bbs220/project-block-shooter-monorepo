@@ -56,10 +56,6 @@ const smol = (num: number): string => {
   return fixedNum;
 };
 
-const instructions = document.getElementById(
-  "loadingBackground"
-) as HTMLDivElement;
-
 const debugInfo = document.createElement("div");
 debugInfo.id = "debugInfo";
 document.body.appendChild(debugInfo);
@@ -78,18 +74,16 @@ function addPointerLook(
 ) {
   const pointerCtrls = new PointerLockControls(camera, renderer.domElement);
 
-  instructions.addEventListener("click", () => {
+  debugInfo.addEventListener("click", () => {
     pointerCtrls.lock();
   });
 
   pointerCtrls.addEventListener("lock", () => {
     console.log("Pointer locked");
-    instructions.style.display = "none";
   });
 
   pointerCtrls.addEventListener("unlock", () => {
     console.log("Pointer unlocked");
-    instructions.style.display = "block";
   });
 
   document.addEventListener("keydown", onKeyDown);
