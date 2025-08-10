@@ -56,7 +56,7 @@ const smol = (num: number): string => {
   return fixedNum;
 };
 
-const debugInfo = document.createElement("div");
+export const debugInfo = document.createElement("div");
 debugInfo.id = "debugInfo";
 document.body.appendChild(debugInfo);
 

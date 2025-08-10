@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { RGBELoader } from "three/examples/jsm/Addons.js";
-// import addOrbitLook from "./controls/orbitLook";
+import addOrbitLook from "./controls/orbitLook";
 import addCamera from "./core/coreCamera";
 import addRenderer3D from "./core/coreRenderer";
 import addScene from "./core/coreScene";
@@ -10,18 +10,14 @@ import addRenderer2D from "./other/otherRenderer";
 import buildingsMesh from "./testScene/buildings";
 import groundMesh from "./testScene/ground";
 import { citrusOrchard } from "./utils/assetPaths";
-import addPointerLook from "./controls/pointerLook";
+import addPointerLook, { debugInfo } from "./controls/pointerLook";
 
 const scene = addScene();
-
 const camera = addCamera();
-
 const renderer3D = addRenderer3D();
-
 const renderer2D = addRenderer2D();
 
 scene.add(buildingsMesh);
-
 scene.add(groundMesh);
 
 const hdriLoader = new RGBELoader(progressManager);
@@ -32,13 +28,14 @@ hdriLoader.load(citrusOrchard, (texture) => {
   scene.backgroundBlurriness = 0;
 });
 
-// this is for debugging view
-// it comes with a gizmo
-// const orbitLock = addOrbitLook(camera, renderer3D);
+const orbitLook = addOrbitLook(camera, renderer3D);
+const pointerLook = addPointerLook(camera, renderer3D);
 
-const pointerLock = addPointerLook(camera, renderer3D);
-
-camera.position.set(0, 0.5, 0);
+orbitLook.orbitCtrls.enabled = true;
+orbitLook.gizmo.enabled = true;
+pointerLook.pointerCtrls.enabled = false;
+debugInfo.style.display = "none";
+camera.position.set(0, 2, 4);
 
 const debugClock = new THREE.Clock();
 
@@ -47,7 +44,9 @@ window.addEventListener("resize", () => {
   camera.updateProjectionMatrix();
   renderer3D.setSize(window.innerWidth, window.innerHeight);
   renderer2D.setSize(window.innerWidth, window.innerHeight);
-  // orbitLock.gizmo.update();
+  if (orbitLook.gizmo.enabled) {
+    orbitLook.gizmo.update();
+  }
 });
 
 function clean3DRender() {
@@ -59,7 +58,7 @@ function clean2DRender() {
 }
 
 const switchControls = {
-  value: false,
+  activeControl: "Orbit",
 };
 
 const controlsFolder = inspectorUI.addFolder({
@@ -67,26 +66,35 @@ const controlsFolder = inspectorUI.addFolder({
   expanded: false,
 });
 
-const orbitToggle = controlsFolder.addBinding(switchControls, "value", {
-  label: "Debug",
-});
+controlsFolder
+  .addBinding(switchControls, "activeControl", {
+    label: "Control Mode",
+    options: {
+      Orbit: "Orbit",
+      PointerLock: "PointerLock",
+    },
+  })
+  .on("change", (ev) => {
+    const selectedControl = ev.value;
+    console.log(`Switched to ${selectedControl} controls`);
 
-orbitToggle.on("change", (ev) => {
-  const isEnabled = ev.value;
-  console.log(`orbit controls is ${isEnabled ? "enabled" : "disabled"}`);
+    // Disable all controls first
+    orbitLook.orbitCtrls.enabled = false;
+    orbitLook.gizmo.enabled = false;
+    pointerLook.pointerCtrls.enabled = false;
 
-  // orbitLock.orbitCtrls.enabled = isEnabled;
-  // orbitLock.gizmo.enabled = isEnabled;
-});
-
-// function runOrbitLock() {
-//   if (orbitLock.orbitCtrls.enabled) {
-//     orbitLock.orbitCtrls.update();
-//   }
-//   if (orbitLock.gizmo.enabled) {
-//     orbitLock.gizmo.render();
-//   }
-// }
+    // Then enable only the selected one
+    if (selectedControl === "Orbit") {
+      orbitLook.orbitCtrls.enabled = true;
+      orbitLook.gizmo.enabled = true;
+      debugInfo.style.display = "none";
+      camera.position.set(0, 2, 4);
+    } else if (selectedControl === "PointerLock") {
+      pointerLook.pointerCtrls.enabled = true;
+      debugInfo.style.display = "flex";
+      camera.position.set(0, 0.5, 0);
+    }
+  });
 
 function animate() {
   requestAnimationFrame(animate);
@@ -94,9 +102,17 @@ function animate() {
   clean2DRender();
   const delta = debugClock.getDelta();
 
-  // runOrbitLock();
-  pointerLock.runControls(delta);
+  if (orbitLook.orbitCtrls.enabled) {
+    orbitLook.orbitCtrls.update();
+  }
+  if (orbitLook.gizmo.enabled) {
+    orbitLook.gizmo.render();
+  }
+  if (pointerLook.pointerCtrls.enabled) {
+    pointerLook.runControls(delta);
+  }
 
   framesMonitor.update();
 }
+
 animate();
