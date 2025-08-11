@@ -8,6 +8,10 @@ const moveState = {
   moveRight: false,
 };
 
+const zoomState = {
+  isZooming: false,
+};
+
 function onKeyDown(event: KeyboardEvent) {
   switch (event.key) {
     case "w":
@@ -42,11 +46,29 @@ function onKeyUp(event: KeyboardEvent) {
   }
 }
 
+// Add event listeners for mouse clicks
+// 2 is right mouse button
+function onMouseDown(event: MouseEvent) {
+  if (event.button === 2) {
+    zoomState.isZooming = true;
+  }
+}
+
+function onMouseUp(event: MouseEvent) {
+  if (event.button === 2) {
+    zoomState.isZooming = false;
+  }
+}
+
 const velocity = new THREE.Vector3();
 const direction = new THREE.Vector3();
 
 const drag = 10;
-const acceleration = 40;
+const acceleration = 10;
+
+const originalFov = 60;
+const zoomedFov = 30;
+const zoomSpeed = 0.1;
 
 const smol = (num: number): string => {
   const fixedNum = num.toFixed(2);
@@ -100,6 +122,11 @@ function addPointerLook(
   document.addEventListener("keydown", onKeyDown);
   document.addEventListener("keyup", onKeyUp);
 
+  // Prevent the default right-click context menu
+  document.addEventListener("contextmenu", (e) => e.preventDefault());
+  document.addEventListener("mousedown", onMouseDown);
+  document.addEventListener("mouseup", onMouseUp);
+
   function runControls(delta: number) {
     if (pointerCtrls.isLocked && delta) {
       // Apply drag
@@ -122,16 +149,23 @@ function addPointerLook(
         velocity.x -= direction.x * acceleration * delta;
       }
 
-      // Apply the final movement
       pointerCtrls.moveRight(-velocity.x * delta);
       pointerCtrls.moveForward(-velocity.z * delta);
+
+      if (zoomState.isZooming) {
+        camera.fov = THREE.MathUtils.lerp(camera.fov, zoomedFov, zoomSpeed);
+      } else {
+        camera.fov = THREE.MathUtils.lerp(camera.fov, originalFov, zoomSpeed);
+      }
+      camera.updateProjectionMatrix();
 
       statusInfo.innerText = `Position X: ${smol(camera.position.x)}, Y: ${smol(
         camera.position.y
       )}, Z: ${smol(camera.position.z)}
       Velocity X: ${smol(velocity.x)}, Y: ${smol(velocity.y)}, Z: ${smol(
         velocity.z
-      )}`;
+      )}
+      FOV: ${smol(camera.fov)}`;
     }
   }
 
