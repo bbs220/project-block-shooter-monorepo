@@ -10,7 +10,7 @@ import addRenderer2D from "./other/otherRenderer";
 import buildingsMesh from "./testScene/buildings";
 import groundMesh from "./testScene/ground";
 import { citrusOrchard } from "./utils/assetPaths";
-import addPointerLook, { debugInfo } from "./controls/pointerLook";
+import addPointerLook, { debugInfo, uiContainer } from "./controls/pointerLook";
 
 const scene = addScene();
 const camera = addCamera();
@@ -31,10 +31,12 @@ hdriLoader.load(citrusOrchard, (texture) => {
 const orbitLook = addOrbitLook(camera, renderer3D);
 const pointerLook = addPointerLook(camera, renderer3D);
 
+// setting up initial states
 orbitLook.orbitCtrls.enabled = true;
 orbitLook.gizmo.enabled = true;
 pointerLook.pointerCtrls.enabled = false;
 debugInfo.style.display = "none";
+uiContainer.style.display = "none";
 camera.position.set(0, 2, 4);
 
 const debugClock = new THREE.Clock();
@@ -88,10 +90,12 @@ controlsFolder
       orbitLook.orbitCtrls.enabled = true;
       orbitLook.gizmo.enabled = true;
       debugInfo.style.display = "none";
+      uiContainer.style.display = "none";
       camera.position.set(0, 2, 4);
     } else if (selectedControl === "PointerLock") {
       pointerLook.pointerCtrls.enabled = true;
       debugInfo.style.display = "flex";
+      uiContainer.style.display = "flex";
       camera.position.set(0, 0.5, 0);
     }
   });

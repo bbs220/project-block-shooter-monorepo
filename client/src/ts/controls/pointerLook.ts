@@ -56,9 +56,15 @@ const smol = (num: number): string => {
   return fixedNum;
 };
 
+// this shit will be removed later on
 export const debugInfo = document.createElement("div");
 debugInfo.id = "debugInfo";
 document.body.appendChild(debugInfo);
+
+// this shit will stay
+export const uiContainer = document.createElement("div");
+uiContainer.id = "uiContainer";
+document.body.appendChild(uiContainer);
 
 const keysInfo = document.createElement("div");
 keysInfo.id = "keysInfo";
