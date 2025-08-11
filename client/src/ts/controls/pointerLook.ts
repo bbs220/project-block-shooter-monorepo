@@ -66,8 +66,13 @@ export const uiContainer = document.createElement("div");
 uiContainer.id = "uiContainer";
 document.body.appendChild(uiContainer);
 
+const reticle = document.createElement("img");
+reticle.id = "reticle";
+uiContainer.appendChild(reticle);
+
 const keysInfo = document.createElement("div");
 keysInfo.id = "keysInfo";
+keysInfo.innerText = "Press here to lock your cursor";
 debugInfo.appendChild(keysInfo);
 
 const statusInfo = document.createElement("div");
