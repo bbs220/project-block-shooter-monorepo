@@ -37,6 +37,7 @@ orbitLook.gizmo.enabled = true;
 pointerLook.pointerCtrls.enabled = false;
 debugInfo.style.display = "none";
 uiContainer.style.display = "none";
+
 camera.position.set(0, 2, 4);
 
 const debugClock = new THREE.Clock();
@@ -92,12 +93,14 @@ controlsFolder
       uiContainer.style.display = "none";
       camera.position.set(0, 2, 4);
       orbitControlsFolder.hidden = false;
+      pointerCtrlsFolder.hidden = true;
     } else if (selectedControl === "PointerLock") {
       pointerLook.pointerCtrls.enabled = true;
       debugInfo.style.display = "flex";
       uiContainer.style.display = "flex";
       camera.position.set(0, 0.5, 0);
       orbitControlsFolder.hidden = true;
+      pointerCtrlsFolder.hidden = false;
     }
   });
 
@@ -142,6 +145,28 @@ resetOrbit.on("click", () => {
   camera.position.set(0, 2, 4);
   orbitLook.orbitCtrls.target.set(0, 0, 0);
   orbitLook.orbitCtrls.update();
+  orbitControlsFolder.refresh();
+});
+
+const pointerCtrlsFolder = controlsFolder.addFolder({
+  title: "PointerLock",
+  expanded: true,
+  hidden: true,
+});
+
+pointerCtrlsFolder.addBinding(pointerLook.pointerCtrls, "pointerSpeed", {
+  label: "Cursor Speed",
+  min: 1,
+  max: 100,
+});
+
+const resetPointer = pointerCtrlsFolder.addButton({
+  title: "Reset to Default",
+});
+
+resetPointer.on("click", () => {
+  pointerLook.pointerCtrls.pointerSpeed = 1;
+  pointerCtrlsFolder.refresh();
 });
 
 function animate() {
