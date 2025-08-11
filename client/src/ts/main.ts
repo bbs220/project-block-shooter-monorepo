@@ -85,20 +85,64 @@ controlsFolder
     orbitLook.gizmo.enabled = false;
     pointerLook.pointerCtrls.enabled = false;
 
-    // Then enable only the selected one
     if (selectedControl === "Orbit") {
       orbitLook.orbitCtrls.enabled = true;
       orbitLook.gizmo.enabled = true;
       debugInfo.style.display = "none";
       uiContainer.style.display = "none";
       camera.position.set(0, 2, 4);
+      orbitControlsFolder.hidden = false;
     } else if (selectedControl === "PointerLock") {
       pointerLook.pointerCtrls.enabled = true;
       debugInfo.style.display = "flex";
       uiContainer.style.display = "flex";
       camera.position.set(0, 0.5, 0);
+      orbitControlsFolder.hidden = true;
     }
   });
+
+const orbitControlsFolder = controlsFolder.addFolder({
+  title: "Orbit Controls",
+  expanded: true,
+});
+
+orbitControlsFolder.addBinding(orbitLook.orbitCtrls, "autoRotate", {
+  label: "Auto Rotate",
+});
+
+orbitControlsFolder.addBinding(orbitLook.orbitCtrls, "autoRotateSpeed", {
+  label: "Rotation Speed",
+  min: 2,
+  max: 10,
+});
+
+orbitControlsFolder.addBinding(orbitLook.orbitCtrls, "enableZoom", {
+  label: "Zoom",
+});
+
+orbitControlsFolder.addBinding(orbitLook.orbitCtrls, "zoomSpeed", {
+  label: "Zoom speed",
+  min: 2,
+  max: 10,
+});
+
+orbitControlsFolder.addBinding(orbitLook.orbitCtrls, "enablePan", {
+  label: "Panning",
+});
+
+orbitControlsFolder.addBinding(orbitLook.orbitCtrls, "panSpeed", {
+  label: "Panning Speed",
+  min: 2,
+  max: 10,
+});
+
+const resetOrbit = orbitControlsFolder.addButton({ title: "Back to Origin" });
+
+resetOrbit.on("click", () => {
+  camera.position.set(0, 2, 4);
+  orbitLook.orbitCtrls.target.set(0, 0, 0);
+  orbitLook.orbitCtrls.update();
+});
 
 function animate() {
   requestAnimationFrame(animate);
