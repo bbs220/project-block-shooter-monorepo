@@ -1,16 +1,14 @@
 import * as THREE from "three";
-import { RGBELoader } from "three/examples/jsm/Addons.js";
 import addOrbitLook from "./controls/orbitLook";
 import addCamera from "./core/coreCamera";
 import addRenderer3D from "./core/coreRenderer";
 import addScene from "./core/coreScene";
 import { framesMonitor, inspectorUI } from "./helpers/debugOptions";
-import { progressManager } from "./helpers/loadingScreen";
 import addRenderer2D from "./other/otherRenderer";
 import buildingsMesh from "./testScene/buildings";
 import groundMesh from "./testScene/ground";
-import { citrusOrchard } from "./utils/assetPaths";
 import addPointerLook, { debugInfo, uiContainer } from "./controls/pointerLook";
+import { addHDRI } from "./helpers/hdriLoader";
 
 const scene = addScene();
 const camera = addCamera();
@@ -20,13 +18,7 @@ const renderer2D = addRenderer2D();
 scene.add(buildingsMesh);
 scene.add(groundMesh);
 
-const hdriLoader = new RGBELoader(progressManager);
-hdriLoader.load(citrusOrchard, (texture) => {
-  texture.mapping = THREE.EquirectangularReflectionMapping;
-  scene.background = texture;
-  scene.environment = texture;
-  scene.backgroundBlurriness = 0;
-});
+addHDRI(scene);
 
 const orbitLook = addOrbitLook(camera, renderer3D);
 const pointerLook = addPointerLook(camera, renderer3D);

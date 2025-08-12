@@ -94,13 +94,16 @@ uiContainer.appendChild(reticle);
 
 const keysInfo = document.createElement("div");
 keysInfo.id = "keysInfo";
-for (let i = 0; i < 6; i++) {
+const keys = ["", "", "W", "RMB", "", "A", "S", "D"];
+
+for (let i = 0; i < 8; i++) {
   const gridItem = document.createElement("div");
   gridItem.id = `Cell ${i + 1}`;
   gridItem.className = "cells";
-  gridItem.innerText = `Cell ${i + 1}`;
+  gridItem.innerText = keys[i] || `Cell ${i + 1}`;
   keysInfo.appendChild(gridItem);
 }
+
 debugInfo.appendChild(keysInfo);
 
 const statusInfo = document.createElement("div");
