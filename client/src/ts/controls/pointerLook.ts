@@ -94,7 +94,13 @@ uiContainer.appendChild(reticle);
 
 const keysInfo = document.createElement("div");
 keysInfo.id = "keysInfo";
-keysInfo.innerText = "Press here to lock your cursor";
+for (let i = 0; i < 6; i++) {
+  const gridItem = document.createElement("div");
+  gridItem.id = `Cell ${i + 1}`;
+  gridItem.className = "cells";
+  gridItem.innerText = `Cell ${i + 1}`;
+  keysInfo.appendChild(gridItem);
+}
 debugInfo.appendChild(keysInfo);
 
 const statusInfo = document.createElement("div");
