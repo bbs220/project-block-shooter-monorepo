@@ -7,6 +7,7 @@ const moveState = {
   moveBackward: false,
   moveLeft: false,
   moveRight: false,
+  isSprinting: false,
 };
 
 const mouseState = {
@@ -18,7 +19,8 @@ const velocity = new THREE.Vector3();
 const direction = new THREE.Vector3();
 
 const drag = 10;
-const acceleration = 10;
+const walkacceleration = 10;
+const sprintAcceleration = 30; // increased acceleration for sprinting
 
 const originalFov = 60;
 const zoomedFov = 30;
@@ -92,6 +94,10 @@ function onKeyDown(event: KeyboardEvent) {
     case "KeyD":
       moveState.moveRight = true;
       break;
+    case "ShiftLeft":
+    case "ShiftRight":
+      moveState.isSprinting = true;
+      break;
   }
 }
 
@@ -108,6 +114,10 @@ function onKeyUp(event: KeyboardEvent) {
       break;
     case "KeyD":
       moveState.moveRight = false;
+      break;
+    case "ShiftLeft":
+    case "ShiftRight":
+      moveState.isSprinting = false;
       break;
   }
 }
@@ -133,10 +143,10 @@ export function addPointerLook(
   document.addEventListener("keydown", onKeyDown);
   document.addEventListener("keyup", onKeyUp);
 
-  // Prevent the default right-click context menu
+  // prevent the default right-click context menu
   document.addEventListener("contextmenu", (e) => e.preventDefault());
 
-  // Left mouse click to shoot
+  // left mouse click to shoot
   document.addEventListener("mousedown", (event: MouseEvent) => {
     if (!pointerCtrls.isLocked) return;
 
@@ -176,11 +186,17 @@ export function addPointerLook(
 
   function runControls(delta: number) {
     if (pointerCtrls.isLocked && delta) {
-      // Apply drag
+      // apply drag
       velocity.x -= velocity.x * drag * delta;
       velocity.z -= velocity.z * drag * delta;
 
-      // Apply acceleration only if a key is pressed
+      // determine current acceleration based on sprinting
+      const currentAcceleration =
+        moveState.isSprinting && moveState.moveForward
+          ? sprintAcceleration
+          : walkacceleration;
+
+      // apply acceleration only if a key is pressed
       if (
         moveState.moveForward ||
         moveState.moveBackward ||
@@ -190,10 +206,10 @@ export function addPointerLook(
         direction.z =
           Number(moveState.moveForward) - Number(moveState.moveBackward);
         direction.x = Number(moveState.moveRight) - Number(moveState.moveLeft);
-        direction.normalize(); // Ensure constant speed in all directions
+        direction.normalize(); // ensure constant speed in all directions
 
-        velocity.z -= direction.z * acceleration * delta;
-        velocity.x -= direction.x * acceleration * delta;
+        velocity.z -= direction.z * currentAcceleration * delta;
+        velocity.x -= direction.x * currentAcceleration * delta;
       }
 
       pointerCtrls.moveRight(-velocity.x * delta);

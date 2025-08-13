@@ -114,8 +114,8 @@ body {
 }
 
 .cells:hover {
+  scale: 1.4;
   filter: invert(1);
-  scale: 1.1;
 }
 
 #statusInfo {
