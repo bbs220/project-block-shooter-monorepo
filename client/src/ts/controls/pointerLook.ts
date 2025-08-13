@@ -55,22 +55,25 @@ uiContainer.appendChild(reticle);
 
 const keysInfo = document.createElement("div");
 keysInfo.id = "keysInfo";
-const keys = [
-  keysImg.shift,
-  keysImg.ctrl,
-  keysImg.w,
-  clicksImg.right,
-  keysImg.space,
-  keysImg.a,
-  keysImg.s,
-  keysImg.d,
+
+const keyMappings = [
+  { src: keysImg.shift, code: "ShiftLeft" },
+  { src: keysImg.space, code: "Space" },
+  { src: keysImg.w, code: "KeyW" },
+  { src: clicksImg.left, code: "ClickLeft" },
+  { src: clicksImg.right, code: "ClickRight" },
+  { src: keysImg.ctrl, code: "ControlLeft" },
+  { src: keysImg.a, code: "KeyA" },
+  { src: keysImg.s, code: "KeyS" },
+  { src: keysImg.d, code: "KeyD" },
+  { src: keysImg.i, code: "KeyI" },
 ];
 
-for (let i = 0; i < 8; i++) {
+for (const key of keyMappings) {
   const gridItem = document.createElement("img");
-  gridItem.id = `Cell ${i + 1}`;
   gridItem.className = "cells";
-  gridItem.src = keys[i] || `Cell ${i + 1}`;
+  gridItem.src = key.src;
+  gridItem.setAttribute("data-key", key.code);
   keysInfo.appendChild(gridItem);
 }
 
@@ -80,7 +83,27 @@ const statusInfo = document.createElement("div");
 statusInfo.id = "statusInfo";
 debugInfo.appendChild(statusInfo);
 
+const cursorLockInstructions = document.createElement("div");
+cursorLockInstructions.id = "cursorLockInstructions";
+cursorLockInstructions.innerText = `Please click here to lock your cursor.
+  You can get your cursor back by pressing the Esc key.`;
+debugInfo.appendChild(cursorLockInstructions);
+
+const style = document.createElement("style");
+style.innerHTML = `
+.key-pressed {
+  filter: invert(1);
+  transform: scale(1.2);
+}
+`;
+document.head.appendChild(style);
+
 function onKeyDown(event: KeyboardEvent) {
+  const keyElement = document.querySelector(`[data-key="${event.code}"]`);
+  if (keyElement) {
+    keyElement.classList.add("key-pressed");
+  }
+
   switch (event.code) {
     case "KeyW":
       moveState.moveForward = true;
@@ -102,6 +125,11 @@ function onKeyDown(event: KeyboardEvent) {
 }
 
 function onKeyUp(event: KeyboardEvent) {
+  const keyElement = document.querySelector(`[data-key="${event.code}"]`);
+  if (keyElement) {
+    keyElement.classList.remove("key-pressed");
+  }
+
   switch (event.code) {
     case "KeyW":
       moveState.moveForward = false;
@@ -134,10 +162,12 @@ export function addPointerLook(
 
   pointerCtrls.addEventListener("lock", () => {
     console.log("Pointer locked");
+    cursorLockInstructions.style.display = "none";
   });
 
   pointerCtrls.addEventListener("unlock", () => {
     console.log("Pointer unlocked");
+    cursorLockInstructions.style.display = "flex";
   });
 
   document.addEventListener("keydown", onKeyDown);
@@ -151,6 +181,10 @@ export function addPointerLook(
     if (!pointerCtrls.isLocked) return;
 
     if (event.button === 0) {
+      const keyElement = document.querySelector(`[data-key="ClickLeft"]`);
+      if (keyElement) {
+        keyElement.classList.add("key-pressed");
+      }
       mouseState.isShooting = true;
       reticle.style.width = "5px";
       reticle.style.height = "5px";
@@ -161,6 +195,10 @@ export function addPointerLook(
     if (!pointerCtrls.isLocked) return;
 
     if (event.button === 0) {
+      const keyElement = document.querySelector(`[data-key="ClickLeft"]`);
+      if (keyElement) {
+        keyElement.classList.remove("key-pressed");
+      }
       mouseState.isShooting = false;
       reticle.style.width = "15px";
       reticle.style.height = "15px";
@@ -172,6 +210,10 @@ export function addPointerLook(
     if (!pointerCtrls.isLocked) return;
 
     if (event.button === 2) {
+      const keyElement = document.querySelector(`[data-key="ClickRight"]`);
+      if (keyElement) {
+        keyElement.classList.add("key-pressed");
+      }
       mouseState.isZooming = true;
     }
   });
@@ -180,6 +222,10 @@ export function addPointerLook(
     if (!pointerCtrls.isLocked) return;
 
     if (event.button === 2) {
+      const keyElement = document.querySelector(`[data-key="ClickRight"]`);
+      if (keyElement) {
+        keyElement.classList.remove("key-pressed");
+      }
       mouseState.isZooming = false;
     }
   });

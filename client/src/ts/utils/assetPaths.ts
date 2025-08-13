@@ -10,6 +10,7 @@ export const keysImg = {
   a: "./images/letter-a.png",
   s: "./images/letter-s.png",
   d: "./images/letter-d.png",
+  i: "./images/letter-i.png",
   ctrl: "./images/ctrl.png",
   shift: "./images/shift.png",
   space: "./images/space.png",
