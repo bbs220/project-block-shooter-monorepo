@@ -79,34 +79,34 @@ statusInfo.id = "statusInfo";
 debugInfo.appendChild(statusInfo);
 
 function onKeyDown(event: KeyboardEvent) {
-  switch (event.key) {
-    case "w":
+  switch (event.code) {
+    case "KeyW":
       moveState.moveForward = true;
       break;
-    case "s":
+    case "KeyS":
       moveState.moveBackward = true;
       break;
-    case "a":
+    case "KeyA":
       moveState.moveLeft = true;
       break;
-    case "d":
+    case "KeyD":
       moveState.moveRight = true;
       break;
   }
 }
 
 function onKeyUp(event: KeyboardEvent) {
-  switch (event.key) {
-    case "w":
+  switch (event.code) {
+    case "KeyW":
       moveState.moveForward = false;
       break;
-    case "s":
+    case "KeyS":
       moveState.moveBackward = false;
       break;
-    case "a":
+    case "KeyA":
       moveState.moveLeft = false;
       break;
-    case "d":
+    case "KeyD":
       moveState.moveRight = false;
       break;
   }
