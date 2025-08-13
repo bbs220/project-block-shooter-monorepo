@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { PointerLockControls } from "three/examples/jsm/Addons.js";
+import { clicksImg, keysImg } from "../utils/assetPaths";
 
 const moveState = {
   moveForward: false,
@@ -8,9 +9,74 @@ const moveState = {
   moveRight: false,
 };
 
-const zoomState = {
+const mouseState = {
   isZooming: false,
+  isShooting: false,
 };
+
+const velocity = new THREE.Vector3();
+const direction = new THREE.Vector3();
+
+const drag = 10;
+const acceleration = 10;
+
+const originalFov = 60;
+const zoomedFov = 30;
+const zoomSpeed = 0.1;
+
+const smol = (num: number): string => {
+  const fixedNum = num.toFixed(2);
+  if (num >= 0) {
+    return `+${fixedNum}`;
+  }
+  return fixedNum;
+};
+
+// this shit will be removed later on
+export const debugInfo = document.createElement("div");
+debugInfo.id = "debugInfo";
+document.body.appendChild(debugInfo);
+
+// this shit will stay
+export const uiContainer = document.createElement("div");
+uiContainer.id = "uiContainer";
+document.body.appendChild(uiContainer);
+
+const reticle = document.createElement("div");
+reticle.id = "reticle";
+reticle.style.width = "15px";
+reticle.style.height = "15px";
+reticle.style.border = `3px solid #ffffffff`;
+reticle.style.borderRadius = "50%";
+reticle.style.transition = "all 0.2s ease-in-out";
+uiContainer.appendChild(reticle);
+
+const keysInfo = document.createElement("div");
+keysInfo.id = "keysInfo";
+const keys = [
+  keysImg.shift,
+  keysImg.ctrl,
+  keysImg.w,
+  clicksImg.right,
+  keysImg.space,
+  keysImg.a,
+  keysImg.s,
+  keysImg.d,
+];
+
+for (let i = 0; i < 8; i++) {
+  const gridItem = document.createElement("img");
+  gridItem.id = `Cell ${i + 1}`;
+  gridItem.className = "cells";
+  gridItem.src = keys[i] || `Cell ${i + 1}`;
+  keysInfo.appendChild(gridItem);
+}
+
+debugInfo.appendChild(keysInfo);
+
+const statusInfo = document.createElement("div");
+statusInfo.id = "statusInfo";
+debugInfo.appendChild(statusInfo);
 
 function onKeyDown(event: KeyboardEvent) {
   switch (event.key) {
@@ -46,71 +112,7 @@ function onKeyUp(event: KeyboardEvent) {
   }
 }
 
-// Add event listeners for mouse clicks
-// 2 is right mouse button
-function onMouseDown(event: MouseEvent) {
-  if (event.button === 2) {
-    zoomState.isZooming = true;
-  }
-}
-
-function onMouseUp(event: MouseEvent) {
-  if (event.button === 2) {
-    zoomState.isZooming = false;
-  }
-}
-
-const velocity = new THREE.Vector3();
-const direction = new THREE.Vector3();
-
-const drag = 10;
-const acceleration = 10;
-
-const originalFov = 60;
-const zoomedFov = 30;
-const zoomSpeed = 0.1;
-
-const smol = (num: number): string => {
-  const fixedNum = num.toFixed(2);
-  if (num >= 0) {
-    return `+${fixedNum}`;
-  }
-  return fixedNum;
-};
-
-// this shit will be removed later on
-export const debugInfo = document.createElement("div");
-debugInfo.id = "debugInfo";
-document.body.appendChild(debugInfo);
-
-// this shit will stay
-export const uiContainer = document.createElement("div");
-uiContainer.id = "uiContainer";
-document.body.appendChild(uiContainer);
-
-const reticle = document.createElement("img");
-reticle.id = "reticle";
-uiContainer.appendChild(reticle);
-
-const keysInfo = document.createElement("div");
-keysInfo.id = "keysInfo";
-const keys = ["", "", "W", "RMB", "", "A", "S", "D"];
-
-for (let i = 0; i < 8; i++) {
-  const gridItem = document.createElement("div");
-  gridItem.id = `Cell ${i + 1}`;
-  gridItem.className = "cells";
-  gridItem.innerText = keys[i] || `Cell ${i + 1}`;
-  keysInfo.appendChild(gridItem);
-}
-
-debugInfo.appendChild(keysInfo);
-
-const statusInfo = document.createElement("div");
-statusInfo.id = "statusInfo";
-debugInfo.appendChild(statusInfo);
-
-function addPointerLook(
+export function addPointerLook(
   camera: THREE.PerspectiveCamera,
   renderer: THREE.WebGLRenderer
 ) {
@@ -133,8 +135,44 @@ function addPointerLook(
 
   // Prevent the default right-click context menu
   document.addEventListener("contextmenu", (e) => e.preventDefault());
-  document.addEventListener("mousedown", onMouseDown);
-  document.addEventListener("mouseup", onMouseUp);
+
+  // Left mouse click to shoot
+  document.addEventListener("mousedown", (event: MouseEvent) => {
+    if (!pointerCtrls.isLocked) return;
+
+    if (event.button === 0) {
+      mouseState.isShooting = true;
+      reticle.style.width = "5px";
+      reticle.style.height = "5px";
+    }
+  });
+
+  document.addEventListener("mouseup", (event: MouseEvent) => {
+    if (!pointerCtrls.isLocked) return;
+
+    if (event.button === 0) {
+      mouseState.isShooting = false;
+      reticle.style.width = "15px";
+      reticle.style.height = "15px";
+    }
+  });
+
+  // right mouse click to zoom
+  document.addEventListener("mousedown", (event: MouseEvent) => {
+    if (!pointerCtrls.isLocked) return;
+
+    if (event.button === 2) {
+      mouseState.isZooming = true;
+    }
+  });
+
+  document.addEventListener("mouseup", (event: MouseEvent) => {
+    if (!pointerCtrls.isLocked) return;
+
+    if (event.button === 2) {
+      mouseState.isZooming = false;
+    }
+  });
 
   function runControls(delta: number) {
     if (pointerCtrls.isLocked && delta) {
@@ -161,7 +199,7 @@ function addPointerLook(
       pointerCtrls.moveRight(-velocity.x * delta);
       pointerCtrls.moveForward(-velocity.z * delta);
 
-      if (zoomState.isZooming) {
+      if (mouseState.isZooming) {
         camera.fov = THREE.MathUtils.lerp(camera.fov, zoomedFov, zoomSpeed);
       } else {
         camera.fov = THREE.MathUtils.lerp(camera.fov, originalFov, zoomSpeed);
