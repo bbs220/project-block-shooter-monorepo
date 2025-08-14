@@ -129,8 +129,7 @@ function onKeyDown(event: KeyboardEvent) {
       break;
     case "ShiftLeft":
     case "ShiftRight":
-      if (!moveState.isCrouching) {
-        // only allow sprinting if not crouching
+      if (!moveState.isCrouching && !mouseState.isZooming) {
         moveState.isSprinting = true;
       }
       break;
@@ -234,6 +233,10 @@ export function addPointerLook(
         keyElement.classList.add("key-pressed");
       }
       mouseState.isZooming = true;
+      // stop sprinting when zooming starts
+      if (moveState.isSprinting) {
+        moveState.isSprinting = false;
+      }
     }
   });
 
