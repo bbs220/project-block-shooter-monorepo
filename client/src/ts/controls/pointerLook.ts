@@ -8,6 +8,7 @@ const moveState = {
   moveLeft: false,
   moveRight: false,
   isSprinting: false,
+  isCrouching: false,
 };
 
 const mouseState = {
@@ -117,9 +118,16 @@ function onKeyDown(event: KeyboardEvent) {
     case "KeyD":
       moveState.moveRight = true;
       break;
+    case "KeyC":
+      moveState.isCrouching = true;
+      moveState.isSprinting = false; // prevent sprinting while crouching
+      break;
     case "ShiftLeft":
     case "ShiftRight":
-      moveState.isSprinting = true;
+      if (!moveState.isCrouching) {
+        // only allow sprinting if not crouching
+        moveState.isSprinting = true;
+      }
       break;
   }
 }
@@ -142,6 +150,12 @@ function onKeyUp(event: KeyboardEvent) {
       break;
     case "KeyD":
       moveState.moveRight = false;
+      break;
+    case "KeyC":
+      moveState.isCrouching = false;
+      if (moveState.moveForward && event.shiftKey) {
+        moveState.isSprinting = true;
+      }
       break;
     case "ShiftLeft":
     case "ShiftRight":
@@ -236,11 +250,15 @@ export function addPointerLook(
       velocity.x -= velocity.x * drag * delta;
       velocity.z -= velocity.z * drag * delta;
 
-      // determine current acceleration based on sprinting
-      const currentAcceleration =
-        moveState.isSprinting && moveState.moveForward
-          ? sprintAcceleration
-          : walkacceleration;
+      // determine current acceleration based on crouching, then sprinting
+      let currentAcceleration;
+      if (moveState.isCrouching) {
+        currentAcceleration = walkacceleration / 2; // Halve acceleration when crouching
+      } else if (moveState.isSprinting && moveState.moveForward) {
+        currentAcceleration = sprintAcceleration;
+      } else {
+        currentAcceleration = walkacceleration;
+      }
 
       // apply acceleration only if a key is pressed
       if (
