@@ -58,11 +58,11 @@ keysInfo.id = "keysInfo";
 
 const keyMappings = [
   { src: keysImg.shift, code: "ShiftLeft" },
-  { src: keysImg.space, code: "Space" },
+  { src: keysImg.c, code: "KeyC" },
   { src: keysImg.w, code: "KeyW" },
   { src: clicksImg.left, code: "ClickLeft" },
   { src: clicksImg.right, code: "ClickRight" },
-  { src: keysImg.ctrl, code: "ControlLeft" },
+  { src: keysImg.space, code: "Space" },
   { src: keysImg.a, code: "KeyA" },
   { src: keysImg.s, code: "KeyS" },
   { src: keysImg.d, code: "KeyD" },
