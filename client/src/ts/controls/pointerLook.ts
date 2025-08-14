@@ -27,6 +27,11 @@ const originalFov = 60;
 const zoomedFov = 30;
 const zoomSpeed = 0.1;
 
+// constants for camera height
+const standingHeight = 0.5;
+const crouchingHeight = 0.2;
+const crouchSpeed = 0.1;
+
 const smol = (num: number): string => {
   const fixedNum = num.toFixed(2);
   if (num >= 0) {
@@ -278,6 +283,14 @@ export function addPointerLook(
 
       pointerCtrls.moveRight(-velocity.x * delta);
       pointerCtrls.moveForward(-velocity.z * delta);
+
+      // camera height adjustment
+      const targetY = moveState.isCrouching ? crouchingHeight : standingHeight;
+      camera.position.y = THREE.MathUtils.lerp(
+        camera.position.y,
+        targetY,
+        crouchSpeed
+      );
 
       if (mouseState.isZooming) {
         camera.fov = THREE.MathUtils.lerp(camera.fov, zoomedFov, zoomSpeed);
