@@ -9,6 +9,7 @@ import buildingsMesh from "./testScene/buildings";
 import groundMesh from "./testScene/ground";
 import addPointerLook, { debugInfo, uiContainer } from "./controls/pointerLook";
 import { addHDRI } from "./helpers/hdriLoader";
+import { addPostProcessing } from "./helpers/postProcessing";
 
 const scene = addScene();
 const camera = addCamera();
@@ -19,6 +20,7 @@ scene.add(buildingsMesh);
 scene.add(groundMesh);
 
 addHDRI(scene);
+const initPostProcessing = addPostProcessing(scene, camera, renderer3D);
 
 const orbitLook = addOrbitLook(camera, renderer3D);
 const pointerLook = addPointerLook(camera, renderer3D);
@@ -45,7 +47,8 @@ window.addEventListener("resize", () => {
 });
 
 function clean3DRender() {
-  renderer3D.render(scene, camera);
+  // renderer3D.render(scene, camera);
+  initPostProcessing.composer.render();
 }
 
 function clean2DRender() {
