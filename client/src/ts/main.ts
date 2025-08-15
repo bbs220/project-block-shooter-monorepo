@@ -5,19 +5,17 @@ import addRenderer3D from "./core/coreRenderer";
 import addScene from "./core/coreScene";
 import { framesMonitor, inspectorUI } from "./helpers/debugOptions";
 import addRenderer2D from "./other/otherRenderer";
-import buildingsMesh from "./testScene/buildings";
-import groundMesh from "./testScene/ground";
 import addPointerLook, { debugInfo, uiContainer } from "./controls/pointerLook";
 import { addHDRI } from "./helpers/hdriLoader";
 import { addPostProcessing } from "./helpers/postProcessing";
+import { addTestLevel } from "./testLevel/testLevel";
 
 const scene = addScene();
 const camera = addCamera();
 const renderer3D = addRenderer3D();
 const renderer2D = addRenderer2D();
 
-scene.add(buildingsMesh);
-scene.add(groundMesh);
+addTestLevel(scene);
 
 addHDRI(scene);
 const initPostProcessing = addPostProcessing(scene, camera, renderer3D);
