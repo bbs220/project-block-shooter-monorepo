@@ -10,8 +10,6 @@ function addRenderer3D() {
   });
   renderer3D.setPixelRatio(window.devicePixelRatio);
   renderer3D.setSize(window.innerWidth, window.innerHeight);
-  renderer3D.toneMapping = THREE.AgXToneMapping;
-  renderer3D.toneMappingExposure = 1;
   renderer3D.shadowMap.enabled = true;
   renderer3D.shadowMap.type = THREE.PCFSoftShadowMap;
   document.body.appendChild(renderer3D.domElement);

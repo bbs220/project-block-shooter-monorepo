@@ -4,6 +4,7 @@ import {
   EffectComposer,
   RenderPass,
   UnrealBloomPass,
+  OutputPass,
 } from "three/examples/jsm/Addons.js";
 import { inspectorUI } from "./debugOptions";
 
@@ -33,6 +34,9 @@ export function addPostProcessing(
   const afterImgPass = new AfterimagePass(0.92);
   afterImgPass.enabled = false;
   composer.addPass(afterImgPass);
+
+  const outputPass = new OutputPass();
+  composer.addPass(outputPass);
 
   const postFolder = inspectorUI.addFolder({
     title: "✨ Post Processing",
