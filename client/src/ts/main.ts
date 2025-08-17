@@ -3,12 +3,13 @@ import addOrbitLook from "./controls/orbitLook";
 import addCamera from "./core/coreCamera";
 import addRenderer3D from "./core/coreRenderer";
 import addScene from "./core/coreScene";
-import { framesMonitor, inspectorUI } from "./helpers/debugOptions";
+import { framesMonitor } from "./helpers/debugOptions";
 import addRenderer2D from "./other/otherRenderer";
-import addPointerLook, { debugInfo, uiContainer } from "./controls/pointerLook";
+import addPointerLook from "./controls/pointerLook";
 import { addHDRI } from "./helpers/hdriLoader";
 import { addPostProcessing } from "./helpers/postProcessing";
 import { addTestLevel } from "./testLevel/testLevel";
+import { setupControlSwitching } from "./controls/switchControls";
 
 const scene = addScene();
 const camera = addCamera();
@@ -27,10 +28,11 @@ const pointerLook = addPointerLook(camera, renderer3D);
 orbitLook.orbitCtrls.enabled = true;
 orbitLook.gizmo.enabled = true;
 pointerLook.pointerCtrls.enabled = false;
-debugInfo.style.display = "none";
-uiContainer.style.display = "none";
 
 camera.position.set(0, 2, 4);
+
+// new function to set up the control switching logic
+setupControlSwitching(orbitLook, pointerLook, camera);
 
 const debugClock = new THREE.Clock();
 
@@ -52,115 +54,6 @@ function clean3DRender() {
 function clean2DRender() {
   renderer2D.render(scene, camera);
 }
-
-const switchControls = {
-  activeControl: "Orbit",
-};
-
-const controlsFolder = inspectorUI.addFolder({
-  title: "🕹️ Controls",
-  expanded: false,
-});
-
-controlsFolder
-  .addBinding(switchControls, "activeControl", {
-    label: "Control Mode",
-    options: {
-      Orbit: "Orbit",
-      PointerLock: "PointerLock",
-    },
-  })
-  .on("change", (ev) => {
-    const selectedControl = ev.value;
-    console.log(`Switched to ${selectedControl} controls`);
-
-    // Disable all controls first
-    orbitLook.orbitCtrls.enabled = false;
-    orbitLook.gizmo.enabled = false;
-    pointerLook.pointerCtrls.enabled = false;
-
-    if (selectedControl === "Orbit") {
-      orbitLook.orbitCtrls.enabled = true;
-      orbitLook.gizmo.enabled = true;
-      debugInfo.style.display = "none";
-      uiContainer.style.display = "none";
-      camera.position.set(0, 2, 4);
-      orbitControlsFolder.hidden = false;
-      pointerCtrlsFolder.hidden = true;
-    } else if (selectedControl === "PointerLock") {
-      pointerLook.pointerCtrls.enabled = true;
-      debugInfo.style.display = "flex";
-      uiContainer.style.display = "flex";
-      camera.position.set(0, 0.5, 0);
-      orbitControlsFolder.hidden = true;
-      pointerCtrlsFolder.hidden = false;
-    }
-  });
-
-const orbitControlsFolder = controlsFolder.addFolder({
-  title: "Orbit Controls",
-  expanded: true,
-});
-
-orbitControlsFolder.addBinding(orbitLook.orbitCtrls, "autoRotate", {
-  label: "Auto Rotate",
-});
-
-orbitControlsFolder.addBinding(orbitLook.orbitCtrls, "autoRotateSpeed", {
-  label: "Rotation Speed",
-  min: 2,
-  max: 10,
-});
-
-orbitControlsFolder.addBinding(orbitLook.orbitCtrls, "enableZoom", {
-  label: "Zoom",
-});
-
-orbitControlsFolder.addBinding(orbitLook.orbitCtrls, "zoomSpeed", {
-  label: "Zoom speed",
-  min: 2,
-  max: 10,
-});
-
-orbitControlsFolder.addBinding(orbitLook.orbitCtrls, "enablePan", {
-  label: "Panning",
-});
-
-orbitControlsFolder.addBinding(orbitLook.orbitCtrls, "panSpeed", {
-  label: "Panning Speed",
-  min: 2,
-  max: 10,
-});
-
-const resetOrbit = orbitControlsFolder.addButton({ title: "Back to Origin" });
-
-resetOrbit.on("click", () => {
-  camera.position.set(0, 2, 4);
-  orbitLook.orbitCtrls.target.set(0, 0, 0);
-  orbitLook.orbitCtrls.update();
-  orbitControlsFolder.refresh();
-});
-
-const pointerCtrlsFolder = controlsFolder.addFolder({
-  title: "PointerLock",
-  expanded: true,
-  hidden: true,
-});
-
-pointerCtrlsFolder.addBinding(pointerLook.pointerCtrls, "pointerSpeed", {
-  label: "Cursor Speed",
-  min: 1,
-  max: 100,
-});
-
-const resetPointer = pointerCtrlsFolder.addButton({
-  title: "Reset to Default",
-});
-
-resetPointer.on("click", () => {
-  pointerLook.pointerCtrls.pointerSpeed = 1;
-  pointerCtrlsFolder.refresh();
-});
 
 function animate() {
   requestAnimationFrame(animate);
