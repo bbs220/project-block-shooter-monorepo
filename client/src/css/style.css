@@ -81,7 +81,7 @@ body {
   width: 30%;
   height: 30%;
   bottom: 5px;
-  right: 5px;
+  left: 5px;
   border: 2px solid rgba(255, 255, 255, 0.384);
   border-radius: 0.5rem;
   backdrop-filter: blur(3px);

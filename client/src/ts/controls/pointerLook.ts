@@ -19,10 +19,11 @@ const mouseState = {
 const velocity = new THREE.Vector3();
 const direction = new THREE.Vector3();
 
-const allMovementValues = {
+export const allMovementValues = {
   drag: 10,
   walkacceleration: 10,
   sprintAcceleration: 30,
+  crouchAcceleration: 5,
   originalFov: 60,
   zoomedFov: 30,
   zoomSpeed: 0.1,
@@ -260,7 +261,7 @@ export function addPointerLook(
       // determine current acceleration based on crouching, then sprinting
       let currentAcceleration;
       if (moveState.isCrouching) {
-        currentAcceleration = allMovementValues.walkacceleration / 2; // Halve acceleration when crouching
+        currentAcceleration = allMovementValues.crouchAcceleration;
       } else if (moveState.isSprinting && moveState.moveForward) {
         currentAcceleration = allMovementValues.sprintAcceleration;
       } else {

@@ -2,7 +2,7 @@ import * as THREE from "three";
 import type addOrbitLook from "./orbitLook";
 import type addPointerLook from "./pointerLook";
 import { inspectorUI } from "../helpers/debugOptions";
-import { debugInfo, uiContainer } from "./pointerLook";
+import { allMovementValues, debugInfo, uiContainer } from "./pointerLook";
 
 type OrbitLook = ReturnType<typeof addOrbitLook>;
 type PointerLook = ReturnType<typeof addPointerLook>;
@@ -116,12 +116,84 @@ export function setupControlSwitching(
     max: 100,
   });
 
+  pointerCtrlsFolder.addBinding(allMovementValues, "walkacceleration", {
+    label: "Walk Speed",
+    min: 1,
+    max: 100,
+  });
+
+  pointerCtrlsFolder.addBinding(allMovementValues, "sprintAcceleration", {
+    label: "Sprint Speed",
+    min: 1,
+    max: 100,
+  });
+
+  pointerCtrlsFolder.addBinding(allMovementValues, "crouchAcceleration", {
+    label: "Crouch Speed",
+    min: 1,
+    max: 100,
+  });
+
+  pointerCtrlsFolder.addBinding(allMovementValues, "drag", {
+    label: "Drag Force",
+    min: 1,
+    max: 100,
+  });
+
+  pointerCtrlsFolder.addBinding(allMovementValues, "standingHeight", {
+    label: "Standing Height",
+    min: 0.1,
+    max: 1,
+  });
+
+  pointerCtrlsFolder.addBinding(allMovementValues, "crouchingHeight", {
+    label: "Crouching Height",
+    min: 0.1,
+    max: 1,
+  });
+
+  pointerCtrlsFolder.addBinding(allMovementValues, "originalFov", {
+    label: "Original FOV",
+    min: 1,
+    max: 80,
+  });
+
+  pointerCtrlsFolder.addBinding(allMovementValues, "zoomedFov", {
+    label: "Zoom FOV",
+    min: 1,
+    max: 80,
+  });
+
+  pointerCtrlsFolder.addBinding(allMovementValues, "zoomSpeed", {
+    label: "Zoom Transistion Speed",
+    min: 0.1,
+    max: 1,
+    readonly: true,
+  });
+
+  pointerCtrlsFolder.addBinding(allMovementValues, "crouchSpeed", {
+    label: "Crouching Transistion Speed",
+    min: 0.1,
+    max: 1,
+    readonly: true,
+  });
+
   const resetPointer = pointerCtrlsFolder.addButton({
     title: "Reset to Default",
   });
 
   resetPointer.on("click", () => {
     pointerLook.pointerCtrls.pointerSpeed = 1;
+    allMovementValues.drag = 10;
+    allMovementValues.walkacceleration = 10;
+    allMovementValues.sprintAcceleration = 30;
+    allMovementValues.crouchAcceleration = 5;
+    allMovementValues.originalFov = 60;
+    allMovementValues.zoomedFov = 30;
+    allMovementValues.zoomSpeed = 0.1;
+    allMovementValues.standingHeight = 0.5;
+    allMovementValues.crouchingHeight = 0.2;
+    allMovementValues.crouchSpeed = 0.1;
     pointerCtrlsFolder.refresh();
   });
 }
