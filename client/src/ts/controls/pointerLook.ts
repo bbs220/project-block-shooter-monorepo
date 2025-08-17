@@ -19,18 +19,17 @@ const mouseState = {
 const velocity = new THREE.Vector3();
 const direction = new THREE.Vector3();
 
-const drag = 10;
-const walkacceleration = 10;
-const sprintAcceleration = 30; // increased acceleration for sprinting
-
-const originalFov = 60;
-const zoomedFov = 30;
-const zoomSpeed = 0.1;
-
-// constants for camera height
-const standingHeight = 0.5;
-const crouchingHeight = 0.2;
-const crouchSpeed = 0.1;
+const allMovementValues = {
+  drag: 10,
+  walkacceleration: 10,
+  sprintAcceleration: 30,
+  originalFov: 60,
+  zoomedFov: 30,
+  zoomSpeed: 0.1,
+  standingHeight: 0.5,
+  crouchingHeight: 0.2,
+  crouchSpeed: 0.1,
+};
 
 const smol = (num: number): string => {
   const fixedNum = num.toFixed(2);
@@ -255,17 +254,17 @@ export function addPointerLook(
   function runControls(delta: number) {
     if (pointerCtrls.isLocked && delta) {
       // apply drag
-      velocity.x -= velocity.x * drag * delta;
-      velocity.z -= velocity.z * drag * delta;
+      velocity.x -= velocity.x * allMovementValues.drag * delta;
+      velocity.z -= velocity.z * allMovementValues.drag * delta;
 
       // determine current acceleration based on crouching, then sprinting
       let currentAcceleration;
       if (moveState.isCrouching) {
-        currentAcceleration = walkacceleration / 2; // Halve acceleration when crouching
+        currentAcceleration = allMovementValues.walkacceleration / 2; // Halve acceleration when crouching
       } else if (moveState.isSprinting && moveState.moveForward) {
-        currentAcceleration = sprintAcceleration;
+        currentAcceleration = allMovementValues.sprintAcceleration;
       } else {
-        currentAcceleration = walkacceleration;
+        currentAcceleration = allMovementValues.walkacceleration;
       }
 
       // apply acceleration only if a key is pressed
@@ -288,17 +287,27 @@ export function addPointerLook(
       pointerCtrls.moveForward(-velocity.z * delta);
 
       // camera height adjustment
-      const targetY = moveState.isCrouching ? crouchingHeight : standingHeight;
+      const targetY = moveState.isCrouching
+        ? allMovementValues.crouchingHeight
+        : allMovementValues.standingHeight;
       camera.position.y = THREE.MathUtils.lerp(
         camera.position.y,
         targetY,
-        crouchSpeed
+        allMovementValues.crouchSpeed
       );
 
       if (mouseState.isZooming) {
-        camera.fov = THREE.MathUtils.lerp(camera.fov, zoomedFov, zoomSpeed);
+        camera.fov = THREE.MathUtils.lerp(
+          camera.fov,
+          allMovementValues.zoomedFov,
+          allMovementValues.zoomSpeed
+        );
       } else {
-        camera.fov = THREE.MathUtils.lerp(camera.fov, originalFov, zoomSpeed);
+        camera.fov = THREE.MathUtils.lerp(
+          camera.fov,
+          allMovementValues.originalFov,
+          allMovementValues.zoomSpeed
+        );
       }
       camera.updateProjectionMatrix();
 
@@ -308,7 +317,7 @@ export function addPointerLook(
       Velocity X: ${smol(velocity.x)}, Y: ${smol(velocity.y)}, Z: ${smol(
         velocity.z
       )}
-      FOV: ${smol(camera.fov)}`;
+      FOV: ${smol(camera.fov)} Speed: ${smol(velocity.length())}`;
     }
   }
 
