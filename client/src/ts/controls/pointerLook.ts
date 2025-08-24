@@ -9,6 +9,7 @@ const moveState = {
   moveRight: false,
   isSprinting: false,
   isCrouching: false,
+  isJumping: false,
 };
 
 const mouseState = {
@@ -30,6 +31,8 @@ export const allMovementValues = {
   standingHeight: 0.5,
   crouchingHeight: 0.2,
   crouchSpeed: 0.1,
+  jumpForce: 10,
+  gravity: 10,
 };
 
 const smol = (num: number): string => {
@@ -92,7 +95,7 @@ debugInfo.appendChild(statusInfo);
 const cursorLockInstructions = document.createElement("div");
 cursorLockInstructions.id = "cursorLockInstructions";
 cursorLockInstructions.innerText = `Please click here to lock your cursor.
-  You can get your cursor back by pressing the Esc key.`;
+You can get your cursor back by pressing the Esc key.`;
 debugInfo.appendChild(cursorLockInstructions);
 
 const style = document.createElement("style");
@@ -131,6 +134,12 @@ function onKeyDown(event: KeyboardEvent) {
     case "ShiftRight":
       if (!moveState.isCrouching && !mouseState.isZooming) {
         moveState.isSprinting = true;
+      }
+      break;
+    case "Space":
+      if (!moveState.isJumping) {
+        velocity.y = allMovementValues.jumpForce;
+        moveState.isJumping = true;
       }
       break;
   }
@@ -258,6 +267,9 @@ export function addPointerLook(
       velocity.x -= velocity.x * allMovementValues.drag * delta;
       velocity.z -= velocity.z * allMovementValues.drag * delta;
 
+      // apply gravity
+      velocity.y -= allMovementValues.gravity * delta;
+
       // determine current acceleration based on crouching, then sprinting
       let currentAcceleration;
       if (moveState.isCrouching) {
@@ -291,6 +303,17 @@ export function addPointerLook(
       const targetY = moveState.isCrouching
         ? allMovementValues.crouchingHeight
         : allMovementValues.standingHeight;
+
+      // apply vertical velocity
+      camera.position.y += velocity.y * delta;
+
+      // Simple ground collision detection
+      if (camera.position.y <= allMovementValues.standingHeight) {
+        velocity.y = 0;
+        camera.position.y = allMovementValues.standingHeight;
+        moveState.isJumping = false;
+      }
+
       camera.position.y = THREE.MathUtils.lerp(
         camera.position.y,
         targetY,

@@ -134,6 +134,12 @@ export function setupControlSwitching(
     max: 100,
   });
 
+  pointerCtrlsFolder.addBinding(allMovementValues, "jumpForce", {
+    label: "Jump Force",
+    min: 1,
+    max: 50,
+  });
+
   pointerCtrlsFolder.addBinding(allMovementValues, "drag", {
     label: "Drag Force",
     min: 1,
