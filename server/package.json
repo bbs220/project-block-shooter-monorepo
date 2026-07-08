@@ -2,11 +2,9 @@
   "name": "game server",
   "version": "1.0.0",
   "description": "headless game server for auth and physics sync",
-  "main": "server.js",
+  "main": "",
   "scripts": {
-    "client": "cd ../client && npm run dev",
-    "server": "",
-    "both": ""
+    "client": "cd ../client && npm run dev"
   },
   "keywords": [],
   "author": "",
