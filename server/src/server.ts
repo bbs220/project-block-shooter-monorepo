@@ -1,3 +1,4 @@
 import "dotenv/config";
+import { logger } from "./utils/logger.js";
 
-console.log(process.env);
+logger.info(process.env);

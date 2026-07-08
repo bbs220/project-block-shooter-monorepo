@@ -4,11 +4,9 @@
   "description": "headless game server for auth and physics sync",
   "main": "server.js",
   "scripts": {
-    "client": "npm run dev --prefix client",
-    "server": "nodemon --watch server --ext js,ts --exec tsx server/src/server.ts",
-    "dev": "concurrently \"npm run server\" \"npm run client\"",
-    "build": "npm install --include=dev && tsc && npm install --prefix client --include=dev && npm run build --prefix client",
-    "start": "node dist/server.js"
+    "client": "cd ../client && npm run dev",
+    "server": "",
+    "both": ""
   },
   "keywords": [],
   "author": "",
