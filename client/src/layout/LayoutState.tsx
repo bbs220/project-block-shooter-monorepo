@@ -1,4 +1,6 @@
-const LayoutState = () => {
-  return <div>LayoutState</div>;
+import type { typeLayoutState } from "../types/typesSource";
+
+const LayoutState = ({ children }: typeLayoutState) => {
+  return <>{children}</>;
 };
 export default LayoutState;
