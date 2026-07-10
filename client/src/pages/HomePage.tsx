@@ -1,4 +1,10 @@
+import PrimaryCanvas from "../components/3dComponents/PrimaryCanvas";
+
 const HomePage = () => {
-  return <div className="w-full h-dvh bg-amber-200">HomePage</div>;
+  return (
+    <div className="w-full h-screen">
+      <PrimaryCanvas />
+    </div>
+  );
 };
 export default HomePage;

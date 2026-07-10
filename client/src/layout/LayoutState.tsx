@@ -4,13 +4,13 @@ import type { typeLayoutState } from "../types/typesSource";
 
 const LayoutState = ({ children }: typeLayoutState) => {
   return (
-    <>
-      <div className="z-100">
-        <NavBar />
+    <div className="w-full h-screen flex flex-col">
+      <NavBar />
+      <div className="flex flex-1 overflow-hidden">
         <SideBar />
+        <main className="flex-1 relative w-full h-full">{children}</main>
       </div>
-      {children}
-    </>
+    </div>
   );
 };
 export default LayoutState;

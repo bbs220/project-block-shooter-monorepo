@@ -1,4 +1,4 @@
 const NavBar = () => {
-  return <div className="bg-amber-600">NavBar</div>;
+  return <nav>NavBar</nav>;
 };
 export default NavBar;
