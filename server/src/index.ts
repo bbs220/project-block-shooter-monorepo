@@ -49,6 +49,14 @@ io.onConnection((channel) => {
     }
   });
 
+  channel.on("look", (data: any) => {
+    const player = players.get(channel.id as string);
+    if (player) {
+      player.yaw = data.yaw || 0;
+      player.pitch = data.pitch || 0;
+    }
+  });
+
   channel.onDisconnect((reason) => {
     if (!channel.id) return;
     const player = players.get(channel.id as string);
