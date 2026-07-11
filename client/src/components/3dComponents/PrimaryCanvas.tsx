@@ -1,6 +1,4 @@
 import { Canvas } from "@react-three/fiber";
-
-import { useTweakpane } from "../../hooks/useTweakPane";
 import { useGameStore } from "../../stores/useGameStore";
 import { PerspectiveCamera, Text } from "@react-three/drei";
 import LocalPlayer from "./LocalPlayer";
@@ -48,16 +46,12 @@ const PrimaryScene = () => {
 };
 
 const PrimaryCanvas = () => {
-  const { sceneColor } = useTweakpane({
-    sceneColor: "#404040",
-  });
-
   return (
     <>
       {/* network manager runs silently outside the 3d canvas */}
       <NetworkManager />
       <Canvas shadows="variance">
-        <color attach="background" args={[sceneColor]} />
+        <color attach="background" args={["#404040"]} />
         <PrimaryScene />
       </Canvas>
     </>

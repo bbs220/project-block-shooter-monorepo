@@ -1,6 +1,7 @@
 import { useFrame } from "@react-three/fiber";
 import { PointerLockControls } from "@react-three/drei";
 import { useRef, useEffect } from "react";
+import * as THREE from "three";
 import { useGameStore } from "../../stores/useGameStore";
 
 // track key states outside the component to avoid re-renders
@@ -13,6 +14,11 @@ export default function LocalPlayer() {
 
   const lastEmit = useRef(0);
   const initialized = useRef(false);
+
+  // vector caches to avoid garbage collection stuttering
+  const direction = useRef(new THREE.Vector3());
+  const frontVector = useRef(new THREE.Vector3());
+  const sideVector = useRef(new THREE.Vector3());
 
   useEffect(() => {
     // continuously track which keys are currently held down
@@ -39,7 +45,6 @@ export default function LocalPlayer() {
     };
   }, []);
 
-  // pull camera directly from the frame state to bypass compiler errors
   useFrame((state, delta) => {
     if (!localId) return;
 
@@ -52,20 +57,40 @@ export default function LocalPlayer() {
       initialized.current = true;
     }
 
-    // calculate raw input direction (-1 to 1)
-    const moveZ = (keys.s ? 1 : 0) - (keys.w ? 1 : 0);
-    const moveX = (keys.d ? 1 : 0) - (keys.a ? 1 : 0);
+    // true fps standard: w is forward (+1), s is backward (-1)
+    const forward = (keys.w ? 1 : 0) - (keys.s ? 1 : 0);
+
+    // invert the a/d input to fix the axis flip
+    const right = (keys.a ? 1 : 0) - (keys.d ? 1 : 0);
 
     let deltaX = 0;
     let deltaZ = 0;
 
-    if (moveX !== 0 || moveZ !== 0) {
-      const yaw = camera.rotation.y;
-      const speed = 5 * delta; // 5 units per second
+    if (forward !== 0 || right !== 0) {
+      const speed = 5 * delta;
 
-      // rotate the movement vector by the camera's yaw using trig
-      deltaX = (moveX * Math.cos(yaw) + moveZ * Math.sin(yaw)) * speed;
-      deltaZ = (moveZ * Math.cos(yaw) - moveX * Math.sin(yaw)) * speed;
+      // 1. get the exact direction the camera is looking
+      camera.getWorldDirection(frontVector.current);
+
+      // 2. flatten it to the x/z plane so looking up/down doesn't slow you down
+      frontVector.current.y = 0;
+      frontVector.current.normalize();
+
+      // 3. calculate the exact right direction using a cross product with the world up vector
+      sideVector.current
+        .crossVectors(camera.up, frontVector.current)
+        .normalize();
+
+      // 4. combine them based on user input
+      direction.current
+        .set(0, 0, 0)
+        .addScaledVector(frontVector.current, forward)
+        .addScaledVector(sideVector.current, right)
+        .normalize()
+        .multiplyScalar(speed);
+
+      deltaX = direction.current.x;
+      deltaZ = direction.current.z;
 
       // client-side prediction: instantly move local camera
       camera.position.x += deltaX;
