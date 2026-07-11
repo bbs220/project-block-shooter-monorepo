@@ -5,50 +5,49 @@ import { useGameStore } from "../stores/useGameStore";
 export function NetworkManager() {
   const setPlayers = useGameStore((state) => state.setPlayers);
   const setLocalId = useGameStore((state) => state.setLocalId);
+  const setChannel = useGameStore((state) => state.setChannel);
 
   useEffect(() => {
+    // connect to the default geckos port on localhost
     const channel = geckos({ port: 9208 });
 
     channel.onConnect((error) => {
       if (error) {
-        console.error("Connection error", error);
+        console.error("connection error", error);
         return;
       }
 
-      // store the local client id
+      console.log("connected to server!");
+
+      // store the local client id and the channel globally
       if (channel.id) {
         setLocalId(channel.id);
+        setChannel(channel);
       }
 
-      const handleKeyDown = (e: KeyboardEvent) => {
-        const move = { x: 0, y: 0, z: 0 };
-        if (e.key === "w") move.z = -1;
-        if (e.key === "s") move.z = 1;
-        if (e.key === "a") move.x = -1;
-        if (e.key === "d") move.x = 1;
-        channel.emit("move", move);
-      };
-
-      window.addEventListener("keydown", handleKeyDown);
-
-      return () => {
-        window.removeEventListener("keydown", handleKeyDown);
-      };
+      // send a test message
+      channel.emit("chat message", "hello from the r3f client");
     });
 
+    // listen for the server echo or test messages
+    channel.on("chat message", (data) => {
+      console.log("message from server:", data);
+    });
+
+    // update zustand with authoritative server state
     channel.on("state", (data: any) => {
       setPlayers(data);
     });
 
     return () => {
-      // catch strict mode unmounts
+      // catch strict mode unmounts before webrtc is ready
       try {
         channel.close();
       } catch (err) {
-        console.warn("Geckos cleanup bypassed", err);
+        console.warn("geckos cleanup bypassed during strict mode remount", err);
       }
     };
-  }, [setPlayers, setLocalId]);
+  }, [setPlayers, setLocalId, setChannel]);
 
   return null;
 }

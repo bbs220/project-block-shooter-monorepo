@@ -37,23 +37,17 @@ io.onConnection((channel) => {
 
   logger.info(`User connected: ${playerName} (${channel.id})`);
 
-  channel.on("move", (data: any) => {
+  // listen for bundled input (movement + rotation)
+  channel.on("playerInput", (data: any) => {
     const player = players.get(channel.id as string);
     if (player) {
-      player.x += data.x || 0;
-      player.y += data.y || 0;
-      player.z += data.z || 0;
-
-      // using the readable name in logs
-      logger.info(`${player.name} moved to X:${player.x} Z:${player.z}`);
-    }
-  });
-
-  channel.on("look", (data: any) => {
-    const player = players.get(channel.id as string);
-    if (player) {
+      // update rotation
       player.yaw = data.yaw || 0;
       player.pitch = data.pitch || 0;
+
+      // update position based on the client's camera-relative math
+      player.x += data.moveX || 0;
+      player.z += data.moveZ || 0;
     }
   });
 

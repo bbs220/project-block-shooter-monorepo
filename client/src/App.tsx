@@ -1,6 +1,5 @@
 import { Outlet } from "react-router";
 import { Toaster } from "react-hot-toast";
-import { NetworkTest } from "./components/NetworkTest";
 
 function App() {
   return (
@@ -9,7 +8,6 @@ function App() {
         <Outlet />
       </div>
       <Toaster position="bottom-right" />
-      <NetworkTest />
     </>
   );
 }
