@@ -4,9 +4,9 @@ import { useGameStore } from "../stores/useGameStore";
 
 export function NetworkManager() {
   const setPlayers = useGameStore((state) => state.setPlayers);
+  const setLocalId = useGameStore((state) => state.setLocalId);
 
   useEffect(() => {
-    // connect to local server
     const channel = geckos({ port: 9208 });
 
     channel.onConnect((error) => {
@@ -15,7 +15,11 @@ export function NetworkManager() {
         return;
       }
 
-      // send dummy movement on keydown
+      // store the local client id
+      if (channel.id) {
+        setLocalId(channel.id);
+      }
+
       const handleKeyDown = (e: KeyboardEvent) => {
         const move = { x: 0, y: 0, z: 0 };
         if (e.key === "w") move.z = -1;
@@ -32,20 +36,19 @@ export function NetworkManager() {
       };
     });
 
-    // update zustand store with server state
     channel.on("state", (data: any) => {
       setPlayers(data);
     });
 
     return () => {
-      // strict mode safe cleanup
+      // catch strict mode unmounts
       try {
         channel.close();
       } catch (err) {
-        console.warn("Geckos cleanup bypassed during strict mode remount", err);
+        console.warn("Geckos cleanup bypassed", err);
       }
     };
-  }, [setPlayers]);
+  }, [setPlayers, setLocalId]);
 
   return null;
 }
