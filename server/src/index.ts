@@ -2,12 +2,10 @@ import "dotenv/config";
 import { logger } from "./utils/logger.js";
 import geckos from "@geckos.io/server";
 import { getRandomColor, getRandomName } from "./utils/helpers.js";
+import { ServerPlayerState } from "./types/typesSource.js";
 
 // store player data
-const players = new Map<
-  string,
-  { x: number; y: number; z: number; color: string; name: string }
->();
+const players = new Map<string, ServerPlayerState>();
 
 const io = geckos();
 io.listen(9208);
@@ -17,11 +15,24 @@ io.onConnection((channel) => {
 
   const playerName = getRandomName();
   players.set(channel.id, {
+    name: playerName,
+    color: getRandomColor(),
+    team: "none", // auto-assign this later when match starts
+
     x: 0,
     y: 0,
     z: 0,
-    color: getRandomColor(),
-    name: playerName,
+    yaw: 0,
+    pitch: 0,
+
+    health: 100,
+    isDead: false,
+    kills: 0,
+    deaths: 0,
+
+    currentWeapon: "rifle",
+    ammo: 30, // rifle clip size
+    isReloading: false,
   });
 
   logger.info(`User connected: ${playerName} (${channel.id})`);
