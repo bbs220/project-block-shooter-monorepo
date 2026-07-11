@@ -1,6 +1,40 @@
-import { Canvas } from "@react-three/fiber";
+import { Canvas, useFrame } from "@react-three/fiber";
 import { OrbitControls, PerspectiveCamera } from "@react-three/drei";
 import { useTweakpane } from "../../hooks/useTweakPane";
+import { useRef } from "react";
+import * as THREE from "three";
+import BasicShape from "./BasicShape";
+import Ground from "./Ground";
+
+const PrimaryScene = ({ boxColor }: { boxColor: string }) => {
+  const ref = useRef<THREE.Mesh>(null);
+
+  useFrame((_state, delta) => {
+    if (ref.current) {
+      ref.current.rotation.x += delta;
+      ref.current.rotation.y += delta;
+      ref.current.rotation.z += delta;
+    }
+  });
+
+  return (
+    <>
+      <PerspectiveCamera makeDefault position={[0, 5, 10]} />
+      <OrbitControls makeDefault />
+      <ambientLight color="#ffffff" intensity={0.8} />
+      <directionalLight
+        position={[0, 5, 0]}
+        color="#ffff00"
+        intensity={1}
+        castShadow
+      />
+
+      <BasicShape ref={ref} boxColor={boxColor} />
+
+      <Ground />
+    </>
+  );
+};
 
 const PrimaryCanvas = () => {
   const { sceneColor, boxColor } = useTweakpane({
@@ -9,27 +43,9 @@ const PrimaryCanvas = () => {
   });
 
   return (
-    <Canvas shadows={`variance`}>
+    <Canvas shadows="variance">
       <color attach="background" args={[sceneColor]} />
-      <PerspectiveCamera makeDefault position={[0, 5, 10]} />
-      <OrbitControls makeDefault />
-      <ambientLight color={`#ffffff`} intensity={0.8} />
-      <directionalLight
-        position={[0, 5, 0]}
-        color={`#ffff00`}
-        intensity={1}
-        castShadow
-      />
-
-      <mesh position={[0, 1, 0]} castShadow>
-        <boxGeometry args={[1, 1, 1]} />
-        <meshStandardMaterial color={boxColor} />
-      </mesh>
-
-      <mesh position={[0, 0, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
-        <planeGeometry args={[10, 10]} />
-        <meshStandardMaterial color={`#ffffff`} />
-      </mesh>
+      <PrimaryScene boxColor={boxColor} />
     </Canvas>
   );
 };
