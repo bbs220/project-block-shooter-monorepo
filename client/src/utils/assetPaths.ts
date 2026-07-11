@@ -1,2 +1,2 @@
 export const gridColorPath =
-  "./images/prototypeTextures/normal/dark/dark_texture7_text.png";
+  "./images/prototypeTextures/normal/green/green_texture2_text.png";

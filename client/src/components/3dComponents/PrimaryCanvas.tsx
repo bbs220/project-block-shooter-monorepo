@@ -11,7 +11,7 @@ const PrimaryScene = () => {
 
   return (
     <>
-      <PerspectiveCamera makeDefault fov={75} />
+      <PerspectiveCamera makeDefault fov={60} />
 
       {/* captures mouse and moves camera */}
       <LocalPlayer />
