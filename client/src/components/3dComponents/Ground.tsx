@@ -6,4 +6,5 @@ const Ground = () => {
     </mesh>
   );
 };
+
 export default Ground;

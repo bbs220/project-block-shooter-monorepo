@@ -1,6 +1,12 @@
-import type { Ref, RefObject } from "react";
+import type { Ref } from "react";
+import * as THREE from "three";
 
-const BasicShape = ({ ref, boxColor }: { ref: RefObject; boxColor: any }) => {
+type BasicShapeProps = {
+  ref?: Ref<THREE.Mesh>;
+  boxColor: string;
+};
+
+const BasicShape = ({ ref, boxColor }: BasicShapeProps) => {
   return (
     <mesh position={[0, 1, 0]} castShadow ref={ref}>
       <boxGeometry args={[1, 1, 1]} />
@@ -8,4 +14,5 @@ const BasicShape = ({ ref, boxColor }: { ref: RefObject; boxColor: any }) => {
     </mesh>
   );
 };
+
 export default BasicShape;

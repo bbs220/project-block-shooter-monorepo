@@ -1,46 +1,60 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect, useRef } from "react";
 import { Pane } from "tweakpane";
 
-export function useTweakpane(config: Record<string, any>) {
-  // initialize state using the incoming 'config' directly.
-  // this callback only executes ONCE during the initial render.
-  const [params, setParams] = useState(() => {
-    const initialState: Record<string, any> = {};
+// conditional type: Extracts 'V' if it's { value: V }, otherwise returns the type itself
+type ExtractValue<T> = T extends { value: infer V } ? V : T;
 
-    Object.keys(config).forEach((key) => {
-      initialState[key] =
-        typeof config[key] === "object" && "value" in config[key]
-          ? config[key].value
-          : config[key];
+// mapped type: Loops over your config object and applies ExtractValue to every key
+type TweakpaneState<T> = {
+  [K in keyof T]: ExtractValue<T[K]>;
+};
+
+// rhe generic <T extends Record<string, unknown>> captures the exact shape of the input
+export function useTweakpane<T extends Record<string, unknown>>(
+  config: T,
+): TweakpaneState<T> {
+  const [params, setParams] = useState<TweakpaneState<T>>(() => {
+    // cast the initial state to our mapped type
+    const initialState = {} as TweakpaneState<T>;
+
+    (Object.keys(config) as Array<keyof T>).forEach((key) => {
+      const item = config[key];
+
+      // determine if it's a tweakpane options object with a 'value' property
+      const isObjectConfig =
+        typeof item === "object" && item !== null && "value" in item;
+
+      initialState[key] = (
+        isObjectConfig ? (item as { value: unknown }).value : item
+      ) as ExtractValue<T[keyof T]>;
     });
+
     return initialState;
   });
 
-  // store the initial config to safely use inside the useEffect
-  // without triggering exhaustive-deps warnings.
   const configRef = useRef(config);
-
-  // tweakpane mutates this object directly
   const stateRef = useRef(params);
 
   useEffect(() => {
     const pane = new Pane({ title: "🛠️ Controls" });
-
-    // reading a ref inside useEffect happens AFTER render.
     const initialConfig = configRef.current;
 
-    Object.keys(initialConfig).forEach((key) => {
+    (Object.keys(initialConfig) as Array<keyof T>).forEach((key) => {
       const item = initialConfig[key];
-      const options = typeof item === "object" && "value" in item ? item : {};
+      const options =
+        typeof item === "object" && item !== null && "value" in item
+          ? item
+          : {};
 
-      pane.addBinding(stateRef.current, key, options).on("change", (ev) => {
-        setParams((prev) => ({ ...prev, [key]: ev.value }));
-      });
+      pane
+        .addBinding(stateRef.current, key as string, options)
+        .on("change", (ev) => {
+          setParams((prev) => ({ ...prev, [key]: ev.value }));
+        });
     });
 
     return () => pane.dispose();
-  }, []); // empty array is compliant because configRef is stable
+  }, []);
 
   return params;
 }
