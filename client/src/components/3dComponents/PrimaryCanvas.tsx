@@ -6,7 +6,10 @@ import * as THREE from "three";
 import BasicShape from "./BasicShape";
 import Ground from "./Ground";
 
-const PrimaryScene = ({ boxColor }: { boxColor: string }) => {
+const PrimaryScene = () => {
+  const { boxColor } = useTweakpane({
+    boxColor: "#00ff00",
+  });
   const ref = useRef<THREE.Mesh>(null);
 
   useFrame((_state, delta) => {
@@ -24,7 +27,7 @@ const PrimaryScene = ({ boxColor }: { boxColor: string }) => {
       <ambientLight color="#ffffff" intensity={0.8} />
       <directionalLight
         position={[0, 5, 0]}
-        color="#ffff00"
+        color="#ffffff"
         intensity={1}
         castShadow
       />
@@ -37,15 +40,14 @@ const PrimaryScene = ({ boxColor }: { boxColor: string }) => {
 };
 
 const PrimaryCanvas = () => {
-  const { sceneColor, boxColor } = useTweakpane({
+  const { sceneColor } = useTweakpane({
     sceneColor: "#404040",
-    boxColor: "#00ffff",
   });
 
   return (
     <Canvas shadows="variance">
       <color attach="background" args={[sceneColor]} />
-      <PrimaryScene boxColor={boxColor} />
+      <PrimaryScene />
     </Canvas>
   );
 };

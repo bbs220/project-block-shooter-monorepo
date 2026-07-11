@@ -9,18 +9,19 @@ type TweakpaneState<T> = {
   [K in keyof T]: ExtractValue<T[K]>;
 };
 
-// rhe generic <T extends Record<string, unknown>> captures the exact shape of the input
+// lives in module scope to share the pane across all components
+let sharedPane: Pane | null = null;
+let activeHooksCount = 0;
+
 export function useTweakpane<T extends Record<string, unknown>>(
   config: T,
 ): TweakpaneState<T> {
+  // initialize React state for rendering
   const [params, setParams] = useState<TweakpaneState<T>>(() => {
-    // cast the initial state to our mapped type
     const initialState = {} as TweakpaneState<T>;
 
     (Object.keys(config) as Array<keyof T>).forEach((key) => {
       const item = config[key];
-
-      // determine if it's a tweakpane options object with a 'value' property
       const isObjectConfig =
         typeof item === "object" && item !== null && "value" in item;
 
@@ -33,11 +34,22 @@ export function useTweakpane<T extends Record<string, unknown>>(
   });
 
   const configRef = useRef(config);
-  const stateRef = useRef(params);
+
+  // create a stable, mutable object specifically for Tweakpane to bind to.
+  // never replace this object; we just let Tweakpane mutate its properties.
+  const tweakpaneTargetRef = useRef({ ...params });
 
   useEffect(() => {
-    const pane = new Pane({ title: "🛠️ Controls" });
+    // initialize the shared pane only if it doesn't exist
+    if (!sharedPane) {
+      sharedPane = new Pane({ title: "🛠️ Controls" });
+    }
+    activeHooksCount++;
+
     const initialConfig = configRef.current;
+
+    // structurally type the binding so we can call dispose() safely
+    const bindings: Array<{ dispose: () => void }> = [];
 
     (Object.keys(initialConfig) as Array<keyof T>).forEach((key) => {
       const item = initialConfig[key];
@@ -46,14 +58,29 @@ export function useTweakpane<T extends Record<string, unknown>>(
           ? item
           : {};
 
-      pane
-        .addBinding(stateRef.current, key as string, options)
+      // bind Tweakpane to our stable ref object
+      const binding = sharedPane!
+        .addBinding(tweakpaneTargetRef.current, key as string, options)
         .on("change", (ev) => {
+          // when Tweakpane mutates the ref, sync that change to React state to trigger a render
           setParams((prev) => ({ ...prev, [key]: ev.value }));
         });
+
+      bindings.push(binding);
     });
 
-    return () => pane.dispose();
+    return () => {
+      // remove only the inputs associated with this specific component
+      bindings.forEach((binding) => binding.dispose());
+
+      activeHooksCount--;
+
+      // if no components are using the pane anymore, destroy the whole window
+      if (activeHooksCount === 0 && sharedPane) {
+        sharedPane.dispose();
+        sharedPane = null;
+      }
+    };
   }, []);
 
   return params;
