@@ -1,19 +1,7 @@
 import "dotenv/config";
 import { logger } from "./utils/logger.js";
 import geckos from "@geckos.io/server";
-
-// helper to generate a random hex color
-const getRandomColor = () =>
-  "#" +
-  Math.floor(Math.random() * 16777215)
-    .toString(16)
-    .padStart(6, "0");
-
-// helper for readable names
-const adjectives = ["swift", "bold", "brave", "calm", "quick"];
-const nouns = ["scout", "soldier", "sniper", "tank", "pilot"];
-const getRandomName = () =>
-  `${adjectives[Math.floor(Math.random() * adjectives.length)]}-${nouns[Math.floor(Math.random() * nouns.length)]}-${Math.floor(Math.random() * 100)}`;
+import { getRandomColor, getRandomName } from "./utils/helpers.js";
 
 // store player data
 const players = new Map<
@@ -50,10 +38,15 @@ io.onConnection((channel) => {
     }
   });
 
-  channel.onDisconnect(() => {
+  channel.onDisconnect((reason) => {
+    if (!channel.id) return;
     const player = players.get(channel.id as string);
-    logger.info(`User disconnected: ${player?.name || channel.id}`);
+    logger.info(`user disconnected: ${player?.name || channel.id} (${reason})`);
     players.delete(channel.id as string);
+  });
+
+  channel.on("error", (err) => {
+    logger.error(`channel error for ${channel.id}: ${err}`);
   });
 });
 
