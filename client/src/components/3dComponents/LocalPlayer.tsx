@@ -4,6 +4,7 @@ import { PointerLockControls } from "@react-three/drei";
 import { useRef, useEffect } from "react";
 import * as THREE from "three";
 import { useGameStore } from "../../stores/useGameStore";
+import { WEAPONS } from "../../utils/weapons";
 
 // track key states outside the component to avoid re-renders
 const keys = { w: false, a: false, s: false, d: false };
@@ -16,12 +17,12 @@ export default function LocalPlayer() {
 
   const lastEmit = useRef(0);
   const initialized = useRef(false);
+  const lastShotClient = useRef(0);
 
   // vector caches to avoid garbage collection stuttering
   const direction = useRef(new THREE.Vector3());
   const frontVector = useRef(new THREE.Vector3());
   const sideVector = useRef(new THREE.Vector3());
-
   useEffect(() => {
     // continuously track which keys are currently held down
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -29,6 +30,13 @@ export default function LocalPlayer() {
       if (key in keys) {
         keys[key as keyof typeof keys] = true;
       }
+
+      // weapon switching
+      if (key === "1" && channel) channel.emit("switchWeapon", "rifle");
+      if (key === "2" && channel) channel.emit("switchWeapon", "pistol");
+
+      // reloading
+      if (key === "r" && channel) channel.emit("reload");
     };
 
     const handleKeyUp = (e: KeyboardEvent) => {
@@ -41,13 +49,21 @@ export default function LocalPlayer() {
     const handleMouseDown = (e: MouseEvent) => {
       // 0 is left click
       if (e.button === 0 && channel) {
-        // 2. Fetch the camera safely outside the render phase
-        const camera = get().camera;
+        const me = useGameStore.getState().players[localId!];
+        if (!me || me.isDead || me.isReloading || me.ammo <= 0) return;
 
-        channel.emit("shoot", {
-          yaw: camera.rotation.y,
-          pitch: camera.rotation.x,
-        });
+        const weapon = WEAPONS[me.currentWeapon];
+        const now = Date.now();
+
+        // strictly enforce fire rate locally so we don't flood the server
+        if (now - lastShotClient.current >= weapon.fireRate) {
+          const camera = get().camera;
+          channel.emit("shoot", {
+            yaw: camera.rotation.y,
+            pitch: camera.rotation.x,
+          });
+          lastShotClient.current = now;
+        }
       }
     };
 
@@ -60,7 +76,7 @@ export default function LocalPlayer() {
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("keyup", handleKeyUp);
     };
-  }, [channel, get]);
+  }, [channel, get, localId]);
 
   useFrame((state, delta) => {
     if (!localId) return;

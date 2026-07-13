@@ -1,10 +1,11 @@
 import { Canvas } from "@react-three/fiber";
 import { useGameStore } from "../../stores/useGameStore";
-import { PerspectiveCamera, Text } from "@react-three/drei";
+import { PerspectiveCamera } from "@react-three/drei";
 import LocalPlayer from "./LocalPlayer";
 import Ground from "./Ground";
 import { NetworkManager } from "../NetworkManager";
 import CrosshairUI from "./CrosshairUI";
+import PlayerLabel from "./PlayerLabel";
 
 const PrimaryScene = () => {
   const players = useGameStore((state) => state.players);
@@ -22,7 +23,6 @@ const PrimaryScene = () => {
 
       {/* render all players EXCEPT the local one */}
       {Object.entries(players)
-        // filter out the local player and any player that is currently dead
         .filter(([id, pos]) => id !== localId && !pos.isDead)
         .map(([id, pos]) => (
           <group
@@ -30,15 +30,13 @@ const PrimaryScene = () => {
             position={[pos.x, pos.y, pos.z]}
             rotation={[0, pos.yaw, 0]}
           >
-            {/* offset mesh up by 1 so the base rests on the floor (y=0) */}
             <mesh castShadow position={[0, 1, 0]}>
               <capsuleGeometry args={[0.5, 1, 4, 16]} />
               <meshStandardMaterial color={pos.color} />
             </mesh>
-            {/* optional: offset text above the capsule */}
-            <Text position={[0, 2.5, 0]} fontSize={0.4} color="white">
-              {pos.name}
-            </Text>
+
+            {/* Clean, extracted component! */}
+            <PlayerLabel player={pos} />
           </group>
         ))}
 

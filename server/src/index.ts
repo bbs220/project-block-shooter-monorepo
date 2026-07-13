@@ -7,6 +7,8 @@ import {
   handleDisconnect,
   handlePlayerInput,
   handleShoot,
+  handleSwitchWeapon,
+  handleReload,
 } from "./events/playerEvents.js";
 
 const io = geckos();
@@ -28,6 +30,16 @@ io.onConnection((channel) => {
     handleShoot(channel.id as string, data);
   });
 
+  // delegate weapon switching
+  channel.on("switchWeapon", (weaponId: any) => {
+    handleSwitchWeapon(channel.id as string, weaponId);
+  });
+
+  // delegate reloading
+  channel.on("reload", () => {
+    handleReload(channel.id as string);
+  });
+
   // delegate disconnect logic
   channel.onDisconnect((reason) => {
     handleDisconnect(channel.id as string, reason);
@@ -42,7 +54,7 @@ const tickRate = 60;
 const tickInterval = 1000 / tickRate;
 
 function gameLoop() {
-  // fetch clean serialized state and broadcast [cite: 381, 382]
+  // fetch clean serialized state and broadcast
   io.emit("state", getPlayersState());
 }
 

@@ -2,6 +2,7 @@ import { ServerChannel } from "@geckos.io/server";
 import { getRandomColor, getRandomName } from "../utils/helpers.js";
 import { players } from "../state/gameState.js";
 import { logger } from "../utils/logger.js";
+import { WEAPONS } from "../utils/weapons.js";
 
 export function handleConnection(channel: ServerChannel) {
   if (!channel.id) return;
@@ -40,12 +41,53 @@ export function handlePlayerInput(id: string, data: any) {
   }
 }
 
+export function handleSwitchWeapon(id: string, weaponId: string) {
+  const player = players.get(id);
+  if (!player || player.isDead || player.isReloading) return;
+
+  if (weaponId === "rifle" || weaponId === "pistol") {
+    player.currentWeapon = weaponId;
+    player.ammo = WEAPONS[weaponId].magSize; // give full ammo on switch for mvp
+  }
+}
+
+export function handleReload(id: string) {
+  const player = players.get(id);
+  if (!player || player.isDead || player.isReloading) return;
+
+  const weapon = WEAPONS[player.currentWeapon];
+  if (player.ammo === weapon.magSize) return; // already full
+
+  player.isReloading = true;
+
+  setTimeout(() => {
+    if (players.has(id)) {
+      const p = players.get(id)!;
+      p.ammo = weapon.magSize;
+      p.isReloading = false;
+    }
+  }, weapon.reloadTime);
+}
+
 export function handleShoot(id: string, data: any) {
   const shooter = players.get(id);
-  if (!shooter || shooter.isDead) return;
+  // block shooting if dead or currently reloading
+  if (!shooter || shooter.isDead || shooter.isReloading) return;
 
-  // 1. calculate the 3d direction vector based on pitch and yaw
-  // in three.js, the camera looks down the negative z axis
+  const weapon = WEAPONS[shooter.currentWeapon];
+  const now = Date.now();
+
+  // 1. validate fire rate (add 10ms grace period for network jitter)
+  if (now - shooter.lastShotTime < weapon.fireRate - 10) return;
+
+  // 2. validate ammo
+  if (shooter.ammo <= 0) return;
+
+  // successful shot! update ammo and timer
+  shooter.ammo -= 1;
+  shooter.lastShotTime = now;
+
+  // calculate the 3d direction vector based on pitch and yaw
   const pitch = data.pitch || 0;
   const yaw = data.yaw || 0;
 
@@ -56,40 +98,35 @@ export function handleShoot(id: string, data: any) {
   // shooter's eye level (origin of the ray)
   const origin = { x: shooter.x, y: shooter.y + 1.5, z: shooter.z };
 
-  let closestHit = null;
+  let closestHit: { player: any; id: any } | null = null;
   let closestDistance = Infinity;
 
-  // 2. check every other player to see if the ray hits them
+  // check every other player to see if the ray hits them
   players.forEach((target, targetId) => {
     if (targetId === id || target.isDead) return;
 
-    // target's center mass (a 2-unit tall capsule rests on y=0, so center is y=1)
+    // target's center mass
     const targetCenter = { x: target.x, y: target.y + 1, z: target.z };
 
-    // vector from shooter to target
     const vX = targetCenter.x - origin.x;
     const vY = targetCenter.y - origin.y;
     const vZ = targetCenter.z - origin.z;
 
-    // dot product projects the target onto the ray
     const t = vX * dirX + vY * dirY + vZ * dirZ;
 
-    // if t < 0, the target is behind the shooter
-    if (t > 0) {
-      // find the closest point on the ray to the target's center
+    // 3. validate distance limit using weapon.range
+    if (t > 0 && t <= weapon.range) {
       const closestPointX = origin.x + dirX * t;
       const closestPointY = origin.y + dirY * t;
       const closestPointZ = origin.z + dirZ * t;
 
-      // distance from the target's center to that closest point on the ray
       const distToRay = Math.sqrt(
         Math.pow(targetCenter.x - closestPointX, 2) +
           Math.pow(targetCenter.y - closestPointY, 2) +
           Math.pow(targetCenter.z - closestPointZ, 2),
       );
 
-      // 0.5 is the radius of our player capsule
-      // we use 0.6 here to give a slightly generous hitbox (lag compensation)
+      // 0.6 is a slightly generous hitbox (lag compensation)
       if (distToRay < 0.6 && t < closestDistance) {
         closestDistance = t;
         closestHit = { id: targetId, player: target };
@@ -97,12 +134,11 @@ export function handleShoot(id: string, data: any) {
     }
   });
 
-  // 3. apply damage if we hit the closest valid target
+  // 4. apply correct weapon damage if we hit a target
   if (closestHit) {
     const hitPlayer = closestHit.player;
 
-    // rifle does 25 damage per body shot
-    hitPlayer.health -= 25;
+    hitPlayer.health -= weapon.damage;
 
     logger.info(
       `${shooter.name} hit ${hitPlayer.name}! hp: ${hitPlayer.health}`,
@@ -116,6 +152,7 @@ export function handleShoot(id: string, data: any) {
 
       // simple respawn logic for mvp (reset after 3 seconds)
       setTimeout(() => {
+        if (closestHit === null) return;
         if (players.has(closestHit.id)) {
           const p = players.get(closestHit.id)!;
           p.health = 100;
