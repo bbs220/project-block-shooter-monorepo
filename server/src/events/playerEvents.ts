@@ -95,74 +95,74 @@ export function handleReload(id: string) {
 
 export function handleShoot(id: string, data: any) {
   const shooter = players.get(id);
-  // block shooting if dead or currently reloading
   if (!shooter || shooter.isDead || shooter.isReloading) return;
 
   const weapon = WEAPONS[shooter.currentWeapon];
+  // ensure range is defined, fallback to 100 if missing
+  const range = weapon.range ?? 100;
   const now = Date.now();
 
-  // 1. validate fire rate (add 10ms grace period for network jitter)
   if (now - shooter.lastShotTime < weapon.fireRate - 10) return;
-
-  // 2. validate ammo
   if (shooter.ammo <= 0) return;
 
-  // successful shot! deduct from both the persistent magazine and the active display counter
   shooter.magazines[shooter.currentWeapon] -= 1;
   shooter.ammo = shooter.magazines[shooter.currentWeapon];
   shooter.lastShotTime = now;
 
-  // calculate the 3d direction vector based on pitch and yaw
   const pitch = data.pitch || 0;
   const yaw = data.yaw || 0;
-
   const dirX = -Math.sin(yaw) * Math.cos(pitch);
   const dirY = Math.sin(pitch);
   const dirZ = -Math.cos(yaw) * Math.cos(pitch);
 
-  // shooter's eye level (origin of the ray)
   const origin = { x: shooter.x, y: shooter.y + 1.5, z: shooter.z };
 
   let closestHit: { id: string; player: ServerPlayerState } | null = null;
   let closestDistance = Infinity;
 
-  // check every other player to see if the ray hits them
   players.forEach((target, targetId) => {
     if (targetId === id || target.isDead) return;
 
-    // target's center mass
-    const targetCenter = { x: target.x, y: target.y + 1, z: target.z };
+    // target is a capsule from y to y+2
+    const targetBase = { x: target.x, y: target.y, z: target.z };
+    const targetTop = { x: target.x, y: target.y + 2, z: target.z };
 
-    const vX = targetCenter.x - origin.x;
-    const vY = targetCenter.y - origin.y;
-    const vZ = targetCenter.z - origin.z;
+    // vector from ray origin to target base
+    const vX = targetBase.x - origin.x;
+    const vY = targetBase.y - origin.y;
+    const vZ = targetBase.z - origin.z;
 
+    // project point onto ray
     const t = vX * dirX + vY * dirY + vZ * dirZ;
 
-    // 3. validate distance limit using weapon.range
-    if (t > 0 && t <= weapon.range) {
+    // only check if target is within weapon range
+    if (t > 0 && t <= range) {
       const closestPointX = origin.x + dirX * t;
       const closestPointY = origin.y + dirY * t;
       const closestPointZ = origin.z + dirZ * t;
 
-      const distToRay = Math.sqrt(
-        Math.pow(targetCenter.x - closestPointX, 2) +
-          Math.pow(targetCenter.y - closestPointY, 2) +
-          Math.pow(targetCenter.z - closestPointZ, 2),
+      // distance to the vertical line segment (capsule)
+      const clampedY = Math.max(
+        targetBase.y,
+        Math.min(targetTop.y, closestPointY),
       );
 
-      // 0.6 is a slightly generous hitbox (lag compensation)
-      if (distToRay < 0.6 && t < closestDistance) {
+      const distToRay = Math.sqrt(
+        Math.pow(target.x - closestPointX, 2) +
+          Math.pow(clampedY - closestPointY, 2) +
+          Math.pow(target.z - closestPointZ, 2),
+      );
+
+      // reduced radius (0.4) for a tighter, more precise hit
+      if (distToRay < 0.4 && t < closestDistance) {
         closestDistance = t;
         closestHit = { id: targetId, player: target };
       }
     }
   });
 
-  // 4. apply correct weapon damage if we hit a target
   if (closestHit) {
     const hitPlayer = closestHit.player;
-
     hitPlayer.health -= weapon.damage;
 
     logger.info(
@@ -175,23 +175,20 @@ export function handleShoot(id: string, data: any) {
       hitPlayer.deaths += 1;
       logger.info(`${shooter.name} killed ${hitPlayer.name}!`);
 
-      // simple respawn logic for mvp (reset after 3 seconds)
       setTimeout(() => {
         if (closestHit === null) return;
         if (players.has(closestHit.id)) {
           const p = players.get(closestHit.id)!;
           p.health = 100;
           p.isDead = false;
-          // respawn back at center
           p.x = 0;
           p.z = 0;
-          logger.info(`${p.name} respawned! after 3 seconds`);
+          logger.info(`${p.name} respawned after 3 seconds!`);
         }
       }, 3000);
     }
   }
 
-  // 5. auto-trigger a reload immediately if that shot emptied the clip
   if (shooter.ammo === 0) {
     handleReload(id);
   }
