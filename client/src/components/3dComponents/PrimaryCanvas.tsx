@@ -4,6 +4,7 @@ import { PerspectiveCamera, Text } from "@react-three/drei";
 import LocalPlayer from "./LocalPlayer";
 import Ground from "./Ground";
 import { NetworkManager } from "../NetworkManager";
+import CrosshairUI from "./CrosshairUI";
 
 const PrimaryScene = () => {
   const players = useGameStore((state) => state.players);
@@ -48,6 +49,7 @@ const PrimaryScene = () => {
 const PrimaryCanvas = () => {
   return (
     <>
+      <CrosshairUI />
       {/* network manager runs silently outside the 3d canvas */}
       <NetworkManager />
       <Canvas shadows="variance">
