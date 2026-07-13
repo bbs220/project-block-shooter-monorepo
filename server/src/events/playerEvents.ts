@@ -2,6 +2,7 @@ import { ServerChannel } from "@geckos.io/server";
 import { getRandomColor, getRandomName } from "../utils/helpers.js";
 import { players } from "../state/gameState.js";
 import { logger } from "../utils/logger.js";
+import { ServerPlayerState } from "../types/typesSource.js";
 import { WEAPONS } from "../utils/weapons.js";
 
 export function handleConnection(channel: ServerChannel) {
@@ -23,9 +24,15 @@ export function handleConnection(channel: ServerChannel) {
     kills: 0,
     deaths: 0,
     currentWeapon: "rifle",
-    ammo: 30,
+    ammo: WEAPONS["rifle"].magSize, // Current visible ammo
+    // NEW: Persistent ammo tracker for both weapons
+    magazines: {
+      rifle: WEAPONS["rifle"].magSize,
+      pistol: WEAPONS["pistol"].magSize,
+    },
     isReloading: false,
     lastShotTime: 0,
+    reloadTimer: null, // NEW: Track the timeout
   });
 
   logger.info(`User connected: ${playerName} (${channel.id})`);
@@ -41,13 +48,26 @@ export function handlePlayerInput(id: string, data: any) {
   }
 }
 
-export function handleSwitchWeapon(id: string, weaponId: string) {
+export function handleSwitchWeapon(id: string, weaponId: "rifle" | "pistol") {
   const player = players.get(id);
-  if (!player || player.isDead || player.isReloading) return;
+
+  // Notice we removed `player.isReloading` from this rejection check
+  if (!player || player.isDead) return;
+
+  // 1. If switching while reloading, CANCEL the ongoing reload
+  if (player.isReloading) {
+    player.isReloading = false;
+    if (player.reloadTimer) {
+      clearTimeout(player.reloadTimer);
+      player.reloadTimer = null;
+    }
+  }
 
   if (weaponId === "rifle" || weaponId === "pistol") {
     player.currentWeapon = weaponId;
-    player.ammo = WEAPONS[weaponId].magSize; // give full ammo on switch for mvp
+
+    // 2. Retrieve the exact ammo left in the holster (no more free ammo)
+    player.ammo = player.magazines[weaponId];
   }
 }
 
@@ -60,11 +80,15 @@ export function handleReload(id: string) {
 
   player.isReloading = true;
 
-  setTimeout(() => {
+  // 3. Save the timeout ID to the player object so we can abort it if needed
+  player.reloadTimer = setTimeout(() => {
     if (players.has(id)) {
       const p = players.get(id)!;
+      // Refill both the persistent magazine and the active ammo counter
+      p.magazines[p.currentWeapon] = weapon.magSize;
       p.ammo = weapon.magSize;
       p.isReloading = false;
+      p.reloadTimer = null;
     }
   }, weapon.reloadTime);
 }
@@ -83,8 +107,9 @@ export function handleShoot(id: string, data: any) {
   // 2. validate ammo
   if (shooter.ammo <= 0) return;
 
-  // successful shot! update ammo and timer
-  shooter.ammo -= 1;
+  // successful shot! deduct from both the persistent magazine and the active display counter
+  shooter.magazines[shooter.currentWeapon] -= 1;
+  shooter.ammo = shooter.magazines[shooter.currentWeapon];
   shooter.lastShotTime = now;
 
   // calculate the 3d direction vector based on pitch and yaw
@@ -98,7 +123,7 @@ export function handleShoot(id: string, data: any) {
   // shooter's eye level (origin of the ray)
   const origin = { x: shooter.x, y: shooter.y + 1.5, z: shooter.z };
 
-  let closestHit: { player: any; id: any } | null = null;
+  let closestHit: { id: string; player: ServerPlayerState } | null = null;
   let closestDistance = Infinity;
 
   // check every other player to see if the ray hits them
@@ -160,9 +185,15 @@ export function handleShoot(id: string, data: any) {
           // respawn back at center
           p.x = 0;
           p.z = 0;
+          logger.info(`${p.name} respawned! after 3 seconds`);
         }
       }, 3000);
     }
+  }
+
+  // 5. auto-trigger a reload immediately if that shot emptied the clip
+  if (shooter.ammo === 0) {
+    handleReload(id);
   }
 }
 

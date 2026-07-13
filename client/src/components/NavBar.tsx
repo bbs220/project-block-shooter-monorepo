@@ -31,11 +31,17 @@ const NavBar = () => {
             <span className="text-xl font-bold uppercase tracking-wider text-gray-200">
               {WEAPONS[me.currentWeapon].name}
             </span>
-            <span className="text-3xl font-black leading-none text-white drop-shadow-sm flex items-baseline">
-              {me.ammo}
+
+            {/* Added tabular-nums to force equal width for all digits */}
+            <span className="text-3xl font-black leading-none text-white drop-shadow-sm flex items-baseline tabular-nums">
+              {/* Pad current ammo with a leading zero */}
+              {String(me.ammo).padStart(2, "0")}
+
               <span className="text-gray-400 text-lg font-bold mx-1">
-                / {WEAPONS[me.currentWeapon].magSize}
+                {/* Pad max ammo with a leading zero */}/{" "}
+                {String(WEAPONS[me.currentWeapon].magSize).padStart(2, "0")}
               </span>
+
               {/* Reserve ammo indicator */}
               <span
                 className="text-gray-500 text-2xl font-bold ml-2 leading-none"
