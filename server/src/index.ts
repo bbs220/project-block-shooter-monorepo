@@ -1,12 +1,13 @@
 import "dotenv/config";
 import { logger } from "./utils/logger.js";
 import geckos from "@geckos.io/server";
+import { getPlayersState } from "./state/gameState.js";
 import {
   handleConnection,
   handleDisconnect,
   handlePlayerInput,
-} from "./playerEvents.js";
-import { getPlayersState } from "./gameState.js";
+  handleShoot,
+} from "./events/playerEvents.js";
 
 const io = geckos();
 io.listen(9208);
@@ -20,6 +21,11 @@ io.onConnection((channel) => {
   // delegate input logic
   channel.on("playerInput", (data: any) => {
     handlePlayerInput(channel.id as string, data);
+  });
+
+  // delegate shooting logic
+  channel.on("shoot", (data: any) => {
+    handleShoot(channel.id as string, data);
   });
 
   // delegate disconnect logic

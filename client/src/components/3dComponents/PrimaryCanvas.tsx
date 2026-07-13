@@ -22,7 +22,8 @@ const PrimaryScene = () => {
 
       {/* render all players EXCEPT the local one */}
       {Object.entries(players)
-        .filter(([id]) => id !== localId)
+        // filter out the local player and any player that is currently dead
+        .filter(([id, pos]) => id !== localId && !pos.isDead)
         .map(([id, pos]) => (
           <group
             key={id}

@@ -1,4 +1,4 @@
-import { ServerPlayerState } from "./types/typesSource.js";
+import { ServerPlayerState } from "../types/typesSource.js";
 
 // central authoritative state
 export const players = new Map<string, ServerPlayerState>();

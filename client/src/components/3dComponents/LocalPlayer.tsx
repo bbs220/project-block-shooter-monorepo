@@ -1,4 +1,5 @@
-import { useFrame } from "@react-three/fiber";
+import { useFrame, useThree } from "@react-three/fiber";
+
 import { PointerLockControls } from "@react-three/drei";
 import { useRef, useEffect } from "react";
 import * as THREE from "three";
@@ -11,6 +12,7 @@ export default function LocalPlayer() {
   const localId = useGameStore((state) => state.localId);
   const players = useGameStore((state) => state.players);
   const channel = useGameStore((state) => state.channel);
+  const { get } = useThree();
 
   const lastEmit = useRef(0);
   const initialized = useRef(false);
@@ -36,14 +38,29 @@ export default function LocalPlayer() {
       }
     };
 
+    const handleMouseDown = (e: MouseEvent) => {
+      // 0 is left click
+      if (e.button === 0 && channel) {
+        // 2. Fetch the camera safely outside the render phase
+        const camera = get().camera;
+
+        channel.emit("shoot", {
+          yaw: camera.rotation.y,
+          pitch: camera.rotation.x,
+        });
+      }
+    };
+
+    window.addEventListener("mousedown", handleMouseDown);
     window.addEventListener("keydown", handleKeyDown);
     window.addEventListener("keyup", handleKeyUp);
 
     return () => {
+      window.removeEventListener("mousedown", handleMouseDown);
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("keyup", handleKeyUp);
     };
-  }, []);
+  }, [channel, get]);
 
   useFrame((state, delta) => {
     if (!localId) return;
