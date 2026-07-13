@@ -1,11 +1,12 @@
 import "dotenv/config";
 import { logger } from "./utils/logger.js";
 import geckos from "@geckos.io/server";
-import { getRandomColor, getRandomName } from "./utils/helpers.js";
-import { ServerPlayerState } from "./types/typesSource.js";
-
-// store player data
-const players = new Map<string, ServerPlayerState>();
+import {
+  handleConnection,
+  handleDisconnect,
+  handlePlayerInput,
+} from "./playerEvents.js";
+import { getPlayersState } from "./gameState.js";
 
 const io = geckos();
 io.listen(9208);
@@ -13,49 +14,17 @@ io.listen(9208);
 io.onConnection((channel) => {
   if (!channel.id) return;
 
-  const playerName = getRandomName();
-  players.set(channel.id, {
-    name: playerName,
-    color: getRandomColor(),
-    team: "none", // auto-assign this later when match starts
+  // delegate connection logic
+  handleConnection(channel);
 
-    x: 0,
-    y: 0,
-    z: 0,
-    yaw: 0,
-    pitch: 0,
-
-    health: 100,
-    isDead: false,
-    kills: 0,
-    deaths: 0,
-
-    currentWeapon: "rifle",
-    ammo: 30, // rifle clip size
-    isReloading: false,
-  });
-
-  logger.info(`User connected: ${playerName} (${channel.id})`);
-
-  // listen for bundled input (movement + rotation)
+  // delegate input logic
   channel.on("playerInput", (data: any) => {
-    const player = players.get(channel.id as string);
-    if (player) {
-      // update rotation
-      player.yaw = data.yaw || 0;
-      player.pitch = data.pitch || 0;
-
-      // update position based on the client's camera-relative math
-      player.x += data.moveX || 0;
-      player.z += data.moveZ || 0;
-    }
+    handlePlayerInput(channel.id as string, data);
   });
 
+  // delegate disconnect logic
   channel.onDisconnect((reason) => {
-    if (!channel.id) return;
-    const player = players.get(channel.id as string);
-    logger.info(`user disconnected: ${player?.name || channel.id} (${reason})`);
-    players.delete(channel.id as string);
+    handleDisconnect(channel.id as string, reason);
   });
 
   channel.on("error", (err) => {
@@ -67,9 +36,8 @@ const tickRate = 60;
 const tickInterval = 1000 / tickRate;
 
 function gameLoop() {
-  // broadcast the entire player state to everyone 60 times a second
-  const state = Object.fromEntries(players);
-  io.emit("state", state);
+  // fetch clean serialized state and broadcast [cite: 381, 382]
+  io.emit("state", getPlayersState());
 }
 
 setInterval(gameLoop, tickInterval);
