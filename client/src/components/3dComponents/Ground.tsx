@@ -16,7 +16,7 @@ const Ground = () => {
     texture.anisotropy = 16;
 
     // tile the texture 25 times
-    texture.repeat.set(25, 25);
+    texture.repeat.set(50, 50);
 
     // tell three.js the texture has been updated
     texture.needsUpdate = true;
@@ -26,7 +26,7 @@ const Ground = () => {
 
   return (
     <mesh position={[0, 0, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
-      <planeGeometry args={[50, 50]} />
+      <planeGeometry args={[100, 100]} />
       <meshStandardMaterial map={gridMap} />
     </mesh>
   );
