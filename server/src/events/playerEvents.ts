@@ -24,6 +24,7 @@ export function handleConnection(channel: ServerChannel) {
     currentWeapon: "rifle",
     ammo: 30,
     isReloading: false,
+    lastShotTime: 0,
   });
 
   logger.info(`User connected: ${playerName} (${channel.id})`);

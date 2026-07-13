@@ -14,4 +14,5 @@ export type ServerPlayerState = {
   currentWeapon: "rifle" | "pistol";
   ammo: number;
   isReloading: boolean;
+  lastShotTime: number;
 };
