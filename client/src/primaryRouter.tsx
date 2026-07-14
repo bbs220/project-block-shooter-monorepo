@@ -10,11 +10,7 @@ export const primaryRouter = createBrowserRouter([
     children: [
       {
         path: "/",
-        element: (
-          <LayoutState>
-            <WelcomePage />
-          </LayoutState>
-        ),
+        element: <WelcomePage />,
       },
       {
         path: "/play",

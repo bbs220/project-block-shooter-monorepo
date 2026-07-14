@@ -2,7 +2,7 @@ import { create } from "zustand";
 import type { ClientChannel } from "@geckos.io/client";
 
 // specific types for strictness
-export type WeaponType = "rifle" | "pistol";
+export type WeaponType = "rifle" | "pistol" | "burstRifle";
 export type TeamType = "red" | "blue" | "none";
 export type MatchState = "waiting" | "playing" | "ended";
 export type GameMode = "tdm" | "ctp";
@@ -53,6 +53,10 @@ export interface GameStore {
 
   // generic updater for match info (time, scores, etc)
   updateMatchData: (data: Partial<GameStore>) => void;
+
+  // pseudo pause state
+  isLocked: boolean;
+  setLocked: (locked: boolean) => void;
 }
 
 export const useGameStore = create<GameStore>((set) => ({
@@ -72,4 +76,7 @@ export const useGameStore = create<GameStore>((set) => ({
   setChannel: (channel) => set({ channel }),
   setPlayers: (players) => set({ players }),
   updateMatchData: (data) => set((state) => ({ ...state, ...data })),
+
+  isLocked: false,
+  setLocked: (locked) => set({ isLocked: locked }),
 }));

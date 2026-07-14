@@ -12,6 +12,7 @@ export default function LocalPlayer() {
   const localId = useGameStore((state) => state.localId);
   const players = useGameStore((state) => state.players);
   const channel = useGameStore((state) => state.channel);
+  const setLocked = useGameStore((state) => state.setLocked);
 
   const lastEmit = useRef(0);
   const initialized = useRef(false);
@@ -50,8 +51,8 @@ export default function LocalPlayer() {
     };
 
     const handleMouseDown = (e: MouseEvent) => {
-      // 0 is left click
-      if (e.button === 0) {
+      // 0 is left click. ONLY shoot if the pointer is currently locked!
+      if (e.button === 0 && useGameStore.getState().isLocked) {
         isShooting.current = true;
       }
     };
@@ -197,5 +198,11 @@ export default function LocalPlayer() {
     }
   });
 
-  return <PointerLockControls />;
+  return (
+    <PointerLockControls
+      selector="#play-button"
+      onLock={() => setLocked(true)}
+      onUnlock={() => setLocked(false)}
+    />
+  );
 }

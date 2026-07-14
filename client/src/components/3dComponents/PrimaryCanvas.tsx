@@ -3,6 +3,7 @@ import { useGameStore } from "../../stores/useGameStore";
 import {
   GizmoHelper,
   GizmoViewport,
+  Loader,
   PerspectiveCamera,
 } from "@react-three/drei";
 import LocalPlayer from "./LocalPlayer";
@@ -12,6 +13,7 @@ import CrosshairUI from "./CrosshairUI";
 import PlayerLabel from "./PlayerLabel";
 import { Physics, RigidBody } from "@react-three/rapier";
 import { useTweakpane } from "../../hooks/useTweakPane";
+import PlayOverlay from "../PlayOverlay";
 
 const PrimaryScene = () => {
   const players = useGameStore((state) => state.players);
@@ -24,6 +26,7 @@ const PrimaryScene = () => {
 
   return (
     <>
+      {/* rapier physics */}
       <Physics debug={showPhyDebug}>
         <PerspectiveCamera makeDefault fov={60} />
         <GizmoHelper alignment="top-left" margin={[450, 100]}>
@@ -63,13 +66,23 @@ const PrimaryScene = () => {
 const PrimaryCanvas = () => {
   return (
     <>
+      {/* cursor for aim */}
       <CrosshairUI />
+      {/* container for pointer controls */}
+      <PlayOverlay />
       {/* network manager runs silently outside the 3d canvas */}
       <NetworkManager />
+      {/* main 3d viewport */}
       <Canvas shadows="variance">
         <color attach="background" args={["#404040"]} />
         <PrimaryScene />
       </Canvas>
+      {/* loading screen */}
+      <Loader
+        containerStyles={{ backgroundColor: "#171717" }}
+        innerStyles={{ width: "300px" }}
+        barStyles={{ backgroundColor: "#3b82f6" }}
+      />
     </>
   );
 };
