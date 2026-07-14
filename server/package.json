@@ -6,7 +6,7 @@
   "scripts": {
     "client": "npm run dev --prefix ../client",
     "server": "nodemon --exec tsx src/index.ts | pino-pretty",
-    "both": "concurrently -k \"npm run server\" \"npm run client\"",
+    "both": "concurrently -k --names \"server,client\" -c \"green,blue\" \"npm run server\" \"npm run client\"",
     "build": "tsc",
     "start": "node dist/index.js"
   },
