@@ -1,14 +1,32 @@
 import { ServerChannel } from "@geckos.io/server";
+import RAPIER from "@dimforge/rapier3d-compat";
 import { getRandomColor, getRandomName } from "../utils/helpers.js";
 import { players } from "../state/gameState.js";
 import { logger } from "../utils/logger.js";
-import { ServerPlayerState } from "../types/typesSource.js";
+import { world } from "../index.js";
 import { WEAPONS } from "../utils/weapons.js";
 
+// 1. Import Rapier and the physics world (we will set 'world' up in index.ts next)
 export function handleConnection(channel: ServerChannel) {
   if (!channel.id) return;
 
   const playerName = getRandomName();
+
+  // 2. Create the Rapier RigidBody & Capsule Collider
+  // Player center is at Y=1 so the 2-unit tall capsule rests on Y=0
+  const bodyDesc = RAPIER.RigidBodyDesc.kinematicPositionBased().setTranslation(
+    0,
+    1,
+    0,
+  );
+  const body = world.createRigidBody(bodyDesc);
+
+  // Tag the physics body with the player's network ID so the raycaster knows who it hit
+  body.userData = { id: channel.id };
+
+  // Capsule args in Rapier are (half-height, radius). 0.5 + 0.5 = 1.0 half height total = 2.0 full height
+  const colliderDesc = RAPIER.ColliderDesc.capsule(0.5, 0.5);
+  world.createCollider(colliderDesc, body);
 
   players.set(channel.id, {
     name: playerName,
@@ -24,8 +42,7 @@ export function handleConnection(channel: ServerChannel) {
     kills: 0,
     deaths: 0,
     currentWeapon: "rifle",
-    ammo: WEAPONS["rifle"].magSize, // Current visible ammo
-    // NEW: Persistent ammo tracker for both weapons
+    ammo: WEAPONS["rifle"].magSize,
     magazines: {
       rifle: WEAPONS["rifle"].magSize,
       pistol: WEAPONS["pistol"].magSize,
@@ -33,7 +50,8 @@ export function handleConnection(channel: ServerChannel) {
     },
     isReloading: false,
     lastShotTime: 0,
-    reloadTimer: null, // NEW: Track the timeout
+    reloadTimer: null,
+    body: body, // Add the physics body to the player state
   });
 
   logger.info(`User connected: ${playerName} (${channel.id})`);
@@ -46,6 +64,13 @@ export function handlePlayerInput(id: string, data: any) {
     player.pitch = data.pitch || 0;
     player.x += data.moveX || 0;
     player.z += data.moveZ || 0;
+
+    // 3. Move the actual physics collider to match the new coordinates
+    player.body.setNextKinematicTranslation({
+      x: player.x,
+      y: player.y + 1, // Keep center mass at Y=1
+      z: player.z,
+    });
   }
 }
 
@@ -57,7 +82,6 @@ export function handleSwitchWeapon(
 
   if (!player || player.isDead) return;
 
-  // 1. if switching while reloading, cancel the ongoing reload
   if (player.isReloading) {
     player.isReloading = false;
     if (player.reloadTimer) {
@@ -66,15 +90,12 @@ export function handleSwitchWeapon(
     }
   }
 
-  // 2. validate the new weapon id
   if (
     weaponId === "rifle" ||
     weaponId === "pistol" ||
     weaponId === "burstRifle"
   ) {
     player.currentWeapon = weaponId;
-
-    // 3. retrieve the exact ammo left in the holster
     player.ammo = player.magazines[weaponId];
   }
 }
@@ -84,15 +105,13 @@ export function handleReload(id: string) {
   if (!player || player.isDead || player.isReloading) return;
 
   const weapon = WEAPONS[player.currentWeapon];
-  if (player.ammo === weapon.magSize) return; // already full
+  if (player.ammo === weapon.magSize) return;
 
   player.isReloading = true;
 
-  // 3. Save the timeout ID to the player object so we can abort it if needed
   player.reloadTimer = setTimeout(() => {
     if (players.has(id)) {
       const p = players.get(id)!;
-      // Refill both the persistent magazine and the active ammo counter
       p.magazines[p.currentWeapon] = weapon.magSize;
       p.ammo = weapon.magSize;
       p.isReloading = false;
@@ -106,7 +125,6 @@ export function handleShoot(id: string, data: any) {
   if (!shooter || shooter.isDead || shooter.isReloading) return;
 
   const weapon = WEAPONS[shooter.currentWeapon];
-  // ensure range is defined, fallback to 100 if missing
   const range = weapon.range ?? 100;
   const now = Date.now();
 
@@ -124,84 +142,61 @@ export function handleShoot(id: string, data: any) {
   const dirZ = -Math.cos(yaw) * Math.cos(pitch);
 
   const origin = { x: shooter.x, y: shooter.y + 1.5, z: shooter.z };
+  const direction = { x: dirX, y: dirY, z: dirZ };
 
-  let closestHit: { id: string; player: ServerPlayerState } | null = null;
-  let closestDistance = Infinity;
+  // 4. Mathematical Rapier Raycast (Replaces all the manual trig!)
+  const ray = new RAPIER.Ray(origin, direction);
 
-  players.forEach((target, targetId) => {
-    if (targetId === id || target.isDead) return;
+  // castRay(ray, maxToi, solid, collisionGroups, filterFlags, filterTarget, filterRigidBody)
+  // We pass `shooter.body` as the 7th argument to guarantee the ray ignores the shooter's own capsule
+  const hit = world.castRay(
+    ray,
+    range,
+    true,
+    undefined,
+    undefined,
+    undefined,
+    shooter.body,
+  );
 
-    // target is a capsule from y to y+2
-    const targetBase = { x: target.x, y: target.y, z: target.z };
-    const targetTop = { x: target.x, y: target.y + 2, z: target.z };
+  if (hit && hit.collider) {
+    // Extract the network ID we saved in userData during connection
+    const hitId = hit.collider.parent()?.userData?.id;
 
-    // vector from ray origin to target base
-    const vX = targetBase.x - origin.x;
-    const vY = targetBase.y - origin.y;
-    const vZ = targetBase.z - origin.z;
+    if (hitId && hitId !== id) {
+      const hitPlayer = players.get(hitId);
 
-    // project point onto ray
-    const t = vX * dirX + vY * dirY + vZ * dirZ;
+      if (hitPlayer && !hitPlayer.isDead) {
+        hitPlayer.health -= weapon.damage;
 
-    // only check if target is within weapon range
-    if (t > 0 && t <= range) {
-      const closestPointX = origin.x + dirX * t;
-      const closestPointY = origin.y + dirY * t;
-      const closestPointZ = origin.z + dirZ * t;
+        logger.info(
+          `${shooter.name} hit ${hitPlayer.name} with ${weapon.name}! hp: ${hitPlayer.health}`,
+        );
 
-      // distance to the vertical line segment (capsule)
-      const clampedY = Math.max(
-        targetBase.y,
-        Math.min(targetTop.y, closestPointY),
-      );
+        if (hitPlayer.health <= 0) {
+          hitPlayer.isDead = true;
+          shooter.kills += 1;
+          hitPlayer.deaths += 1;
 
-      const distToRay = Math.sqrt(
-        Math.pow(target.x - closestPointX, 2) +
-          Math.pow(clampedY - closestPointY, 2) +
-          Math.pow(target.z - closestPointZ, 2),
-      );
+          logger.info(
+            `${shooter.name} killed ${hitPlayer.name} with ${weapon.name}!`,
+          );
 
-      // reduced radius (0.4) for a tighter, more precise hit
-      if (distToRay < 0.4 && t < closestDistance) {
-        closestDistance = t;
-        closestHit = { id: targetId, player: target };
-      }
-    }
-  });
-
-  if (closestHit) {
-    const hitPlayer = closestHit.player;
-
-    hitPlayer.health -= weapon.damage;
-
-    // updated log to include the weapon name
-    logger.info(
-      `${shooter.name} hit ${hitPlayer.name} with ${weapon.name}! hp: ${hitPlayer.health}`,
-    );
-
-    if (hitPlayer.health <= 0) {
-      hitPlayer.isDead = true;
-      shooter.kills += 1;
-      hitPlayer.deaths += 1;
-
-      // updated log to include the killing weapon
-      logger.info(
-        `${shooter.name} killed ${hitPlayer.name} with ${weapon.name}!`,
-      );
-
-      // simple respawn logic for mvp (reset after 3 seconds)
-      setTimeout(() => {
-        if (closestHit === null) return;
-        if (players.has(closestHit.id)) {
-          const p = players.get(closestHit.id)!;
-          p.health = 100;
-          p.isDead = false;
-          // respawn back at center
-          p.x = 0;
-          p.z = 0;
-          logger.info(`${p.name} respawned!`);
+          // Respawn logic
+          setTimeout(() => {
+            if (players.has(hitId)) {
+              const p = players.get(hitId)!;
+              p.health = 100;
+              p.isDead = false;
+              p.x = 0;
+              p.z = 0;
+              // 5. Teleport the physics body back to spawn too!
+              p.body.setNextKinematicTranslation({ x: 0, y: 1, z: 0 });
+              logger.info(`${p.name} respawned!`);
+            }
+          }, 3000);
         }
-      }, 3000);
+      }
     }
   }
 
@@ -212,6 +207,13 @@ export function handleShoot(id: string, data: any) {
 
 export function handleDisconnect(id: string, reason: string) {
   const player = players.get(id);
-  logger.info(`User disconnected: ${player?.name || id} (${reason})`);
+  if (player) {
+    logger.info(`User disconnected: ${player.name} (${reason})`);
+
+    // 6. Clean up the physics body so ghost colliders don't block bullets
+    if (player.body) {
+      world.removeRigidBody(player.body);
+    }
+  }
   players.delete(id);
 }
