@@ -1,6 +1,10 @@
 import { Canvas } from "@react-three/fiber";
 import { useGameStore } from "../../stores/useGameStore";
-import { PerspectiveCamera } from "@react-three/drei";
+import {
+  GizmoHelper,
+  GizmoViewport,
+  PerspectiveCamera,
+} from "@react-three/drei";
 import LocalPlayer from "./LocalPlayer";
 import Ground from "./Ground";
 import { NetworkManager } from "../NetworkManager";
@@ -13,15 +17,18 @@ const PrimaryScene = () => {
   const players = useGameStore((state) => state.players);
   const localId = useGameStore((state) => state.localId);
 
-  const { showPhyDebug } = useTweakpane({
+  const { showPhyDebug, showGizmo } = useTweakpane({
     showPhyDebug: false,
+    showGizmo: false,
   });
 
   return (
     <>
       <Physics debug={showPhyDebug}>
         <PerspectiveCamera makeDefault fov={60} />
-
+        <GizmoHelper alignment="top-left" margin={[450, 100]}>
+          <GizmoViewport labelColor="white" visible={showGizmo} />
+        </GizmoHelper>
         {/* captures mouse and moves camera */}
         <LocalPlayer />
 

@@ -11,7 +11,7 @@ const NavBar = () => {
 
   return (
     // Anchor everything to the top-left to leave the right side completely free for Tweakpane
-    <nav className="absolute top-0 left-0 p-6 z-10 pointer-events-none">
+    <nav className="absolute top-0 left-0 p-2 z-10 pointer-events-none">
       {me ? (
         // Single unified HUD container
         <div className="flex flex-col items-start gap-3 bg-black/50 p-4 rounded-xl backdrop-blur-md shadow-lg w-fit border border-white/10">
