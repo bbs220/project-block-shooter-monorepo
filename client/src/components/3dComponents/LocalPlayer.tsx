@@ -1,4 +1,4 @@
-import { useFrame, useThree } from "@react-three/fiber";
+import { useFrame } from "@react-three/fiber";
 import { PointerLockControls } from "@react-three/drei";
 import { useRef, useEffect } from "react";
 import * as THREE from "three";
@@ -12,16 +12,19 @@ export default function LocalPlayer() {
   const localId = useGameStore((state) => state.localId);
   const players = useGameStore((state) => state.players);
   const channel = useGameStore((state) => state.channel);
-  const { get } = useThree();
 
   const lastEmit = useRef(0);
   const initialized = useRef(false);
   const lastShotClient = useRef(0);
+  const isShooting = useRef(false);
+  const triggerReady = useRef(true);
+  const burstShotsLeft = useRef(0);
 
   // vector caches to avoid garbage collection stuttering
   const direction = useRef(new THREE.Vector3());
   const frontVector = useRef(new THREE.Vector3());
   const sideVector = useRef(new THREE.Vector3());
+
   useEffect(() => {
     // continuously track which keys are currently held down
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -33,6 +36,7 @@ export default function LocalPlayer() {
       // weapon switching
       if (key === "1" && channel) channel.emit("switchWeapon", "rifle");
       if (key === "2" && channel) channel.emit("switchWeapon", "pistol");
+      if (key === "3" && channel) channel.emit("switchWeapon", "burstRifle");
 
       // reloading
       if (key === "r" && channel) channel.emit("reload");
@@ -47,35 +51,31 @@ export default function LocalPlayer() {
 
     const handleMouseDown = (e: MouseEvent) => {
       // 0 is left click
-      if (e.button === 0 && channel) {
-        const me = useGameStore.getState().players[localId!];
-        if (!me || me.isDead || me.isReloading || me.ammo <= 0) return;
+      if (e.button === 0) {
+        isShooting.current = true;
+      }
+    };
 
-        const weapon = WEAPONS[me.currentWeapon];
-        const now = Date.now();
-
-        // strictly enforce fire rate locally so we don't flood the server
-        if (now - lastShotClient.current >= weapon.fireRate) {
-          const camera = get().camera;
-          channel.emit("shoot", {
-            yaw: camera.rotation.y,
-            pitch: camera.rotation.x,
-          });
-          lastShotClient.current = now;
-        }
+    const handleMouseUp = (e: MouseEvent) => {
+      if (e.button === 0) {
+        isShooting.current = false;
+        // reset the trigger so semi/single weapons can fire again
+        triggerReady.current = true;
       }
     };
 
     window.addEventListener("mousedown", handleMouseDown);
+    window.addEventListener("mouseup", handleMouseUp);
     window.addEventListener("keydown", handleKeyDown);
     window.addEventListener("keyup", handleKeyUp);
 
     return () => {
       window.removeEventListener("mousedown", handleMouseDown);
+      window.removeEventListener("mouseup", handleMouseUp);
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("keyup", handleKeyUp);
     };
-  }, [channel, get, localId]);
+  }, [channel]);
 
   useFrame((state, delta) => {
     if (!localId) return;
@@ -129,8 +129,51 @@ export default function LocalPlayer() {
       camera.position.z += deltaZ;
     }
 
-    // throttle network emission to roughly 20hz
     const now = performance.now();
+
+    // handle weapon firing modes
+    if (me && !me.isDead && !me.isReloading && me.ammo > 0) {
+      const weapon = WEAPONS[me.currentWeapon];
+
+      // 1. check if we should initiate a new shot/burst from mouse hold
+      if (isShooting.current && channel) {
+        if (now - lastShotClient.current >= weapon.fireRate) {
+          if (weapon.mode === "auto" || triggerReady.current) {
+            // if it's a burst weapon, queue up 3 shots (or whatever ammo is left)
+            if (weapon.mode === "burst") {
+              burstShotsLeft.current = Math.min(3, me.ammo);
+            } else {
+              // standard auto/semi/single shot
+              channel.emit("shoot", {
+                yaw: camera.rotation.y,
+                pitch: camera.rotation.x,
+              });
+              lastShotClient.current = now;
+            }
+
+            // force trigger release for semi/single/burst
+            if (weapon.mode !== "auto") {
+              triggerReady.current = false;
+            }
+          }
+        }
+      }
+
+      // 2. handle the ongoing burst queue completely independently of the mouse button
+      if (burstShotsLeft.current > 0 && channel) {
+        if (now - lastShotClient.current >= weapon.fireRate) {
+          channel.emit("shoot", {
+            yaw: camera.rotation.y,
+            pitch: camera.rotation.x,
+          });
+
+          lastShotClient.current = now;
+          burstShotsLeft.current -= 1;
+        }
+      }
+    }
+
+    // throttle movement network emission to roughly 20hz
     if (channel && now - lastEmit.current > 50) {
       // bundle movement and look data into one payload
       channel.emit("playerInput", {

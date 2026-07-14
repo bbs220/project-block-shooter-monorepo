@@ -17,11 +17,12 @@ export type ServerPlayerState = {
   deaths: number;
 
   // combat & weapons
-  currentWeapon: "rifle" | "pistol";
+  currentWeapon: "rifle" | "pistol" | "burstRifle";
   ammo: number;
   magazines: {
     rifle: number;
     pistol: number;
+    burstRifle: number;
   };
   isReloading: boolean;
   lastShotTime: number;

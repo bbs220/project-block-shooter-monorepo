@@ -29,6 +29,7 @@ export function handleConnection(channel: ServerChannel) {
     magazines: {
       rifle: WEAPONS["rifle"].magSize,
       pistol: WEAPONS["pistol"].magSize,
+      burstRifle: WEAPONS["burstRifle"].magSize,
     },
     isReloading: false,
     lastShotTime: 0,
@@ -48,13 +49,15 @@ export function handlePlayerInput(id: string, data: any) {
   }
 }
 
-export function handleSwitchWeapon(id: string, weaponId: "rifle" | "pistol") {
+export function handleSwitchWeapon(
+  id: string,
+  weaponId: "rifle" | "pistol" | "burstRifle",
+) {
   const player = players.get(id);
 
-  // Notice we removed `player.isReloading` from this rejection check
   if (!player || player.isDead) return;
 
-  // 1. If switching while reloading, CANCEL the ongoing reload
+  // 1. if switching while reloading, cancel the ongoing reload
   if (player.isReloading) {
     player.isReloading = false;
     if (player.reloadTimer) {
@@ -63,10 +66,15 @@ export function handleSwitchWeapon(id: string, weaponId: "rifle" | "pistol") {
     }
   }
 
-  if (weaponId === "rifle" || weaponId === "pistol") {
+  // 2. validate the new weapon id
+  if (
+    weaponId === "rifle" ||
+    weaponId === "pistol" ||
+    weaponId === "burstRifle"
+  ) {
     player.currentWeapon = weaponId;
 
-    // 2. Retrieve the exact ammo left in the holster (no more free ammo)
+    // 3. retrieve the exact ammo left in the holster
     player.ammo = player.magazines[weaponId];
   }
 }
@@ -163,27 +171,35 @@ export function handleShoot(id: string, data: any) {
 
   if (closestHit) {
     const hitPlayer = closestHit.player;
+
     hitPlayer.health -= weapon.damage;
 
+    // updated log to include the weapon name
     logger.info(
-      `${shooter.name} hit ${hitPlayer.name}! hp: ${hitPlayer.health}`,
+      `${shooter.name} hit ${hitPlayer.name} with ${weapon.name}! hp: ${hitPlayer.health}`,
     );
 
     if (hitPlayer.health <= 0) {
       hitPlayer.isDead = true;
       shooter.kills += 1;
       hitPlayer.deaths += 1;
-      logger.info(`${shooter.name} killed ${hitPlayer.name}!`);
 
+      // updated log to include the killing weapon
+      logger.info(
+        `${shooter.name} killed ${hitPlayer.name} with ${weapon.name}!`,
+      );
+
+      // simple respawn logic for mvp (reset after 3 seconds)
       setTimeout(() => {
         if (closestHit === null) return;
         if (players.has(closestHit.id)) {
           const p = players.get(closestHit.id)!;
           p.health = 100;
           p.isDead = false;
+          // respawn back at center
           p.x = 0;
           p.z = 0;
-          logger.info(`${p.name} respawned after 3 seconds!`);
+          logger.info(`${p.name} respawned!`);
         }
       }, 3000);
     }

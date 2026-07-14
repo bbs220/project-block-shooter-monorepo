@@ -68,6 +68,14 @@ const NavBar = () => {
               Pistol
             </span>
 
+            {/* newly added burst rifle hint */}
+            <span className="text-gray-300 flex items-center">
+              <kbd className="bg-gray-800 border border-gray-600 px-1.5 py-0.5 rounded text-white shadow-sm mr-2">
+                3
+              </kbd>
+              Burst
+            </span>
+
             {/* Dynamic Reload Indicator */}
             <span
               className={`flex items-center transition-colors duration-200 font-bold tracking-wider ${
