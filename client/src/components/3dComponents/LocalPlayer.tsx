@@ -83,10 +83,12 @@ export default function LocalPlayer() {
     const camera = state.camera;
     const me = players[localId];
 
-    // only snap to server position on the very first spawn to get the initial coordinates
-    if (me && !initialized.current) {
-      camera.position.set(me.x, me.y + 1.5, me.z);
-      initialized.current = true;
+    // 1. snap on first load, or if server marks us dead (resets camera on respawn)
+    if (me) {
+      if (!initialized.current || me.isDead) {
+        camera.position.set(me.x, me.y + 1.5, me.z);
+        initialized.current = true;
+      }
     }
 
     // true fps standard: w is forward (+1), s is backward (-1)
@@ -101,19 +103,19 @@ export default function LocalPlayer() {
     if (forward !== 0 || right !== 0) {
       const speed = 5 * delta;
 
-      // 1. get the exact direction the camera is looking
+      // get the exact direction the camera is looking
       camera.getWorldDirection(frontVector.current);
 
-      // 2. flatten it to the x/z plane so looking up/down doesn't slow you down
+      // flatten it to the x/z plane so looking up/down doesn't slow you down
       frontVector.current.y = 0;
       frontVector.current.normalize();
 
-      // 3. calculate the exact right direction using a cross product with the world up vector
+      // calculate the exact right direction using a cross product with the world up vector
       sideVector.current
         .crossVectors(camera.up, frontVector.current)
         .normalize();
 
-      // 4. combine them based on user input
+      // combine them based on user input
       direction.current
         .set(0, 0, 0)
         .addScaledVector(frontVector.current, forward)
@@ -135,7 +137,7 @@ export default function LocalPlayer() {
     if (me && !me.isDead && !me.isReloading && me.ammo > 0) {
       const weapon = WEAPONS[me.currentWeapon];
 
-      // 1. check if we should initiate a new shot/burst from mouse hold
+      // check if we should initiate a new shot/burst from mouse hold
       if (isShooting.current && channel) {
         if (now - lastShotClient.current >= weapon.fireRate) {
           if (weapon.mode === "auto" || triggerReady.current) {
@@ -143,10 +145,15 @@ export default function LocalPlayer() {
             if (weapon.mode === "burst") {
               burstShotsLeft.current = Math.min(3, me.ammo);
             } else {
+              // get the exact mathematical direction of the crosshair
+              const dir = new THREE.Vector3();
+              camera.getWorldDirection(dir);
+
               // standard auto/semi/single shot
               channel.emit("shoot", {
-                yaw: camera.rotation.y,
-                pitch: camera.rotation.x,
+                dirX: dir.x,
+                dirY: dir.y,
+                dirZ: dir.z,
               });
               lastShotClient.current = now;
             }
@@ -159,12 +166,17 @@ export default function LocalPlayer() {
         }
       }
 
-      // 2. handle the ongoing burst queue completely independently of the mouse button
+      // handle the ongoing burst queue completely independently of the mouse button
       if (burstShotsLeft.current > 0 && channel) {
         if (now - lastShotClient.current >= weapon.fireRate) {
+          // get the exact mathematical direction of the crosshair
+          const dir = new THREE.Vector3();
+          camera.getWorldDirection(dir);
+
           channel.emit("shoot", {
-            yaw: camera.rotation.y,
-            pitch: camera.rotation.x,
+            dirX: dir.x,
+            dirY: dir.y,
+            dirZ: dir.z,
           });
 
           lastShotClient.current = now;
@@ -173,14 +185,13 @@ export default function LocalPlayer() {
       }
     }
 
-    // throttle movement network emission to roughly 20hz
+    // throttle network emission, but send absolute position
     if (channel && now - lastEmit.current > 50) {
-      // bundle movement and look data into one payload
       channel.emit("playerInput", {
         yaw: camera.rotation.y,
         pitch: camera.rotation.x,
-        moveX: deltaX,
-        moveZ: deltaZ,
+        x: camera.position.x, // send exact x
+        z: camera.position.z, // send exact z
       });
       lastEmit.current = now;
     }

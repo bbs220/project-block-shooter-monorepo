@@ -6,14 +6,14 @@ import { logger } from "../utils/logger.js";
 import { world } from "../index.js";
 import { WEAPONS } from "../utils/weapons.js";
 
-// 1. Import Rapier and the physics world (we will set 'world' up in index.ts next)
+// import rapier and the physics world
 export function handleConnection(channel: ServerChannel) {
   if (!channel.id) return;
 
   const playerName = getRandomName();
 
-  // 2. Create the Rapier RigidBody & Capsule Collider
-  // Player center is at Y=1 so the 2-unit tall capsule rests on Y=0
+  // create the rapier rigidbody & capsule collider
+  // player center is at y=1 so the 2-unit tall capsule rests on y=0
   const bodyDesc = RAPIER.RigidBodyDesc.kinematicPositionBased().setTranslation(
     0,
     1,
@@ -21,10 +21,10 @@ export function handleConnection(channel: ServerChannel) {
   );
   const body = world.createRigidBody(bodyDesc);
 
-  // Tag the physics body with the player's network ID so the raycaster knows who it hit
+  // tag the physics body with the player's network id so the raycaster knows who it hit
   body.userData = { id: channel.id };
 
-  // Capsule args in Rapier are (half-height, radius). 0.5 + 0.5 = 1.0 half height total = 2.0 full height
+  // capsule args in rapier are (half-height, radius). 0.5 + 0.5 = 1.0 half height total = 2.0 full height
   const colliderDesc = RAPIER.ColliderDesc.capsule(0.5, 0.5);
   world.createCollider(colliderDesc, body);
 
@@ -51,24 +51,28 @@ export function handleConnection(channel: ServerChannel) {
     isReloading: false,
     lastShotTime: 0,
     reloadTimer: null,
-    body: body, // Add the physics body to the player state
+    body: body, // add the physics body to the player state
   });
 
-  logger.info(`User connected: ${playerName} (${channel.id})`);
+  logger.info(`user connected: ${playerName} (${channel.id})`);
 }
 
 export function handlePlayerInput(id: string, data: any) {
   const player = players.get(id);
-  if (player) {
-    player.yaw = data.yaw || 0;
-    player.pitch = data.pitch || 0;
-    player.x += data.moveX || 0;
-    player.z += data.moveZ || 0;
 
-    // 3. Move the actual physics collider to match the new coordinates
+  // block movement if dead so they can't run around as a ghost
+  if (player && !player.isDead) {
+    player.yaw = data.yaw ?? player.yaw;
+    player.pitch = data.pitch ?? player.pitch;
+
+    // trust the absolute position sent by the client to prevent delta-loss desync
+    player.x = data.x ?? player.x;
+    player.z = data.z ?? player.z;
+
+    // move the actual physics collider to match the exact new coordinates
     player.body.setNextKinematicTranslation({
       x: player.x,
-      y: player.y + 1, // Keep center mass at Y=1
+      y: player.y + 1, // keep center mass at y=1
       z: player.z,
     });
   }
@@ -135,20 +139,16 @@ export function handleShoot(id: string, data: any) {
   shooter.ammo = shooter.magazines[shooter.currentWeapon];
   shooter.lastShotTime = now;
 
-  const pitch = data.pitch || 0;
-  const yaw = data.yaw || 0;
-  const dirX = -Math.sin(yaw) * Math.cos(pitch);
-  const dirY = Math.sin(pitch);
-  const dirZ = -Math.cos(yaw) * Math.cos(pitch);
-
+  // origin: exactly at the shooter's camera level
   const origin = { x: shooter.x, y: shooter.y + 1.5, z: shooter.z };
-  const direction = { x: dirX, y: dirY, z: dirZ };
 
-  // 4. Mathematical Rapier Raycast (Replaces all the manual trig!)
+  // direction: use the exact 3d vector sent by the client
+  const direction = { x: data.dirX, y: data.dirY, z: data.dirZ };
+
+  // fire the true physics raycast
   const ray = new RAPIER.Ray(origin, direction);
 
-  // castRay(ray, maxToi, solid, collisionGroups, filterFlags, filterTarget, filterRigidBody)
-  // We pass `shooter.body` as the 7th argument to guarantee the ray ignores the shooter's own capsule
+  // castray ignores the shooter's own body so they don't shoot themselves
   const hit = world.castRay(
     ray,
     range,
@@ -160,7 +160,7 @@ export function handleShoot(id: string, data: any) {
   );
 
   if (hit && hit.collider) {
-    // Extract the network ID we saved in userData during connection
+    // extract the id of the hit player
     const hitId = hit.collider.parent()?.userData?.id;
 
     if (hitId && hitId !== id) {
@@ -182,7 +182,7 @@ export function handleShoot(id: string, data: any) {
             `${shooter.name} killed ${hitPlayer.name} with ${weapon.name}!`,
           );
 
-          // Respawn logic
+          // respawn logic
           setTimeout(() => {
             if (players.has(hitId)) {
               const p = players.get(hitId)!;
@@ -190,7 +190,7 @@ export function handleShoot(id: string, data: any) {
               p.isDead = false;
               p.x = 0;
               p.z = 0;
-              // 5. Teleport the physics body back to spawn too!
+              // teleport the physics body back to spawn
               p.body.setNextKinematicTranslation({ x: 0, y: 1, z: 0 });
               logger.info(`${p.name} respawned!`);
             }
@@ -208,9 +208,9 @@ export function handleShoot(id: string, data: any) {
 export function handleDisconnect(id: string, reason: string) {
   const player = players.get(id);
   if (player) {
-    logger.info(`User disconnected: ${player.name} (${reason})`);
+    logger.info(`user disconnected: ${player.name} (${reason})`);
 
-    // 6. Clean up the physics body so ghost colliders don't block bullets
+    // clean up the physics body so ghost colliders don't block bullets
     if (player.body) {
       world.removeRigidBody(player.body);
     }
