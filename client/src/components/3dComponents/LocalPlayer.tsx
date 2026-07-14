@@ -97,8 +97,8 @@ export default function LocalPlayer() {
     // invert the a/d input to fix the axis flip
     const right = (keys.a ? 1 : 0) - (keys.d ? 1 : 0);
 
-    let deltaX = 0;
-    let deltaZ = 0;
+    let deltaX: number;
+    let deltaZ: number;
 
     if (forward !== 0 || right !== 0) {
       const speed = 5 * delta;
