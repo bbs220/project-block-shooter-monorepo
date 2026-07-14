@@ -1,8 +1,8 @@
 import { createBrowserRouter } from "react-router";
-
 import App from "./App";
 import LayoutState from "./layout/LayoutState";
-import HomePage from "./pages/HomePage";
+import GamePage from "./pages/GamePage";
+import WelcomePage from "./pages/WelcomePage";
 
 export const primaryRouter = createBrowserRouter([
   {
@@ -12,7 +12,16 @@ export const primaryRouter = createBrowserRouter([
         path: "/",
         element: (
           <LayoutState>
-            <HomePage />
+            <WelcomePage />
+          </LayoutState>
+        ),
+      },
+      {
+        path: "/play",
+        element: (
+          <LayoutState>
+            {/* this page mounts the 3d canvas and network manager */}
+            <GamePage />
           </LayoutState>
         ),
       },

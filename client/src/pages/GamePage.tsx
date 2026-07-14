@@ -1,10 +1,10 @@
 import PrimaryCanvas from "../components/3dComponents/PrimaryCanvas";
 
-const HomePage = () => {
+const GamePage = () => {
   return (
     <div className="w-full h-screen">
       <PrimaryCanvas />
     </div>
   );
 };
-export default HomePage;
+export default GamePage;
