@@ -1,3 +1,5 @@
+import RAPIER from "@dimforge/rapier3d-compat";
+
 export type ServerPlayerState = {
   name: string;
   color: string;
@@ -15,6 +17,7 @@ export type ServerPlayerState = {
   isDead: boolean;
   kills: number;
   deaths: number;
+  body: RAPIER.RigidBody;
 
   // combat & weapons
   currentWeapon: "rifle" | "pistol" | "burstRifle";

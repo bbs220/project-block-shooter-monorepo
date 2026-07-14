@@ -12,6 +12,8 @@ import {
   handleReload,
 } from "./events/playerEvents.js";
 
+export let world: RAPIER.World;
+
 const io = geckos();
 io.listen(9208);
 
@@ -58,10 +60,8 @@ async function startServer() {
   // wait for webassembly to compile and load
   await RAPIER.init();
 
-  // create a physics world with standard earth gravity
-  const gravity = { x: 0.0, y: -9.81, z: 0.0 };
-  const world = new RAPIER.World(gravity);
-  logger.info("physics world initialized with v0.19.2");
+  world = new RAPIER.World({ x: 0.0, y: -9.81, z: 0.0 });
+  logger.info("physics world initialized");
 
   function gameLoop() {
     // step the physics simulation forward
