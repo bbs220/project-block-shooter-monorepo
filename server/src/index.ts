@@ -1,6 +1,7 @@
 import "dotenv/config";
 import { logger } from "./utils/logger.js";
 import geckos from "@geckos.io/server";
+import RAPIER from "@dimforge/rapier3d-compat";
 import { getPlayersState } from "./state/gameState.js";
 import {
   handleConnection,
@@ -53,9 +54,25 @@ io.onConnection((channel) => {
 const tickRate = 60;
 const tickInterval = 1000 / tickRate;
 
-function gameLoop() {
-  // fetch clean serialized state and broadcast
-  io.emit("state", getPlayersState());
+async function startServer() {
+  // wait for webassembly to compile and load
+  await RAPIER.init();
+
+  // create a physics world with standard earth gravity
+  const gravity = { x: 0.0, y: -9.81, z: 0.0 };
+  const world = new RAPIER.World(gravity);
+  logger.info("physics world initialized with v0.19.2");
+
+  function gameLoop() {
+    // step the physics simulation forward
+    world.step();
+
+    // broadcast the clean serialized state
+    io.emit("state", getPlayersState());
+  }
+
+  setInterval(gameLoop, tickInterval);
 }
 
-setInterval(gameLoop, tickInterval);
+// 3. boot the server
+startServer();

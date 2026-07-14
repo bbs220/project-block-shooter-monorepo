@@ -2,12 +2,13 @@ import { useLoader } from "@react-three/fiber";
 import { TextureLoader, RepeatWrapping } from "three";
 import { useMemo } from "react";
 import { gridColorPath } from "../../utils/assetPaths";
+import { RigidBody } from "@react-three/rapier";
 
 const Ground = () => {
   const originalMap = useLoader(TextureLoader, gridColorPath);
 
   // clone the texture to safely modify it without upsetting the react compiler
-  const gridMap = useMemo(() => {
+  const clonedMap = useMemo(() => {
     const texture = originalMap.clone();
 
     // set the wrapping mode to repeat
@@ -25,10 +26,12 @@ const Ground = () => {
   }, [originalMap]);
 
   return (
-    <mesh position={[0, 0, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
-      <planeGeometry args={[100, 100]} />
-      <meshStandardMaterial map={gridMap} />
-    </mesh>
+    <RigidBody type="fixed">
+      <mesh position={[0, 0, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
+        <planeGeometry args={[100, 100]} />
+        <meshStandardMaterial map={clonedMap} />
+      </mesh>
+    </RigidBody>
   );
 };
 
