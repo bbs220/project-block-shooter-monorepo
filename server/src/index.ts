@@ -2,7 +2,7 @@ import "dotenv/config";
 import { logger } from "./utils/logger.js";
 import geckos from "@geckos.io/server";
 import RAPIER from "@dimforge/rapier3d-compat";
-import { getFullState, matchData } from "./state/gameState.js";
+import { getFullState, matchData, players } from "./state/gameState.js";
 import {
   handleConnection,
   handleDisconnect,
@@ -71,6 +71,7 @@ async function startServer() {
 
   setInterval(gameLoop, tickInterval);
 
+  // the 1hz slow loop for the match timer
   setInterval(() => {
     if (matchData.matchState === "playing") {
       matchData.timeRemaining -= 1;
@@ -84,6 +85,20 @@ async function startServer() {
           matchData.timeRemaining = 240;
           matchData.teamScores = { red: 0, blue: 0 };
           matchData.matchState = "playing";
+
+          // reset all players' stats and health for the new match
+          players.forEach((p) => {
+            p.kills = 0;
+            p.deaths = 0;
+            p.health = 100;
+            p.isDead = false;
+
+            // teleport everyone back to the center spawn point
+            p.x = 0;
+            p.z = 0;
+            p.body.setNextKinematicTranslation({ x: 0, y: 1, z: 0 });
+          });
+
           logger.info("new match started!");
         }, 5000);
       }

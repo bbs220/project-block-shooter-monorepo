@@ -8,13 +8,13 @@ import {
 } from "@react-three/drei";
 import LocalPlayer from "./LocalPlayer";
 import Ground from "./Ground";
-import { NetworkManager } from "../NetworkManager";
+import { NetworkManager } from "./NetworkManager";
 import CrosshairUI from "./CrosshairUI";
 import PlayerLabel from "./PlayerLabel";
 import { Physics, RigidBody } from "@react-three/rapier";
 import { useTweakpane } from "../../hooks/useTweakPane";
-import PlayOverlay from "../PlayOverlay";
-import MatchTimerUI from "../MatchTimerUI";
+import PlayButtonUI from "./PlayButtonUI";
+import MatchTimerUI from "./MatchTimerUI";
 
 const PrimaryScene = () => {
   const players = useGameStore((state) => state.players);
@@ -70,7 +70,7 @@ const PrimaryCanvas = () => {
       {/* cursor for aim */}
       <CrosshairUI />
       {/* container for pointer controls */}
-      <PlayOverlay />
+      <PlayButtonUI />
       {/* match timer */}
       <MatchTimerUI />
       {/* network manager runs silently outside the 3d canvas */}

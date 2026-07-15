@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import geckos from "@geckos.io/client";
-import { useGameStore } from "../stores/useGameStore";
+import { useGameStore } from "../../stores/useGameStore";
 
 export function NetworkManager() {
   const setPlayers = useGameStore((state) => state.setPlayers);

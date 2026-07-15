@@ -1,6 +1,6 @@
-import { useGameStore } from "../stores/useGameStore";
+import { useGameStore } from "../../stores/useGameStore";
 
-const PlayOverlay = () => {
+const PlayButtonUI = () => {
   const isLocked = useGameStore((state) => state.isLocked);
 
   return (
@@ -24,4 +24,4 @@ const PlayOverlay = () => {
   );
 };
 
-export default PlayOverlay;
+export default PlayButtonUI;
