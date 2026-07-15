@@ -15,6 +15,7 @@ import { Physics, RigidBody } from "@react-three/rapier";
 import { useTweakpane } from "../../hooks/useTweakPane";
 import PlayButtonUI from "./PlayButtonUI";
 import MatchTimerUI from "./MatchTimerUI";
+import ScoreboardUI from "./ScoreBoardUI";
 
 const PrimaryScene = () => {
   const players = useGameStore((state) => state.players);
@@ -73,6 +74,8 @@ const PrimaryCanvas = () => {
       <PlayButtonUI />
       {/* match timer */}
       <MatchTimerUI />
+      {/* scoreboard tracker */}
+      <ScoreboardUI />
       {/* network manager runs silently outside the 3d canvas */}
       <NetworkManager />
       {/* main 3d viewport */}
