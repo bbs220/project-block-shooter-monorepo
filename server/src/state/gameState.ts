@@ -3,17 +3,27 @@ import { ServerPlayerState } from "../types/typesSource.js";
 // central authoritative state
 export const players = new Map<string, ServerPlayerState>();
 
+// global match state matching your client interface
+export const matchData = {
+  mode: "tdm",
+  matchState: "playing", // starting straight into playing for mvp
+  timeRemaining: 240,
+  teamScores: { red: 0, blue: 0 },
+};
+
 // helper to serialize state for geckos broadcast
-export const getPlayersState = () => {
-  const safeState: Record<string, any> = {};
+export const getFullState = () => {
+  const safePlayers: Record<string, any> = {};
 
   players.forEach((player, id) => {
-    // Destructure the player object to extract everything EXCEPT reloadTimer and body
+    // extract both the timer and the physics body
     const { reloadTimer, body, ...safePlayerData } = player;
-
-    // Assign the clean data to our broadcast object
-    safeState[id] = safePlayerData;
+    safePlayers[id] = safePlayerData;
   });
 
-  return safeState;
+  // bundle the payload
+  return {
+    players: safePlayers,
+    ...matchData, // spread the match data so it sits at the root level of the payload
+  };
 };

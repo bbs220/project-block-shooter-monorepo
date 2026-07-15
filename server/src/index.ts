@@ -2,7 +2,7 @@ import "dotenv/config";
 import { logger } from "./utils/logger.js";
 import geckos from "@geckos.io/server";
 import RAPIER from "@dimforge/rapier3d-compat";
-import { getPlayersState } from "./state/gameState.js";
+import { getFullState, matchData } from "./state/gameState.js";
 import {
   handleConnection,
   handleDisconnect,
@@ -66,10 +66,29 @@ async function startServer() {
     world.step();
 
     // broadcast the clean serialized state
-    io.emit("state", getPlayersState());
+    io.emit("state", getFullState());
   }
 
   setInterval(gameLoop, tickInterval);
+
+  setInterval(() => {
+    if (matchData.matchState === "playing") {
+      matchData.timeRemaining -= 1;
+
+      if (matchData.timeRemaining <= 0) {
+        matchData.matchState = "ended";
+        logger.info("match has ended!");
+
+        // simple mvp reset: wait 5 seconds, then restart the match
+        setTimeout(() => {
+          matchData.timeRemaining = 240;
+          matchData.teamScores = { red: 0, blue: 0 };
+          matchData.matchState = "playing";
+          logger.info("new match started!");
+        }, 5000);
+      }
+    }
+  }, 1000);
 }
 
 // boot the server
