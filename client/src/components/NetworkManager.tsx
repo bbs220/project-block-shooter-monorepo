@@ -36,7 +36,11 @@ export function NetworkManager() {
 
     // update zustand with authoritative server state
     channel.on("state", (data: any) => {
-      setPlayers(data);
+      const { players, ...matchInfo } = data;
+
+      // sync using the two separate zustand setters
+      useGameStore.getState().setPlayers(players);
+      useGameStore.getState().updateMatchData(matchInfo);
     });
 
     return () => {

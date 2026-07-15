@@ -14,6 +14,7 @@ import PlayerLabel from "./PlayerLabel";
 import { Physics, RigidBody } from "@react-three/rapier";
 import { useTweakpane } from "../../hooks/useTweakPane";
 import PlayOverlay from "../PlayOverlay";
+import MatchTimerUI from "../MatchTimerUI";
 
 const PrimaryScene = () => {
   const players = useGameStore((state) => state.players);
@@ -70,6 +71,8 @@ const PrimaryCanvas = () => {
       <CrosshairUI />
       {/* container for pointer controls */}
       <PlayOverlay />
+      {/* match timer */}
+      <MatchTimerUI />
       {/* network manager runs silently outside the 3d canvas */}
       <NetworkManager />
       {/* main 3d viewport */}

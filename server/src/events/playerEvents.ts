@@ -12,26 +12,36 @@ export function handleConnection(channel: ServerChannel) {
 
   const playerName = getRandomName();
 
-  // create the rapier rigidbody & capsule collider
-  // player center is at y=1 so the 2-unit tall capsule rests on y=0
+  // count existing players to balance the lobby
+  let redCount = 0;
+  let blueCount = 0;
+
+  players.forEach((p) => {
+    if (p.team === "red") redCount++;
+    if (p.team === "blue") blueCount++;
+  });
+
+  // assign to the smaller team (default to red on ties)
+  const assignedTeam = redCount <= blueCount ? "red" : "blue";
+
+  // assign distinct hex colors so players can visually identify enemies
+  const teamColor = assignedTeam === "red" ? "#ef4444" : "#3b82f6";
+
   const bodyDesc = RAPIER.RigidBodyDesc.kinematicPositionBased().setTranslation(
     0,
     1,
     0,
   );
   const body = world.createRigidBody(bodyDesc);
-
-  // tag the physics body with the player's network id so the raycaster knows who it hit
   body.userData = { id: channel.id };
 
-  // capsule args in rapier are (half-height, radius). 0.5 + 0.5 = 1.0 half height total = 2.0 full height
   const colliderDesc = RAPIER.ColliderDesc.capsule(0.5, 0.5);
   world.createCollider(colliderDesc, body);
 
   players.set(channel.id, {
     name: playerName,
-    color: getRandomColor(),
-    team: "none",
+    color: teamColor, // use team color instead of random
+    team: assignedTeam, // assign actual team
     x: 0,
     y: 0,
     z: 0,
@@ -51,10 +61,12 @@ export function handleConnection(channel: ServerChannel) {
     isReloading: false,
     lastShotTime: 0,
     reloadTimer: null,
-    body: body, // add the physics body to the player state
+    body: body,
   });
 
-  logger.info(`user connected: ${playerName} (${channel.id})`);
+  logger.info(
+    `user connected: ${playerName} (${channel.id}) joined team ${assignedTeam}`,
+  );
 }
 
 export function handlePlayerInput(id: string, data: any) {
@@ -167,6 +179,11 @@ export function handleShoot(id: string, data: any) {
       const hitPlayer = players.get(hitId);
 
       if (hitPlayer && !hitPlayer.isDead) {
+        // NEW: prevent friendly fire (block damage if on the same team)
+        if (shooter.team === hitPlayer.team) {
+          return;
+        }
+
         hitPlayer.health -= weapon.damage;
 
         logger.info(
