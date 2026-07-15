@@ -1,1 +1,39 @@
-# 🔫 Project Shooter
+# 🔫 Block Shooter MVP
+
+A low-poly, 8-player multiplayer arena FPS built with React Three Fiber and a server-authoritative Node.js backend.
+
+## 🚀 Project Status
+- **MVP Phase**: Core networking, client-side prediction, and hitscan combat mechanics are fully implemented.
+- **Architecture**: Authoritative server using **geckos.io** (UDP over WebRTC) to prevent cheating and ensure smooth, low-latency hit registration.
+
+## 🛠️ Technical Stack
+
+### Client
+| Tool | Description |
+| :--- | :--- |
+| **Framework** | React 19, React Router v7 |
+| **3D Engine** | React Three Fiber (R3F), @react-three/drei, @react-three/rapier |
+| **State** | Zustand |
+| **Styling** | Tailwind CSS |
+| **Utilities** | Lucide-React, Tweakpane |
+
+### Server
+| Tool | Description |
+| :--- | :--- |
+| **Networking** | Geckos.io (UDP-like communication) |
+| **Physics** | @dimforge/rapier3d-compat (Headless engine) |
+| **Logging** | Pino |
+| **Runtime** | Node.js with TypeScript (tsx) |
+
+## ✨ Core Features
+- **Server-Authoritative**: Physics and hit detection are processed on the server to prevent client-side tampering. 🛡️
+- **Client-Side Prediction**: Local movement is processed instantly for a smooth experience, reconciled with server updates. ⚡
+- **Hitscan Combat**: Precise mathematical raycasting for weapon hits. 🎯
+- **Match Structure**: 4-minute rounds with automated respawn logic and team auto-balancing (4v4). 🕒
+- **Weapon System**: Rifle and pistol with independent magazine tracking, fire rate throttling, and tactical reloading. 🔫
+
+## 🚀 Getting Started
+1. **Install dependencies**: 
+   `npm install` (in both client and server directories)
+2. **Run the project**: 
+   `npm run both` in server directory (uses concurrently to start the server and client simultaneously)
