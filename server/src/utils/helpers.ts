@@ -11,3 +11,24 @@ const nouns = ["scout", "soldier", "sniper", "tank", "pilot"];
 
 export const getRandomName = () =>
   `${adjectives[Math.floor(Math.random() * adjectives.length)]}-${nouns[Math.floor(Math.random() * nouns.length)]}-${Math.floor(Math.random() * 100)}`;
+
+// Define safe coordinates on opposite sides of your map
+const RED_SPAWNS = [
+  { x: -20, z: -20 },
+  { x: -22, z: -18 },
+  { x: -18, z: -22 },
+  { x: -20, z: -18 },
+];
+
+const BLUE_SPAWNS = [
+  { x: 20, z: 20 },
+  { x: 22, z: 18 },
+  { x: 18, z: 22 },
+  { x: 20, z: 18 },
+];
+
+// Helper function to grab a random spawn
+export function getRandomSpawn(team: "red" | "blue") {
+  const spawns = team === "red" ? RED_SPAWNS : BLUE_SPAWNS;
+  return spawns[Math.floor(Math.random() * spawns.length)];
+}

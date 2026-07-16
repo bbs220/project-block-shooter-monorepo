@@ -1,6 +1,10 @@
 import { ServerChannel } from "@geckos.io/server";
 import RAPIER from "@dimforge/rapier3d-compat";
-import { getRandomColor, getRandomName } from "../utils/helpers.js";
+import {
+  getRandomColor,
+  getRandomName,
+  getRandomSpawn,
+} from "../utils/helpers.js";
 import { players } from "../state/gameState.js";
 import { logger } from "../utils/logger.js";
 import { world } from "../index.js";
@@ -24,13 +28,15 @@ export function handleConnection(channel: ServerChannel) {
   // assign to the smaller team (default to red on ties)
   const assignedTeam = redCount <= blueCount ? "red" : "blue";
 
+  const spawnPoint = getRandomSpawn(assignedTeam);
+
   // assign distinct hex colors so players can visually identify enemies
   const teamColor = assignedTeam === "red" ? "#ef4444" : "#3b82f6";
 
   const bodyDesc = RAPIER.RigidBodyDesc.kinematicPositionBased().setTranslation(
-    0,
+    spawnPoint.x,
     1,
-    0,
+    spawnPoint.z,
   );
   const body = world.createRigidBody(bodyDesc);
   body.userData = { id: channel.id };
@@ -42,9 +48,9 @@ export function handleConnection(channel: ServerChannel) {
     name: playerName,
     color: teamColor, // use team color instead of random
     team: assignedTeam, // assign actual team
-    x: 0,
+    x: spawnPoint.x,
     y: 0,
-    z: 0,
+    z: spawnPoint.z,
     yaw: 0,
     pitch: 0,
     health: 100,
@@ -205,10 +211,14 @@ export function handleShoot(id: string, data: any) {
               const p = players.get(hitId)!;
               p.health = 100;
               p.isDead = false;
-              p.x = 0;
-              p.z = 0;
-              // teleport the physics body back to spawn
-              p.body.setNextKinematicTranslation({ x: 0, y: 1, z: 0 });
+              const newSpawn = getRandomSpawn(p.team);
+              p.x = newSpawn.x;
+              p.z = newSpawn.z;
+              p.body.setNextKinematicTranslation({
+                x: newSpawn.x,
+                y: 1,
+                z: newSpawn.z,
+              });
               logger.info(`${p.name} respawned!`);
             }
           }, 3000);

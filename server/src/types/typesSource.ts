@@ -3,7 +3,7 @@ import RAPIER from "@dimforge/rapier3d-compat";
 export type ServerPlayerState = {
   name: string;
   color: string;
-  team: "red" | "blue" | "none";
+  team: "red" | "blue";
 
   // position and rotation
   x: number;
