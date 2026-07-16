@@ -34,14 +34,6 @@ async function startServer() {
 
     handleConnection(channel);
 
-    channel.on("set_mode", (requestedMode: any) => {
-      // Only change the mode if the match hasn't started yet!
-      if (matchData.matchState === "waiting") {
-        matchData.mode = requestedMode;
-        logger.info(`lobby mode set to [${requestedMode}] by first player!`);
-      }
-    });
-
     channel.on("playerInput", (data: any) => {
       handlePlayerInput(channel.id as string, data);
     });
@@ -127,6 +119,12 @@ async function startServer() {
           matchData.matchState = players.size > 0 ? "playing" : "waiting";
           matchData.timeRemaining = 240;
           matchData.teamScores = { red: 0, blue: 0 };
+
+          const modes = ["tdm", "ctp"];
+          matchData.mode = modes[Math.floor(Math.random() * modes.length)];
+          logger.info(
+            `server selected new mode: ${matchData.mode.toUpperCase()}`,
+          );
 
           // reset all players' stats and health for the new match
           players.forEach((p) => {

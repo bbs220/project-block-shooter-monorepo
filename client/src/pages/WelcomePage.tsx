@@ -3,12 +3,6 @@ import { useNavigate } from "react-router";
 const WelcomePage = () => {
   const navigate = useNavigate();
 
-  const handlePlay = (mode: string) => {
-    // later, we can pass this mode to the server or zustand store.
-    // for now, just route them to the game canvas.
-    navigate(`/play?mode=${mode}`);
-  };
-
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-neutral-900 text-white font-sans">
       <div className="max-w-md w-full p-8 bg-neutral-800 rounded-xl shadow-2xl border border-neutral-700 text-center">
@@ -19,21 +13,16 @@ const WelcomePage = () => {
           8-Player Arena FPS
         </p>
 
-        <div className="flex flex-col gap-4">
-          <button
-            onClick={() => handlePlay("tdm")}
-            className="w-full py-4 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-lg transition-colors shadow-lg shadow-blue-900/20 cursor-pointer"
-          >
-            Team Deathmatch
-          </button>
+        <button
+          onClick={() => navigate("/play")}
+          className="w-full py-5 bg-blue-600 hover:bg-blue-500 text-white text-xl font-black tracking-widest uppercase rounded-lg transition-colors shadow-lg shadow-blue-900/20 cursor-pointer"
+        >
+          Join Match
+        </button>
 
-          <button
-            onClick={() => handlePlay("ctp")}
-            className="w-full py-4 bg-orange-600 hover:bg-orange-500 text-white font-bold rounded-lg transition-colors shadow-lg shadow-orange-900/20 cursor-pointer"
-          >
-            Capture the Point
-          </button>
-        </div>
+        <p className="mt-4 text-xs text-neutral-500 uppercase tracking-widest">
+          Server dictates Game Mode
+        </p>
       </div>
     </div>
   );
