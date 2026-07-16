@@ -34,6 +34,14 @@ async function startServer() {
 
     handleConnection(channel);
 
+    channel.on("set_mode", (requestedMode: any) => {
+      // Only change the mode if the match hasn't started yet!
+      if (matchData.matchState === "waiting") {
+        matchData.mode = requestedMode;
+        logger.info(`lobby mode set to [${requestedMode}] by first player!`);
+      }
+    });
+
     channel.on("playerInput", (data: any) => {
       handlePlayerInput(channel.id as string, data);
     });

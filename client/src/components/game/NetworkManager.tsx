@@ -25,6 +25,10 @@ export function NetworkManager() {
         setChannel(channel);
       }
 
+      const searchParams = new URLSearchParams(window.location.search);
+      const requestedMode = searchParams.get("mode") || "tdm";
+      channel.emit("set_mode", requestedMode);
+
       // send a test message
       channel.emit("chat message", "hello from the r3f client");
     });
