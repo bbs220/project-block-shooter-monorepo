@@ -14,6 +14,9 @@ export default function LocalPlayer() {
   const channel = useGameStore((state) => state.channel);
   const setLocked = useGameStore((state) => state.setLocked);
 
+  // pull in the setter for the dynamic crosshair
+  const setCrosshairSpread = useGameStore((state) => state.setCrosshairSpread);
+
   const lastEmit = useRef(0);
   const initialized = useRef(false);
   const lastShotClient = useRef(0);
@@ -21,7 +24,9 @@ export default function LocalPlayer() {
   const triggerReady = useRef(true);
   const burstShotsLeft = useRef(0);
 
-  // vector caches to avoid garbage collection stuttering
+  // local ref for math processing before sending to Zustand
+  const currentSpread = useRef(0);
+
   const direction = useRef(new THREE.Vector3());
   const frontVector = useRef(new THREE.Vector3());
   const sideVector = useRef(new THREE.Vector3());
@@ -84,7 +89,7 @@ export default function LocalPlayer() {
     const camera = state.camera;
     const me = players[localId];
 
-    // 1. snap on first load, or if server marks us dead (resets camera on respawn)
+    // snap on first load, or if server marks us dead (resets camera on respawn)
     if (me) {
       if (!initialized.current || me.isDead) {
         camera.position.set(me.x, me.y + 1.5, me.z);
@@ -92,7 +97,12 @@ export default function LocalPlayer() {
       }
     }
 
-    // true fps standard: w is forward (+1), s is backward (-1)
+    // crosshair decay
+    if (currentSpread.current > 0) {
+      currentSpread.current -= delta * 60; // Shrink speed
+      if (currentSpread.current < 0) currentSpread.current = 0;
+    }
+
     const forward = (keys.w ? 1 : 0) - (keys.s ? 1 : 0);
 
     // invert the a/d input to fix the axis flip
@@ -130,6 +140,9 @@ export default function LocalPlayer() {
       // client-side prediction: instantly move local camera
       camera.position.x += deltaX;
       camera.position.z += deltaZ;
+
+      // cap walking spread at 15
+      currentSpread.current = Math.min(currentSpread.current + delta * 30, 15);
     }
 
     const now = performance.now();
@@ -156,7 +169,10 @@ export default function LocalPlayer() {
                 dirY: dir.y,
                 dirZ: dir.z,
               });
+
               lastShotClient.current = now;
+              // cap shooting spread at 40
+              currentSpread.current = Math.min(currentSpread.current + 15, 40);
             }
 
             // force trigger release for semi/single/burst
@@ -182,11 +198,16 @@ export default function LocalPlayer() {
 
           lastShotClient.current = now;
           burstShotsLeft.current -= 1;
+
+          // burst shooting kick
+          currentSpread.current = Math.min(currentSpread.current + 15, 40);
         }
       }
     }
 
-    // throttle network emission, but send absolute position
+    // send to store for render
+    setCrosshairSpread(currentSpread.current);
+
     if (channel && now - lastEmit.current > 50) {
       channel.emit("playerInput", {
         yaw: camera.rotation.y,

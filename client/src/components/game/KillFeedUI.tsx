@@ -5,7 +5,7 @@ const KillFeedUI = () => {
   const killFeed = useGameStore((state) => state.killFeed);
   const removeOldKills = useGameStore((state) => state.removeOldKills);
 
-  // Self-cleaning garbage collector (runs every 1 second)
+  // self-cleaning garbage collector (runs every 1 second)
   useEffect(() => {
     const interval = setInterval(() => {
       removeOldKills();
@@ -13,7 +13,7 @@ const KillFeedUI = () => {
     return () => clearInterval(interval);
   }, [removeOldKills]);
 
-  // Don't render anything if there are no recent kills
+  // don't render anything if there are no recent kills
   if (killFeed.length === 0) return null;
 
   return (
@@ -23,7 +23,7 @@ const KillFeedUI = () => {
           key={kill.id}
           className="bg-black/60 backdrop-blur-md px-4 py-2 rounded-lg border border-white/10 shadow-lg text-sm font-bold flex items-center gap-2 animate-in fade-in slide-in-from-right-4 duration-300"
         >
-          {/* Shooter Name */}
+          {/* shooter Name */}
           <span
             className={
               kill.shooterTeam === "red" ? "text-red-400" : "text-blue-400"
@@ -32,12 +32,12 @@ const KillFeedUI = () => {
             {kill.shooter}
           </span>
 
-          {/* Weapon Used */}
+          {/* weapon Used */}
           <span className="text-neutral-400 text-xs uppercase tracking-wider mx-1">
             [{kill.weapon}]
           </span>
 
-          {/* Target Name */}
+          {/* target Name */}
           <span
             className={
               kill.targetTeam === "red" ? "text-red-400" : "text-blue-400"

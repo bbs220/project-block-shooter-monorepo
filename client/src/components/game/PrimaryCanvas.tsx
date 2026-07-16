@@ -1,5 +1,4 @@
 import { Canvas } from "@react-three/fiber";
-import { useGameStore } from "../../stores/useGameStore";
 import {
   GizmoHelper,
   GizmoViewport,
@@ -10,18 +9,15 @@ import LocalPlayer from "./LocalPlayer";
 import Ground from "./Ground";
 import { NetworkManager } from "./NetworkManager";
 import CrosshairUI from "./CrosshairUI";
-import PlayerLabel from "./PlayerLabel";
-import { Physics, RigidBody } from "@react-three/rapier";
+import { Physics } from "@react-three/rapier";
 import { useTweakpane } from "../../hooks/useTweakPane";
 import PlayButtonUI from "./PlayButtonUI";
 import MatchTimerUI from "./MatchTimerUI";
 import ScoreboardUI from "./ScoreboardUI";
 import KillFeedUI from "./KillFeedUI";
+import RemotePlayers from "./RemotePlayers";
 
 const PrimaryScene = () => {
-  const players = useGameStore((state) => state.players);
-  const localId = useGameStore((state) => state.localId);
-
   const { showPhyDebug, showGizmo } = useTweakpane({
     showPhyDebug: false,
     showGizmo: false,
@@ -35,32 +31,16 @@ const PrimaryScene = () => {
         <GizmoHelper alignment="top-left" margin={[450, 100]}>
           <GizmoViewport labelColor="white" visible={showGizmo} />
         </GizmoHelper>
-        {/* captures mouse and moves camera */}
-        <LocalPlayer />
-
         <ambientLight color="#ffffff" intensity={0.8} />
         <directionalLight position={[0, 5, 0]} intensity={1} castShadow />
-
-        {/* render all players EXCEPT the local one */}
-        {Object.entries(players)
-          .filter(([id, pos]) => id !== localId && !pos.isDead)
-          .map(([id, pos]) => (
-            <RigidBody
-              key={id}
-              type="kinematicPosition"
-              position={[pos.x, pos.y, pos.z]}
-            >
-              <group rotation={[0, pos.yaw, 0]}>
-                <mesh castShadow position={[0, 1, 0]}>
-                  <capsuleGeometry args={[0.5, 1, 4, 16]} />
-                  <meshStandardMaterial color={pos.color} />
-                </mesh>
-                <PlayerLabel player={pos} />
-              </group>
-            </RigidBody>
-          ))}
-
-        <Ground />
+        <>
+          {/* captures mouse and moves camera for local player */}
+          <LocalPlayer />
+          {/* render all players EXCEPT the local one */}
+          <RemotePlayers />
+          {/* something to stand on */}
+          <Ground />
+        </>
       </Physics>
     </>
   );

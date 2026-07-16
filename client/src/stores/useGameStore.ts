@@ -72,6 +72,10 @@ export interface GameStore {
   killFeed: KillEvent[];
   addKillEvent: (event: KillEvent) => void;
   removeOldKills: () => void;
+
+  // dynamic crosshair
+  crosshairSpread: number;
+  setCrosshairSpread: (spread: number) => void;
 }
 
 export const useGameStore = create<GameStore>((set) => ({
@@ -108,4 +112,7 @@ export const useGameStore = create<GameStore>((set) => ({
         killFeed: state.killFeed.filter((k) => now - k.timestamp < 5000),
       };
     }),
+
+  crosshairSpread: 0,
+  setCrosshairSpread: (spread) => set({ crosshairSpread: spread }),
 }));
