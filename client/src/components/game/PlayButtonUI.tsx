@@ -9,7 +9,7 @@ const PlayButtonUI = () => {
 
   return (
     <div
-      className={`absolute inset-0 flex items-center justify-center z-50 pointer-events-none transition-opacity duration-200 ${
+      className={`absolute inset-0 flex items-center justify-center z-40 pointer-events-none transition-opacity duration-200 ${
         isHidden ? "opacity-0" : "opacity-100"
       }`}
     >

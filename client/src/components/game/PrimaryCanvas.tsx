@@ -16,6 +16,7 @@ import MatchTimerUI from "./MatchTimerUI";
 import ScoreboardUI from "./ScoreboardUI";
 import KillFeedUI from "./KillFeedUI";
 import RemotePlayers from "./RemotePlayers";
+import LoadingScreen from "./LoadingScreen";
 
 const PrimaryScene = () => {
   const { showPhyDebug, showGizmo } = useTweakpane({
@@ -49,6 +50,8 @@ const PrimaryScene = () => {
 const PrimaryCanvas = () => {
   return (
     <>
+      {/* sits on top until player data exists */}
+      <LoadingScreen />
       {/* cursor for aim */}
       <CrosshairUI />
       {/* container for pointer controls */}
