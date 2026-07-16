@@ -1,6 +1,10 @@
+import type { ReactNode } from "react";
 import NavBar from "../components/NavBar";
 import SideBar from "../components/SideBar";
-import type { typeLayoutState } from "../types/typesSource";
+
+type typeLayoutState = {
+  children: ReactNode;
+};
 
 const LayoutState = ({ children }: typeLayoutState) => {
   return (
