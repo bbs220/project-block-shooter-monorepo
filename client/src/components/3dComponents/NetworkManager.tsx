@@ -43,6 +43,13 @@ export function NetworkManager() {
       useGameStore.getState().updateMatchData(matchInfo);
     });
 
+    channel.on("kill_feed", (data: any) => {
+      useGameStore.getState().addKillEvent({
+        ...data,
+        timestamp: Date.now(),
+      });
+    });
+
     return () => {
       // catch strict mode unmounts before webrtc is ready
       try {

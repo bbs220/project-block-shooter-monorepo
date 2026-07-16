@@ -32,6 +32,16 @@ export interface PlayerState {
   isReloading: boolean;
 }
 
+export interface KillEvent {
+  id: string;
+  shooter: string;
+  target: string;
+  weapon: string;
+  shooterTeam: TeamType;
+  targetTeam: TeamType;
+  timestamp: number;
+}
+
 export interface GameStore {
   // network & identity
   localId: string | null;
@@ -57,6 +67,11 @@ export interface GameStore {
   // pseudo pause state
   isLocked: boolean;
   setLocked: (locked: boolean) => void;
+
+  // for kill feed in ui
+  killFeed: KillEvent[];
+  addKillEvent: (event: KillEvent) => void;
+  removeOldKills: () => void;
 }
 
 export const useGameStore = create<GameStore>((set) => ({
@@ -79,4 +94,18 @@ export const useGameStore = create<GameStore>((set) => ({
 
   isLocked: false,
   setLocked: (locked) => set({ isLocked: locked }),
+
+  killFeed: [],
+
+  addKillEvent: (event) =>
+    set((state) => ({ killFeed: [...state.killFeed, event] })),
+
+  removeOldKills: () =>
+    set((state) => {
+      const now = Date.now();
+      // Keep messages that are less than 5 seconds old
+      return {
+        killFeed: state.killFeed.filter((k) => now - k.timestamp < 5000),
+      };
+    }),
 }));

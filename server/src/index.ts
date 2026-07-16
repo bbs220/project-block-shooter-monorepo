@@ -38,7 +38,7 @@ async function startServer() {
     });
 
     channel.on("shoot", (data: any) => {
-      handleShoot(channel.id as string, data);
+      handleShoot(channel.id as string, data, io);
     });
 
     channel.on("switchWeapon", (weaponId: any) => {

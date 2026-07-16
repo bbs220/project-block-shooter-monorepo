@@ -1,4 +1,4 @@
-import { ServerChannel } from "@geckos.io/server";
+import { GeckosServer, ServerChannel } from "@geckos.io/server";
 import RAPIER from "@dimforge/rapier3d-compat";
 import {
   getRandomColor,
@@ -142,7 +142,7 @@ export function handleReload(id: string) {
   }, weapon.reloadTime);
 }
 
-export function handleShoot(id: string, data: any) {
+export function handleShoot(id: string, data: any, io: GeckosServer) {
   const shooter = players.get(id);
   if (!shooter || shooter.isDead || shooter.isReloading) return;
 
@@ -204,6 +204,15 @@ export function handleShoot(id: string, data: any) {
           logger.info(
             `${shooter.name} killed ${hitPlayer.name} with ${weapon.name}!`,
           );
+
+          io.emit("kill_feed", {
+            id: Math.random().toString(36).substring(2, 9), // unique key
+            shooter: shooter.name,
+            target: hitPlayer.name,
+            weapon: weapon.name,
+            shooterTeam: shooter.team,
+            targetTeam: hitPlayer.team,
+          });
 
           // respawn logic
           setTimeout(() => {
