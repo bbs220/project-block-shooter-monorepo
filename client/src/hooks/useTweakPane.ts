@@ -40,7 +40,9 @@ export function useTweakpane<T extends Record<string, unknown>>(
   const tweakpaneTargetRef = useRef({ ...params });
 
   useEffect(() => {
-    // initialize the shared pane only if it doesn't exist
+    // ONLY run tweakpane if Vite is in development mode
+    if (!import.meta.env.DEV) return;
+
     if (!sharedPane) {
       sharedPane = new Pane({ title: "🛠️ Controls" });
     }
