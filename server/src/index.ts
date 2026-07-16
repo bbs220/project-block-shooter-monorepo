@@ -12,6 +12,9 @@ import {
   handleReload,
 } from "./events/playerEvents.js";
 import { getRandomSpawn } from "./utils/helpers.js";
+import { envValid } from "./utils/envValid.js";
+
+const PORT = Number(envValid.PORT);
 
 // export world so playerEvents can import it
 export let world: RAPIER.World;
@@ -27,7 +30,7 @@ async function startServer() {
   logger.info("physics world initialized");
 
   // now safe to listen for connections
-  io.listen(9208);
+  io.listen(PORT);
 
   io.onConnection((channel) => {
     if (!channel.id) return;

@@ -26,11 +26,11 @@ A low-poly, 8-player multiplayer arena FPS built with React Three Fiber and a se
 | **Runtime** | Node.js with TypeScript (tsx) |
 
 ## ✨ Core Features
-- 🛡️**Server-Authoritative**: Physics and hit detection are processed on the server to prevent client-side tampering.
-- ⚡**Client-Side Prediction**: Local movement is processed instantly for a smooth experience, reconciled with server updates.
-- 🎯**Hitscan Combat**: Precise mathematical raycasting for weapon hits.
-- 🕒**Match Structure**: 4-minute rounds with automated respawn logic and team auto-balancing (4v4).
-- 🔫**Weapon System**: Rifle and pistol with independent magazine tracking, fire rate throttling, and tactical reloading.
+- 🛡️ **Server-Authoritative**: Physics and hit detection are processed on the server to prevent client-side tampering.
+- ⚡ **Client-Side Prediction**: Local movement is processed instantly for a smooth experience, reconciled with server updates.
+- 🎯 **Hitscan Combat**: Precise mathematical raycasting for weapon hits.
+- 🕒 **Match Structure**: 4-minute rounds with automated respawn logic and team auto-balancing (4v4).
+- 🔫 **Weapon System**: Rifle and pistol with independent magazine tracking, fire rate throttling, and tactical reloading.
 
 ## 🚀 Getting Started
 1. **Install dependencies**: 

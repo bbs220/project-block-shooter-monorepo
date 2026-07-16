@@ -3,13 +3,15 @@ import geckos from "@geckos.io/client";
 import { useGameStore } from "../../stores/useGameStore";
 
 export function NetworkManager() {
+  const serverPort = Number(import.meta.env.VITE_SERVER_PORT);
+
   const setPlayers = useGameStore((state) => state.setPlayers);
   const setLocalId = useGameStore((state) => state.setLocalId);
   const setChannel = useGameStore((state) => state.setChannel);
 
   useEffect(() => {
     // connect to the default geckos port on localhost
-    const channel = geckos({ port: 9208 });
+    const channel = geckos({ port: serverPort });
 
     channel.onConnect((error) => {
       if (error) {
@@ -58,7 +60,7 @@ export function NetworkManager() {
         console.warn("geckos cleanup bypassed during strict mode remount", err);
       }
     };
-  }, [setPlayers, setLocalId, setChannel]);
+  }, [setPlayers, setLocalId, setChannel, serverPort]);
 
   return null;
 }
