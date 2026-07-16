@@ -5,7 +5,7 @@ import {
   getRandomName,
   getRandomSpawn,
 } from "../utils/helpers.js";
-import { players } from "../state/gameState.js";
+import { matchData, players } from "../state/gameState.js";
 import { logger } from "../utils/logger.js";
 import { world } from "../index.js";
 import { WEAPONS } from "../utils/weapons.js";
@@ -185,7 +185,7 @@ export function handleShoot(id: string, data: any, io: GeckosServer) {
       const hitPlayer = players.get(hitId);
 
       if (hitPlayer && !hitPlayer.isDead) {
-        // NEW: prevent friendly fire (block damage if on the same team)
+        // prevent friendly fire (block damage if on the same team)
         if (shooter.team === hitPlayer.team) {
           return;
         }
@@ -200,6 +200,10 @@ export function handleShoot(id: string, data: any, io: GeckosServer) {
           hitPlayer.isDead = true;
           shooter.kills += 1;
           hitPlayer.deaths += 1;
+          // update tdm match specific scores
+          if (matchData.mode === "tdm") {
+            matchData.teamScores[shooter.team] += 1;
+          }
 
           logger.info(
             `${shooter.name} killed ${hitPlayer.name} with ${weapon.name}!`,
