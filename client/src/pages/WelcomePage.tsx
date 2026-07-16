@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router";
+import { Monitor } from "lucide-react";
 
 const WelcomePage = () => {
   const navigate = useNavigate();
@@ -20,7 +21,14 @@ const WelcomePage = () => {
           Join Match
         </button>
 
-        <p className="mt-4 text-xs text-neutral-500 uppercase tracking-widest">
+        <div className="mt-6 flex items-center justify-center gap-2 text-amber-500 bg-amber-500/10 py-2 rounded-full border border-amber-500/20 pointer-events-none">
+          <Monitor className="animate-pulse" />
+          <span className="text-[10px] uppercase font-bold tracking-widest">
+            Desktop Only [BETA]
+          </span>
+        </div>
+
+        <p className="mt-6 text-xs text-neutral-500 uppercase tracking-widest">
           Server dictates Game Mode
         </p>
       </div>
