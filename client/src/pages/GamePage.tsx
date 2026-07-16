@@ -1,4 +1,4 @@
-import PrimaryCanvas from "../components/3dComponents/PrimaryCanvas";
+import PrimaryCanvas from "../components/game/PrimaryCanvas";
 
 const GamePage = () => {
   return (
