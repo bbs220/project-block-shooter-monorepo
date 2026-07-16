@@ -3,22 +3,24 @@
 ## ✅ Completed: Core Engine & Combat
 | Feature | Status | Details |
 | :--- | :--- | :--- |
-| **Networking** | Finished | Authoritative Node.js server using Geckos.io for low-latency UDP-like communication. |
-| **Physics & Tick** | Finished | 60Hz server heartbeat running headless `@dimforge/rapier3d-compat` for true collision tracking. |
+| **Networking** | Finished | Authoritative Node.js server using Geckos.io. |
+| **Physics & Tick** | Finished | 60Hz server heartbeat using Rapier3D. |
 | **Movement** | Finished | Client-side prediction with true FPS camera math. |
-| **Combat Loop** | Finished | Authoritative hitscan raycasting, team auto-balancing, and friendly-fire prevention. |
-| **Weapon System** | Finished | Stats tree (Rifle, Pistol, Burst Rifle) with fire rates, clip sizes, and reloading mechanics. |
-| **Client UI** | Finished | Dynamic crosshair, unified HUD with weapon icons, self-cleaning Kill Feed, and 4v4 Scoreboard. |
+| **Combat Loop** | Finished | Authoritative raycasting, team balancing, and kill tracking. |
+| **Weapon System** | Finished | Stats tree (Assault Rifle, Pistol, Burst Rifle) with icon support. |
+| **Client UI** | Finished | Crosshair, HUD, Kill Feed, Scoreboard, and Top-Bar Match Info. |
 
 ## ✅ Completed: Match Structure
 | Feature | Status | Details |
 | :--- | :--- | :--- |
-| **Lobby UI** | Finished | React Router based Welcome Page for mode selection. |
-| **Match Timers** | Finished | 1Hz server loop handling 4-minute rounds, match states (`playing`, `ended`), and auto-restarts. |
+| **Lobby UI** | Finished | Welcome Page with "Join Match" entry point. |
+| **Match Timers** | Finished | 1Hz server loop handling 4-minute rounds and 5-second resets. |
+| **Playlist Logic** | Finished | Server-side random mode rotation (TDM/CTP) on match restart. |
+| **Score Sync** | Finished | Live team score updates linked to player kills. |
 
-## ⏳ Remaining Tasks (The Final 10%)
+## ⏳ Remaining Tasks (The Final 5%)
 | Feature | Details |
 | :--- | :--- |
-| **TDM Score Limits** | Adding server logic to end the match early if a team hits a specific kill limit (e.g., 30 kills). |
-| **Mode Syncing** | Passing the `?mode=` query parameter from the Welcome Page to the server so it configures the right match type. |
-| **Capture the Point** | Defining a physical capture zone in the map, tracking player presence inside it, and awarding points over time. |
+| **TDM Score Limits** | Add "Mercy Rule": End the match immediately if a team hits 30 kills. |
+| **Capture the Point** | Define a physical capture zone; track player presence and award periodic points. |
+| **Polish** | Final sound effects and UI animations for round start/end. |

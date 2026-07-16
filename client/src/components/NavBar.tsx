@@ -22,7 +22,7 @@ const NavBar = () => {
 
   return (
     <nav className="absolute top-0 left-0 p-2 z-10 pointer-events-none">
-      {me ? (
+      {me && (
         <div className="flex flex-col items-start gap-3 bg-black/50 p-4 rounded-xl backdrop-blur-md shadow-lg w-fit border border-white/10">
           {/* Top Row: Player Identity */}
           <div className="flex items-center gap-3 w-full border-b border-gray-600/50 pb-3">
@@ -94,12 +94,6 @@ const NavBar = () => {
               RELOADING
             </span>
           </div>
-        </div>
-      ) : (
-        <div className="bg-black/50 px-5 py-3 rounded-xl backdrop-blur-md w-fit border border-white/10">
-          <span className="text-white font-bold text-lg animate-pulse">
-            Connecting...
-          </span>
         </div>
       )}
     </nav>
