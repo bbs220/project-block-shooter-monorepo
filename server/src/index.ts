@@ -11,6 +11,7 @@ import {
   handleSwitchWeapon,
   handleReload,
 } from "./events/playerEvents.js";
+import { getRandomSpawn } from "./utils/helpers.js";
 
 // export world so playerEvents can import it
 export let world: RAPIER.World;
@@ -61,9 +62,21 @@ async function startServer() {
   const tickRate = 60;
   const tickInterval = 1000 / tickRate;
 
+  let debugTickCounter = 0;
+
   function gameLoop() {
     // step the physics simulation forward
     world.step();
+
+    const statePayload = getFullState();
+
+    debugTickCounter++;
+    if (debugTickCounter % 60 === 0) {
+      // very heavy logs do not run this for long time
+      logger.info(
+        "📡 GECKOS PAYLOAD SNAPSHOT:\n" + JSON.stringify(statePayload, null, 2),
+      );
+    }
 
     // broadcast the clean serialized state
     io.emit("state", getFullState());
@@ -73,6 +86,26 @@ async function startServer() {
 
   // the 1hz slow loop for the match timer
   setInterval(() => {
+    const playerCount = players.size;
+
+    // if the server is completely empty, reset and wait.
+    if (playerCount === 0) {
+      if (matchData.matchState !== "waiting") {
+        matchData.matchState = "waiting";
+        matchData.timeRemaining = 240;
+        matchData.teamScores = { red: 0, blue: 0 };
+        logger.info("server empty, match reset to waiting state.");
+      }
+      return; // stop here, don't tick the clock down!
+    }
+
+    // if players are here and we are waiting, start the match!
+    if (matchData.matchState === "waiting" && playerCount > 0) {
+      matchData.matchState = "playing";
+      logger.info("players detected, starting match!");
+    }
+
+    // tick the clock down if we are actively playing
     if (matchData.matchState === "playing") {
       matchData.timeRemaining -= 1;
 
@@ -82,9 +115,10 @@ async function startServer() {
 
         // simple mvp reset: wait 5 seconds, then restart the match
         setTimeout(() => {
+          // double check if everyone left during the 5-second scoreboard screen
+          matchData.matchState = players.size > 0 ? "playing" : "waiting";
           matchData.timeRemaining = 240;
           matchData.teamScores = { red: 0, blue: 0 };
-          matchData.matchState = "playing";
 
           // reset all players' stats and health for the new match
           players.forEach((p) => {
@@ -93,10 +127,15 @@ async function startServer() {
             p.health = 100;
             p.isDead = false;
 
-            // teleport everyone back to the center spawn point
-            p.x = 0;
-            p.z = 0;
-            p.body.setNextKinematicTranslation({ x: 0, y: 1, z: 0 });
+            // teleport everyone back to a proper team spawn point
+            const newSpawn = getRandomSpawn(p.team);
+            p.x = newSpawn.x;
+            p.z = newSpawn.z;
+            p.body.setNextKinematicTranslation({
+              x: newSpawn.x,
+              y: 1,
+              z: newSpawn.z,
+            });
           });
 
           logger.info("new match started!");

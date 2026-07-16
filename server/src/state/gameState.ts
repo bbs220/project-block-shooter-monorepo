@@ -6,7 +6,7 @@ export const players = new Map<string, ServerPlayerState>();
 // global match state matching your client interface
 export const matchData = {
   mode: "tdm",
-  matchState: "playing", // starting straight into playing for mvp
+  matchState: "waiting", // for mvp waiting then playing
   timeRemaining: 240,
   teamScores: { red: 0, blue: 0 },
 };
