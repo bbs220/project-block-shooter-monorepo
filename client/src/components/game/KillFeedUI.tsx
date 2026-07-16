@@ -1,11 +1,23 @@
 import { useEffect } from "react";
 import { useGameStore } from "../../stores/useGameStore";
+import {
+  iconAssaultRifle,
+  iconBurstRifle,
+  iconPistol,
+} from "../../utils/assetPaths";
+
+// helper to map the server's weapon name to the UI icon
+const getKillFeedIcon = (weaponName: string) => {
+  const name = weaponName.toLowerCase();
+  if (name.includes("burst")) return iconBurstRifle;
+  if (name.includes("pistol")) return iconPistol;
+  return iconAssaultRifle;
+};
 
 const KillFeedUI = () => {
   const killFeed = useGameStore((state) => state.killFeed);
   const removeOldKills = useGameStore((state) => state.removeOldKills);
 
-  // self-cleaning garbage collector (runs every 1 second)
   useEffect(() => {
     const interval = setInterval(() => {
       removeOldKills();
@@ -13,7 +25,6 @@ const KillFeedUI = () => {
     return () => clearInterval(interval);
   }, [removeOldKills]);
 
-  // don't render anything if there are no recent kills
   if (killFeed.length === 0) return null;
 
   return (
@@ -23,7 +34,7 @@ const KillFeedUI = () => {
           key={kill.id}
           className="bg-black/60 backdrop-blur-md px-4 py-2 rounded-lg border border-white/10 shadow-lg text-sm font-bold flex items-center gap-2 animate-in fade-in slide-in-from-right-4 duration-300"
         >
-          {/* shooter Name */}
+          {/* Shooter Name */}
           <span
             className={
               kill.shooterTeam === "red" ? "text-red-400" : "text-blue-400"
@@ -32,12 +43,14 @@ const KillFeedUI = () => {
             {kill.shooter}
           </span>
 
-          {/* weapon Used */}
-          <span className="text-neutral-400 text-xs uppercase tracking-wider mx-1">
-            [{kill.weapon}]
-          </span>
+          {/* Weapon Icon (Replacing the text) */}
+          <img
+            src={getKillFeedIcon(kill.weapon)}
+            alt={kill.weapon}
+            className="h-4 object-contain mx-2 opacity-80"
+          />
 
-          {/* target Name */}
+          {/* Target Name */}
           <span
             className={
               kill.targetTeam === "red" ? "text-red-400" : "text-blue-400"
