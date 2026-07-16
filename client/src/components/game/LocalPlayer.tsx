@@ -40,7 +40,7 @@ export default function LocalPlayer() {
       }
 
       // weapon switching
-      if (key === "1" && channel) channel.emit("switchWeapon", "rifle");
+      if (key === "1" && channel) channel.emit("switchWeapon", "assaultRifle");
       if (key === "2" && channel) channel.emit("switchWeapon", "pistol");
       if (key === "3" && channel) channel.emit("switchWeapon", "burstRifle");
 

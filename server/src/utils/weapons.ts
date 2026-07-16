@@ -1,4 +1,4 @@
-export type WeaponId = "rifle" | "pistol" | "burstRifle";
+export type WeaponId = "assaultRifle" | "pistol" | "burstRifle";
 export type FireMode = "auto" | "semi" | "single" | "burst"; // added burst
 
 export interface WeaponStats {
@@ -13,8 +13,8 @@ export interface WeaponStats {
 }
 
 export const WEAPONS: Record<WeaponId, WeaponStats> = {
-  rifle: {
-    id: "rifle",
+  assaultRifle: {
+    id: "assaultRifle",
     name: "Assault Rifle",
     damage: 25,
     fireRate: 120,

@@ -57,10 +57,10 @@ export function handleConnection(channel: ServerChannel) {
     isDead: false,
     kills: 0,
     deaths: 0,
-    currentWeapon: "rifle",
-    ammo: WEAPONS["rifle"].magSize,
+    currentWeapon: "assaultRifle",
+    ammo: WEAPONS["assaultRifle"].magSize,
     magazines: {
-      rifle: WEAPONS["rifle"].magSize,
+      assaultRifle: WEAPONS["assaultRifle"].magSize,
       pistol: WEAPONS["pistol"].magSize,
       burstRifle: WEAPONS["burstRifle"].magSize,
     },
@@ -98,7 +98,7 @@ export function handlePlayerInput(id: string, data: any) {
 
 export function handleSwitchWeapon(
   id: string,
-  weaponId: "rifle" | "pistol" | "burstRifle",
+  weaponId: "assaultRifle" | "pistol" | "burstRifle",
 ) {
   const player = players.get(id);
 
@@ -113,7 +113,7 @@ export function handleSwitchWeapon(
   }
 
   if (
-    weaponId === "rifle" ||
+    weaponId === "assaultRifle" ||
     weaponId === "pistol" ||
     weaponId === "burstRifle"
   ) {

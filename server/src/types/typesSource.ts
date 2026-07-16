@@ -20,10 +20,10 @@ export type ServerPlayerState = {
   body: RAPIER.RigidBody;
 
   // combat & weapons
-  currentWeapon: "rifle" | "pistol" | "burstRifle";
+  currentWeapon: "assaultRifle" | "pistol" | "burstRifle";
   ammo: number;
   magazines: {
-    rifle: number;
+    assaultRifle: number;
     pistol: number;
     burstRifle: number;
   };

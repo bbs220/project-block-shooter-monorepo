@@ -2,7 +2,7 @@ import { create } from "zustand";
 import type { ClientChannel } from "@geckos.io/client";
 
 // specific types for strictness
-export type WeaponType = "rifle" | "pistol" | "burstRifle";
+export type WeaponType = "assaultRifle" | "pistol" | "burstRifle";
 export type TeamType = "red" | "blue" | "none";
 export type MatchState = "waiting" | "playing" | "ended";
 export type GameMode = "tdm" | "ctp";
