@@ -4,9 +4,7 @@
   "description": "headless game server for auth and physics sync",
   "main": "src/index.ts",
   "scripts": {
-    "client": "npm run dev --prefix ../client",
-    "server": "nodemon --exec tsx src/index.ts | pino-pretty",
-    "both": "concurrently -k --names \"server,client\" -c \"green,blue\" \"npm run server\" \"npm run client\"",
+    "dev": "nodemon --exec tsx src/index.ts | pino-pretty",
     "build": "tsc",
     "start": "node dist/index.js"
   },
@@ -25,7 +23,6 @@
   },
   "devDependencies": {
     "@types/node": "^26.1.0",
-    "concurrently": "^10.0.3",
     "nodemon": "^3.1.14",
     "tsx": "^4.23.0",
     "typescript": "^6.0.3"

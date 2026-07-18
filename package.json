@@ -1,8 +1,14 @@
 {
-  "name": "project-block-shooter-workspace",
+  "name": "block-shooter-workspace",
   "private": true,
   "workspaces": [
     "apps/*",
     "packages/*"
-  ]
+  ],
+  "scripts": {
+    "dev": "concurrently -k --names \"CLIENT,SERVER\" -c \"blue,green\" \"npm run dev -w appClient\" \"npm run dev -w appServer\""
+  },
+  "devDependencies": {
+    "concurrently": "^10.0.3"
+  }
 }
