@@ -1,6 +1,6 @@
 import { InfinityIcon } from "lucide-react";
 import { useGameStore } from "../stores/useGameStore";
-import { WEAPONS } from "../utils/weapons";
+import { WEAPONS } from "@block-shooter/shared";
 import {
   iconAssaultRifle,
   iconBurstRifle,

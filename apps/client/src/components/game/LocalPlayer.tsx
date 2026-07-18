@@ -3,7 +3,7 @@ import { PointerLockControls } from "@react-three/drei";
 import { useRef, useEffect } from "react";
 import * as THREE from "three";
 import { useGameStore } from "../../stores/useGameStore";
-import { WEAPONS } from "../../utils/weapons";
+import { WEAPONS } from "@block-shooter/shared";
 
 // track key states outside the component to avoid re-renders
 const keys = { w: false, a: false, s: false, d: false };

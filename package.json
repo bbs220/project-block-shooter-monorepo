@@ -1,0 +1,8 @@
+{
+  "name": "project-block-shooter-workspace",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ]
+}

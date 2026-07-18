@@ -8,7 +8,7 @@ import {
 import { matchData, players } from "../state/gameState.js";
 import { logger } from "../utils/logger.js";
 import { world } from "../index.js";
-import { WEAPONS } from "../utils/weapons.js";
+import { WEAPONS } from "@block-shooter/shared";
 
 // import rapier and the physics world
 export function handleConnection(channel: ServerChannel) {
