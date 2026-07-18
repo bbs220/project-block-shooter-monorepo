@@ -1,5 +1,5 @@
 {
-  "name": "game server",
+  "name": "appServer",
   "version": "1.0.0",
   "description": "headless game server for auth and physics sync",
   "main": "src/index.ts",
