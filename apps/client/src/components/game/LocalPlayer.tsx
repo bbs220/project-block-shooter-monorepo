@@ -35,7 +35,11 @@ export default function LocalPlayer() {
       if (key === "a") movementState.left = true;
       if (key === "d") movementState.right = true;
       if (key === "shift") movementState.sprint = true;
-      if (key === " ") movementState.jump = true;
+
+      if (key === " ") {
+        movementState.jump = true;
+        if (channel) channel.emit("jump");
+      }
 
       // Weapon switching
       if (key === "1" && channel) channel.emit("switchWeapon", "assaultRifle");

@@ -13,14 +13,15 @@ import { WEAPONS } from "@block-shooter/shared";
 export function isPlayerOnGround(playerBody: RAPIER.RigidBody): boolean {
   const position = playerBody.translation();
 
-  // start ray exactly at the player's center
-  const rayOrigin = { x: position.x, y: position.y, z: position.z };
-  const rayDirection = { x: 0, y: -1.0, z: 0 }; // Pointing straight down
+  // capsule center is at Y. The bottom is at Y - 1.0.
+  // start the laser slightly below the capsule (-1.01) so it doesn't hit the player.
+  const rayOrigin = { x: position.x, y: position.y - 1.01, z: position.z };
+  const rayDirection = { x: 0, y: -1.0, z: 0 };
   const ray = new RAPIER.Ray(rayOrigin, rayDirection);
 
-  // capsule is 2 units tall (center is 1 unit from the bottom).
-  // checking 1.1 units down covers the bottom + 0.1 tolerance.
-  const hit = world.castRay(ray, 1.1, true);
+  // need to shoot the laser a tiny distance (0.1 units) downwards
+  // if it hits anything within that 0.1 gap, we are standing on the floor.
+  const hit = world.castRay(ray, 0.1, true);
 
   return hit !== null;
 }

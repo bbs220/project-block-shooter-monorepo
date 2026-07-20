@@ -10,6 +10,7 @@ import {
   handleShoot,
   handleSwitchWeapon,
   handleReload,
+  handleJump,
 } from "./events/playerEvents.js";
 import { getRandomSpawn } from "./utils/helpers.js";
 import { envValid } from "./utils/envValid.js";
@@ -63,6 +64,10 @@ async function startServer() {
 
     channel.on("playerInput", (data: any) => {
       handlePlayerInput(channel.id as string, data);
+    });
+
+    channel.on("jump", () => {
+      handleJump(channel.id as string);
     });
 
     channel.on("shoot", (data: any) => {
