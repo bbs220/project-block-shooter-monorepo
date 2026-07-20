@@ -186,8 +186,8 @@ export function handleShoot(id: string, data: any, io: GeckosServer) {
   shooter.ammo = shooter.magazines[shooter.currentWeapon];
   shooter.lastShotTime = now;
 
-  // origin: exactly at the shooter's camera level
-  const origin = { x: shooter.x, y: shooter.y + 1.5, z: shooter.z };
+  // origin: exactly at the shooter's camera level (center 1.0 + 0.5 = 1.5)
+  const origin = { x: shooter.x, y: shooter.y + 0.5, z: shooter.z };
 
   // direction: use the exact 3d vector sent by the client
   const direction = { x: data.dirX, y: data.dirY, z: data.dirZ };
