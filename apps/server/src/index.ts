@@ -14,7 +14,7 @@ import {
 } from "./events/playerEvents.js";
 import { getRandomSpawn } from "./utils/helpers.js";
 import { envValid } from "./utils/envValid.js";
-import { MAPS } from "@block-shooter/shared";
+import { GRAVITY, MAPS } from "@block-shooter/shared";
 
 const PORT = Number(envValid.PORT);
 
@@ -28,7 +28,7 @@ async function startServer() {
   await RAPIER.init();
 
   // initialize world before allowing any connections
-  world = new RAPIER.World({ x: 0.0, y: -9.81, z: 0.0 });
+  world = new RAPIER.World(GRAVITY);
   logger.info("physics world initialized");
 
   const currentMap = MAPS["arena_01"];

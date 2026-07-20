@@ -8,7 +8,7 @@ import {
 import { matchData, players } from "../state/gameState.js";
 import { logger } from "../utils/logger.js";
 import { world } from "../index.js";
-import { WEAPONS } from "@block-shooter/shared";
+import { PHYSICS_CONFIG, WEAPONS } from "@block-shooter/shared";
 
 export function isPlayerOnGround(playerBody: RAPIER.RigidBody): boolean {
   const position = playerBody.translation();
@@ -121,7 +121,7 @@ export function handleJump(id: string) {
   if (player && !player.isDead) {
     if (isPlayerOnGround(player.body)) {
       // Apply an upward velocity impulse
-      player.body.setLinvel({ x: 0, y: 8.0, z: 0 }, true);
+      player.body.setLinvel({ x: 0, y: PHYSICS_CONFIG.JUMP_FORCE, z: 0 }, true);
     }
   }
 }
