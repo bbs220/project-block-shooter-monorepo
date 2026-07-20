@@ -34,6 +34,15 @@ const CrosshairUI = () => {
 
   // animation Block
   useGSAP(() => {
+    // if refs are null
+    if (
+      !topRef.current ||
+      !bottomRef.current ||
+      !leftRef.current ||
+      !rightRef.current
+    )
+      return;
+
     const baseOffset = 8;
     const currentOffset = baseOffset + spread;
 
@@ -48,7 +57,7 @@ const CrosshairUI = () => {
     gsap.to(bottomRef.current, { y: currentOffset, ...config });
     gsap.to(leftRef.current, { x: -currentOffset, ...config });
     gsap.to(rightRef.current, { x: currentOffset, ...config });
-  }, [spread]); // re-run this animation every time the spread state changes
+  }, [spread]);
 
   if (!isLocked || matchState === "ended" || isHoldingTab) return null;
 

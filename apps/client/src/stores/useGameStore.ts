@@ -102,7 +102,12 @@ export const useGameStore = create<GameStore>((set) => ({
   killFeed: [],
 
   addKillEvent: (event) =>
-    set((state) => ({ killFeed: [...state.killFeed, event] })),
+    set((state) => {
+      if (state.killFeed.some((k) => k.id === event.id)) {
+        return state;
+      }
+      return { killFeed: [...state.killFeed, event] };
+    }),
 
   removeOldKills: () =>
     set((state) => {

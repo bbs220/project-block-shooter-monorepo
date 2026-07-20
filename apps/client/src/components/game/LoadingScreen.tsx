@@ -15,7 +15,7 @@ const LoadingScreen = () => {
 
   useGSAP(() => {
     // 'me' exists, it means we connected
-    if (me) {
+    if (me && containerRef.current) {
       gsap.to(containerRef.current, {
         opacity: 0,
         duration: 0.6,
