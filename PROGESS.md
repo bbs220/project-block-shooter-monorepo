@@ -6,9 +6,10 @@
 | **Networking** | Finished | Authoritative Node.js server using Geckos.io. |
 | **Physics & Tick** | Finished | 60Hz server heartbeat using Rapier3D. |
 | **Movement** | Finished | Client-side prediction with true FPS camera math. |
+| **Advanced Movement**| Finished | Server-side gravity, jumping, sprint tracking, and client headbob. |
 | **Combat Loop** | Finished | Authoritative raycasting, team balancing, and kill tracking. |
 | **Weapon System** | Finished | Stats tree (Assault Rifle, Pistol, Burst Rifle) with icon support. |
-| **Client UI** | Finished | Crosshair, HUD, Loading Screen, Kill Feed, Scoreboard, and Top-Bar Match Info. |
+| **Client UI** | Finished | Crosshair, HUD, Loading Screen, Kill Feed, Scoreboard, and Top-Bar. |
 
 ## ✅ Completed: Match Structure
 | Feature | Status | Details |
@@ -23,6 +24,5 @@
 | :--- | :--- |
 | **TDM Score Limits** | Add "Mercy Rule": End the match immediately if a team hits 30 kills. |
 | **Capture the Point** | Define a physical capture zone; track player presence and award periodic points. |
-| **Advanced Movement** | Wire up Sprint and Jump inputs to server physics; add client-side camera headbob for game feel. |
 | **3D Assets** | Swap placeholder geometry with actual 3D weapon models (GLTF/GLB) attached to the viewport. |
-| **Audio Architecture** | Implement hybrid system: `use-sound` for 2D UI feedback (hit markers, clicks) and `@react-three/drei` `<PositionalAudio>` for 3D spatial sounds (gunshots, footsteps). |
+| **Audio Architecture** | Implement hybrid system: `use-sound` for UI/2D feedback and `<PositionalAudio>` for 3D environment sounds. |
