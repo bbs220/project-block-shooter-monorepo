@@ -13,6 +13,7 @@ import {
 } from "./events/playerEvents.js";
 import { getRandomSpawn } from "./utils/helpers.js";
 import { envValid } from "./utils/envValid.js";
+import { MAPS } from "@block-shooter/shared";
 
 const PORT = Number(envValid.PORT);
 
@@ -28,6 +29,29 @@ async function startServer() {
   // initialize world before allowing any connections
   world = new RAPIER.World({ x: 0.0, y: -9.81, z: 0.0 });
   logger.info("physics world initialized");
+
+  const currentMap = MAPS["arena_01"];
+  const thickness = currentMap.floor.thickness;
+
+  // static rigid body for the floor.
+  // shift it down by half the thickness (-0.5) so the top surface sits perfectly at Y = 0.
+  const groundBodyDesc = RAPIER.RigidBodyDesc.fixed().setTranslation(
+    0,
+    -thickness / 2,
+    0,
+  );
+  const groundBody = world.createRigidBody(groundBodyDesc);
+
+  // cuboid collider.
+  // rapier uses half-extents. A 100x1x100 floor needs half-extents of 50x0.5x50.
+  const groundColliderDesc = RAPIER.ColliderDesc.cuboid(
+    currentMap.floor.width / 2,
+    thickness / 2,
+    currentMap.floor.depth / 2,
+  );
+  world.createCollider(groundColliderDesc, groundBody);
+
+  logger.info(`Loaded Map: ${currentMap.name}`);
 
   // now safe to listen for connections
   io.listen(PORT);
@@ -140,11 +164,14 @@ async function startServer() {
             const newSpawn = getRandomSpawn(p.team);
             p.x = newSpawn.x;
             p.z = newSpawn.z;
-            p.body.setNextKinematicTranslation({
-              x: newSpawn.x,
-              y: 1,
-              z: newSpawn.z,
-            });
+            p.body.setTranslation(
+              {
+                x: newSpawn.x,
+                y: 10.0, // drop them from the sky again!
+                z: newSpawn.z,
+              },
+              true,
+            ); // 'true' wakes the body up if it went to sleep
           });
 
           logger.info("new match started!");

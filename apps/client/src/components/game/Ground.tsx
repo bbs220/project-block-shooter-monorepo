@@ -16,10 +16,8 @@ const Ground = () => {
     texture.wrapT = RepeatWrapping;
     texture.anisotropy = 16;
 
-    // tile the texture 25 times
+    // tile the texture 50 times
     texture.repeat.set(50, 50);
-
-    // tell three.js the texture has been updated
     texture.needsUpdate = true;
 
     return texture;
@@ -27,8 +25,9 @@ const Ground = () => {
 
   return (
     <RigidBody type="fixed">
-      <mesh position={[0, 0, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
-        <planeGeometry args={[100, 100]} />
+      <mesh position={[0, -0.5, 0]} receiveShadow>
+        {/* Width: 100, Height (Thickness): 1, Depth: 100 */}
+        <boxGeometry args={[100, 1, 100]} />
         <meshStandardMaterial map={clonedMap} />
       </mesh>
     </RigidBody>
