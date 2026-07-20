@@ -8,7 +8,7 @@ import {
 import { matchData, players } from "../state/gameState.js";
 import { logger } from "../utils/logger.js";
 import { world } from "../index.js";
-import { PHYSICS_CONFIG, WEAPONS } from "@block-shooter/shared";
+import { PHYSICS_CONFIG, PLAYER_CONFIG, WEAPONS } from "@block-shooter/shared";
 
 export function isPlayerOnGround(playerBody: RAPIER.RigidBody): boolean {
   const position = playerBody.translation();
@@ -55,7 +55,10 @@ export function handleConnection(channel: ServerChannel) {
   const body = world.createRigidBody(bodyDesc);
   body.userData = { id: channel.id };
 
-  const colliderDesc = RAPIER.ColliderDesc.capsule(0.5, 0.5); // Total height = 2 units
+  const colliderDesc = RAPIER.ColliderDesc.capsule(
+    PLAYER_CONFIG.HALF_HEIGHT,
+    PLAYER_CONFIG.RADIUS,
+  ); // Total height = 2 units
   world.createCollider(colliderDesc, body);
 
   players.set(channel.id, {
@@ -188,7 +191,11 @@ export function handleShoot(id: string, data: any, io: GeckosServer) {
   shooter.lastShotTime = now;
 
   // origin: exactly at the shooter's camera level (center 1.0 + 0.5 = 1.5)
-  const origin = { x: shooter.x, y: shooter.y + 0.5, z: shooter.z };
+  const origin = {
+    x: shooter.x,
+    y: shooter.y + PLAYER_CONFIG.EYE_LEVEL_OFFSET,
+    z: shooter.z,
+  };
 
   // direction: use the exact 3d vector sent by the client
   const direction = { x: data.dirX, y: data.dirY, z: data.dirZ };

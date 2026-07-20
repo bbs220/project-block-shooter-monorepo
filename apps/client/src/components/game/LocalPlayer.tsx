@@ -3,7 +3,13 @@ import { PointerLockControls } from "@react-three/drei";
 import { useRef, useEffect } from "react";
 import * as THREE from "three";
 import { useGameStore } from "../../stores/useGameStore";
-import { WEAPONS, movementState, combatState } from "@block-shooter/shared";
+import {
+  WEAPONS,
+  movementState,
+  combatState,
+  PLAYER_CONFIG,
+  PHYSICS_CONFIG,
+} from "@block-shooter/shared";
 
 export default function LocalPlayer() {
   const localId = useGameStore((state) => state.localId);
@@ -18,8 +24,6 @@ export default function LocalPlayer() {
   const triggerReady = useRef(true);
   const burstShotsLeft = useRef(0);
   const currentSpread = useRef(0);
-
-  const PLAYER_HEIGHT = 1.5; // Lock camera to this height
 
   const direction = useRef(new THREE.Vector3());
   const frontVector = useRef(new THREE.Vector3());
@@ -95,7 +99,9 @@ export default function LocalPlayer() {
 
     // Read the physics Y from the server and add the eye-level offset (+0.5)
     // Server center = 1.0 (on ground). Eye level = 1.5.
-    const currentEyeLevel = me ? me.y + 0.5 : PLAYER_HEIGHT;
+    const currentEyeLevel = me
+      ? me.y + PLAYER_CONFIG.EYE_LEVEL_OFFSET
+      : 1.0 + PLAYER_CONFIG.EYE_LEVEL_OFFSET;
 
     if (me) {
       if (!initialized.current || me.isDead) {
@@ -116,7 +122,9 @@ export default function LocalPlayer() {
 
     if (forward !== 0 || right !== 0) {
       // Sprint logic
-      const baseSpeed = movementState.sprint ? 8.5 : 5.0;
+      const baseSpeed = movementState.sprint
+        ? PHYSICS_CONFIG.SPRINT_SPEED
+        : PHYSICS_CONFIG.WALK_SPEED;
       const speed = baseSpeed * delta;
 
       camera.getWorldDirection(frontVector.current);
