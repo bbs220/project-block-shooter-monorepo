@@ -17,6 +17,7 @@ import ScoreboardUI from "./ScoreboardUI";
 import KillFeedUI from "./KillFeedUI";
 import RemotePlayers from "./RemotePlayers";
 import LoadingScreen from "./LoadingScreen";
+import { GRAVITY } from "@block-shooter/shared";
 
 const PrimaryScene = () => {
   const { showPhyDebug, showGizmo } = useTweakpane({
@@ -27,7 +28,7 @@ const PrimaryScene = () => {
   return (
     <>
       {/* rapier physics */}
-      <Physics debug={showPhyDebug}>
+      <Physics debug={showPhyDebug} gravity={[GRAVITY.x, GRAVITY.y, GRAVITY.z]}>
         <PerspectiveCamera makeDefault fov={60} />
         <GizmoHelper alignment="top-left" margin={[450, 100]}>
           <GizmoViewport labelColor="white" visible={showGizmo} />

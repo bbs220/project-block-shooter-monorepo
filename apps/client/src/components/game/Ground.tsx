@@ -3,6 +3,7 @@ import { TextureLoader, RepeatWrapping } from "three";
 import { useMemo } from "react";
 import { gridColorPath } from "../../utils/assetPaths";
 import { RigidBody } from "@react-three/rapier";
+import { MAPS } from "@block-shooter/shared";
 
 const Ground = () => {
   const originalMap = useLoader(TextureLoader, gridColorPath);
@@ -27,7 +28,13 @@ const Ground = () => {
     <RigidBody type="fixed">
       <mesh position={[0, -0.5, 0]} receiveShadow>
         {/* Width: 100, Height (Thickness): 1, Depth: 100 */}
-        <boxGeometry args={[100, 1, 100]} />
+        <boxGeometry
+          args={[
+            MAPS.arena_01.floor.width,
+            MAPS.arena_01.floor.thickness,
+            MAPS.arena_01.floor.depth,
+          ]}
+        />
         <meshStandardMaterial map={clonedMap} />
       </mesh>
     </RigidBody>
