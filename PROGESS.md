@@ -22,6 +22,7 @@
 ## ⏳ Remaining Tasks (The Final Stretch)
 | Feature | Details |
 | :--- | :--- |
+| **World Boundaries** | Add invisible perimeter walls/fall-out triggers to prevent players from wandering off the finite map. |
 | **TDM Score Limits** | Add "Mercy Rule": End the match immediately if a team hits 30 kills. |
 | **Capture the Point** | Define a physical capture zone; track player presence and award periodic points. |
 | **3D Assets** | Swap placeholder geometry with actual 3D weapon models (GLTF/GLB) attached to the viewport. |
