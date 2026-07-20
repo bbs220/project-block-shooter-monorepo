@@ -3,69 +3,69 @@ import { PointerLockControls } from "@react-three/drei";
 import { useRef, useEffect } from "react";
 import * as THREE from "three";
 import { useGameStore } from "../../stores/useGameStore";
-import { WEAPONS } from "@block-shooter/shared";
-
-// track key states outside the component to avoid re-renders
-const keys = { w: false, a: false, s: false, d: false };
+import { WEAPONS, movementState, combatState } from "@block-shooter/shared";
 
 export default function LocalPlayer() {
   const localId = useGameStore((state) => state.localId);
   const players = useGameStore((state) => state.players);
   const channel = useGameStore((state) => state.channel);
   const setLocked = useGameStore((state) => state.setLocked);
-
-  // pull in the setter for the dynamic crosshair
   const setCrosshairSpread = useGameStore((state) => state.setCrosshairSpread);
 
   const lastEmit = useRef(0);
   const initialized = useRef(false);
   const lastShotClient = useRef(0);
-  const isShooting = useRef(false);
   const triggerReady = useRef(true);
   const burstShotsLeft = useRef(0);
-
-  // local ref for math processing before sending to Zustand
   const currentSpread = useRef(0);
+
+  const PLAYER_HEIGHT = 1.5; // Lock camera to this height
 
   const direction = useRef(new THREE.Vector3());
   const frontVector = useRef(new THREE.Vector3());
   const sideVector = useRef(new THREE.Vector3());
 
   useEffect(() => {
-    // continuously track which keys are currently held down
     const handleKeyDown = (e: KeyboardEvent) => {
       const key = e.key.toLowerCase();
-      if (key in keys) {
-        keys[key as keyof typeof keys] = true;
-      }
 
-      // weapon switching
+      // Write directly to your shared state
+      if (key === "w") movementState.forward = true;
+      if (key === "s") movementState.backward = true;
+      if (key === "a") movementState.left = true;
+      if (key === "d") movementState.right = true;
+      if (key === "shift") movementState.sprint = true;
+      if (key === " ") movementState.jump = true;
+
+      // Weapon switching
       if (key === "1" && channel) channel.emit("switchWeapon", "assaultRifle");
       if (key === "2" && channel) channel.emit("switchWeapon", "pistol");
       if (key === "3" && channel) channel.emit("switchWeapon", "burstRifle");
 
-      // reloading
+      // Reloading
       if (key === "r" && channel) channel.emit("reload");
     };
 
     const handleKeyUp = (e: KeyboardEvent) => {
       const key = e.key.toLowerCase();
-      if (key in keys) {
-        keys[key as keyof typeof keys] = false;
-      }
+
+      if (key === "w") movementState.forward = false;
+      if (key === "s") movementState.backward = false;
+      if (key === "a") movementState.left = false;
+      if (key === "d") movementState.right = false;
+      if (key === "shift") movementState.sprint = false;
+      if (key === " ") movementState.jump = false;
     };
 
     const handleMouseDown = (e: MouseEvent) => {
-      // 0 is left click. ONLY shoot if the pointer is currently locked!
       if (e.button === 0 && useGameStore.getState().isLocked) {
-        isShooting.current = true;
+        combatState.isShooting = true;
       }
     };
 
     const handleMouseUp = (e: MouseEvent) => {
       if (e.button === 0) {
-        isShooting.current = false;
-        // reset the trigger so semi/single weapons can fire again
+        combatState.isShooting = false;
         triggerReady.current = true;
       }
     };
@@ -89,44 +89,36 @@ export default function LocalPlayer() {
     const camera = state.camera;
     const me = players[localId];
 
-    // snap on first load, or if server marks us dead (resets camera on respawn)
     if (me) {
       if (!initialized.current || me.isDead) {
-        camera.position.set(me.x, me.y + 1.5, me.z);
+        camera.position.set(me.x, PLAYER_HEIGHT, me.z);
         initialized.current = true;
       }
     }
 
-    // crosshair decay
     if (currentSpread.current > 0) {
-      currentSpread.current -= delta * 60; // Shrink speed
+      currentSpread.current -= delta * 60;
       if (currentSpread.current < 0) currentSpread.current = 0;
     }
 
-    const forward = (keys.w ? 1 : 0) - (keys.s ? 1 : 0);
-
-    // invert the a/d input to fix the axis flip
-    const right = (keys.a ? 1 : 0) - (keys.d ? 1 : 0);
-
-    let deltaX: number;
-    let deltaZ: number;
+    // --- READ FROM MOVEMENT STATE ---
+    const forward =
+      (movementState.forward ? 1 : 0) - (movementState.backward ? 1 : 0);
+    const right = (movementState.left ? 1 : 0) - (movementState.right ? 1 : 0);
 
     if (forward !== 0 || right !== 0) {
-      const speed = 5 * delta;
+      // Sprint logic
+      const baseSpeed = movementState.sprint ? 8.5 : 5.0;
+      const speed = baseSpeed * delta;
 
-      // get the exact direction the camera is looking
       camera.getWorldDirection(frontVector.current);
-
-      // flatten it to the x/z plane so looking up/down doesn't slow you down
-      frontVector.current.y = 0;
+      frontVector.current.y = 0; // lock vertical look from affecting speed
       frontVector.current.normalize();
 
-      // calculate the exact right direction using a cross product with the world up vector
       sideVector.current
         .crossVectors(camera.up, frontVector.current)
         .normalize();
 
-      // combine them based on user input
       direction.current
         .set(0, 0, 0)
         .addScaledVector(frontVector.current, forward)
@@ -134,36 +126,30 @@ export default function LocalPlayer() {
         .normalize()
         .multiplyScalar(speed);
 
-      deltaX = direction.current.x;
-      deltaZ = direction.current.z;
+      camera.position.x += direction.current.x;
+      camera.position.z += direction.current.z;
 
-      // client-side prediction: instantly move local camera
-      camera.position.x += deltaX;
-      camera.position.z += deltaZ;
-
-      // cap walking spread at 15
       currentSpread.current = Math.min(currentSpread.current + delta * 30, 15);
     }
 
+    // Hard-lock Y position to prevent drift
+    camera.position.y = PLAYER_HEIGHT;
+
     const now = performance.now();
 
-    // handle weapon firing modes
+    // --- READ FROM COMBAT STATE ---
     if (me && !me.isDead && !me.isReloading && me.ammo > 0) {
       const weapon = WEAPONS[me.currentWeapon];
 
-      // check if we should initiate a new shot/burst from mouse hold
-      if (isShooting.current && channel) {
+      if (combatState.isShooting && channel) {
         if (now - lastShotClient.current >= weapon.fireRate) {
           if (weapon.mode === "auto" || triggerReady.current) {
-            // if it's a burst weapon, queue up 3 shots (or whatever ammo is left)
             if (weapon.mode === "burst") {
               burstShotsLeft.current = Math.min(3, me.ammo);
             } else {
-              // get the exact mathematical direction of the crosshair
               const dir = new THREE.Vector3();
               camera.getWorldDirection(dir);
 
-              // standard auto/semi/single shot
               channel.emit("shoot", {
                 dirX: dir.x,
                 dirY: dir.y,
@@ -171,11 +157,9 @@ export default function LocalPlayer() {
               });
 
               lastShotClient.current = now;
-              // cap shooting spread at 40
               currentSpread.current = Math.min(currentSpread.current + 15, 40);
             }
 
-            // force trigger release for semi/single/burst
             if (weapon.mode !== "auto") {
               triggerReady.current = false;
             }
@@ -183,10 +167,8 @@ export default function LocalPlayer() {
         }
       }
 
-      // handle the ongoing burst queue completely independently of the mouse button
       if (burstShotsLeft.current > 0 && channel) {
         if (now - lastShotClient.current >= weapon.fireRate) {
-          // get the exact mathematical direction of the crosshair
           const dir = new THREE.Vector3();
           camera.getWorldDirection(dir);
 
@@ -198,22 +180,20 @@ export default function LocalPlayer() {
 
           lastShotClient.current = now;
           burstShotsLeft.current -= 1;
-
-          // burst shooting kick
           currentSpread.current = Math.min(currentSpread.current + 15, 40);
         }
       }
     }
 
-    // send to store for render
     setCrosshairSpread(currentSpread.current);
 
     if (channel && now - lastEmit.current > 50) {
       channel.emit("playerInput", {
         yaw: camera.rotation.y,
         pitch: camera.rotation.x,
-        x: camera.position.x, // send exact x
-        z: camera.position.z, // send exact z
+        x: camera.position.x,
+        y: 1.0, // Hardcoded center of body for flat-plane physics
+        z: camera.position.z,
       });
       lastEmit.current = now;
     }
