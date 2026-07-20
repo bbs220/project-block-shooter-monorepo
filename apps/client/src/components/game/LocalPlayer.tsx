@@ -89,9 +89,13 @@ export default function LocalPlayer() {
     const camera = state.camera;
     const me = players[localId];
 
+    // Read the physics Y from the server and add the eye-level offset (+0.5)
+    // Server center = 1.0 (on ground). Eye level = 1.5.
+    const currentEyeLevel = me ? me.y + 0.5 : PLAYER_HEIGHT;
+
     if (me) {
       if (!initialized.current || me.isDead) {
-        camera.position.set(me.x, PLAYER_HEIGHT, me.z);
+        camera.position.set(me.x, currentEyeLevel, me.z);
         initialized.current = true;
       }
     }
@@ -112,7 +116,7 @@ export default function LocalPlayer() {
       const speed = baseSpeed * delta;
 
       camera.getWorldDirection(frontVector.current);
-      frontVector.current.y = 0; // lock vertical look from affecting speed
+      frontVector.current.y = 0;
       frontVector.current.normalize();
 
       sideVector.current
@@ -132,8 +136,8 @@ export default function LocalPlayer() {
       currentSpread.current = Math.min(currentSpread.current + delta * 30, 15);
     }
 
-    // Hard-lock Y position to prevent drift
-    camera.position.y = PLAYER_HEIGHT;
+    // let the camera fall with gravity based on the server's physics Y
+    camera.position.y = currentEyeLevel;
 
     const now = performance.now();
 
@@ -192,8 +196,8 @@ export default function LocalPlayer() {
         yaw: camera.rotation.y,
         pitch: camera.rotation.x,
         x: camera.position.x,
-        y: 1.0, // Hardcoded center of body for flat-plane physics
         z: camera.position.z,
+        // no need to emit Y anymore! the server handles it.
       });
       lastEmit.current = now;
     }

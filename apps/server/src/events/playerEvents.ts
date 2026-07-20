@@ -10,7 +10,21 @@ import { logger } from "../utils/logger.js";
 import { world } from "../index.js";
 import { WEAPONS } from "@block-shooter/shared";
 
-// import rapier and the physics world
+export function isPlayerOnGround(playerBody: RAPIER.RigidBody): boolean {
+  const position = playerBody.translation();
+
+  // start ray exactly at the player's center
+  const rayOrigin = { x: position.x, y: position.y, z: position.z };
+  const rayDirection = { x: 0, y: -1.0, z: 0 }; // Pointing straight down
+  const ray = new RAPIER.Ray(rayOrigin, rayDirection);
+
+  // capsule is 2 units tall (center is 1 unit from the bottom).
+  // checking 1.1 units down covers the bottom + 0.1 tolerance.
+  const hit = world.castRay(ray, 1.1, true);
+
+  return hit !== null;
+}
+
 export function handleConnection(channel: ServerChannel) {
   if (!channel.id) return;
 
@@ -33,23 +47,22 @@ export function handleConnection(channel: ServerChannel) {
   // assign distinct hex colors so players can visually identify enemies
   const teamColor = assignedTeam === "red" ? "#ef4444" : "#3b82f6";
 
-  const bodyDesc = RAPIER.RigidBodyDesc.kinematicPositionBased().setTranslation(
-    spawnPoint.x,
-    1,
-    spawnPoint.z,
-  );
+  const bodyDesc = RAPIER.RigidBodyDesc.dynamic()
+    .setTranslation(spawnPoint.x, 10.0, spawnPoint.z)
+    .lockRotations();
+
   const body = world.createRigidBody(bodyDesc);
   body.userData = { id: channel.id };
 
-  const colliderDesc = RAPIER.ColliderDesc.capsule(0.5, 0.5);
+  const colliderDesc = RAPIER.ColliderDesc.capsule(0.5, 0.5); // Total height = 2 units
   world.createCollider(colliderDesc, body);
 
   players.set(channel.id, {
     name: playerName,
-    color: teamColor, // use team color instead of random
-    team: assignedTeam, // assign actual team
+    color: teamColor,
+    team: assignedTeam,
     x: spawnPoint.x,
-    y: 0,
+    y: 10.0, // Match the initial drop height
     z: spawnPoint.z,
     yaw: 0,
     pitch: 0,
@@ -83,16 +96,32 @@ export function handlePlayerInput(id: string, data: any) {
     player.yaw = data.yaw ?? player.yaw;
     player.pitch = data.pitch ?? player.pitch;
 
-    // trust the absolute position sent by the client to prevent delta-loss desync
+    const currentPos = player.body.translation();
+
     player.x = data.x ?? player.x;
     player.z = data.z ?? player.z;
+    player.y = currentPos.y; // Trust the server for Y!
 
-    // move the actual physics collider to match the exact new coordinates
-    player.body.setNextKinematicTranslation({
-      x: player.x,
-      y: player.y + 1, // keep center mass at y=1
-      z: player.z,
-    });
+    // Teleport the X/Z to match client input, but preserve the physics Y
+    player.body.setTranslation(
+      {
+        x: player.x,
+        y: player.y,
+        z: player.z,
+      },
+      true,
+    );
+  }
+}
+
+export function handleJump(id: string) {
+  const player = players.get(id);
+
+  if (player && !player.isDead) {
+    if (isPlayerOnGround(player.body)) {
+      // Apply an upward velocity impulse
+      player.body.setLinvel({ x: 0, y: 8.0, z: 0 }, true);
+    }
   }
 }
 
@@ -200,6 +229,7 @@ export function handleShoot(id: string, data: any, io: GeckosServer) {
           hitPlayer.isDead = true;
           shooter.kills += 1;
           hitPlayer.deaths += 1;
+
           // update tdm match specific scores
           if (matchData.mode === "tdm") {
             matchData.teamScores[shooter.team] += 1;
@@ -227,11 +257,17 @@ export function handleShoot(id: string, data: any, io: GeckosServer) {
               const newSpawn = getRandomSpawn(p.team);
               p.x = newSpawn.x;
               p.z = newSpawn.z;
-              p.body.setNextKinematicTranslation({
-                x: newSpawn.x,
-                y: 1,
-                z: newSpawn.z,
-              });
+
+              // use setTranslation for dynamic bodies and drop from sky!
+              p.body.setTranslation(
+                {
+                  x: newSpawn.x,
+                  y: 10.0,
+                  z: newSpawn.z,
+                },
+                true,
+              );
+
               logger.info(`${p.name} respawned!`);
             }
           }, 3000);

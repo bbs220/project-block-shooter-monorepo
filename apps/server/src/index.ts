@@ -97,6 +97,17 @@ async function startServer() {
 
     const statePayload = getFullState();
 
+    players.forEach((p) => {
+      if (!p.isDead && p.body) {
+        const pos = p.body.translation();
+
+        // We now trust the physics engine as the ultimate source of truth
+        p.x = pos.x;
+        p.y = pos.y;
+        p.z = pos.z;
+      }
+    });
+
     debugTickCounter++;
     if (debugTickCounter % 60 === 0) {
       // very heavy logs do not run this for long time
