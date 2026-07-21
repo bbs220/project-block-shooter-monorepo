@@ -10,6 +10,7 @@ import {
   PLAYER_CONFIG,
   PHYSICS_CONFIG,
 } from "@block-shooter/shared";
+import { calculateHeadbobOffset } from "../../utils/headbob";
 
 export default function LocalPlayer() {
   const localId = useGameStore((state) => state.localId);
@@ -24,6 +25,7 @@ export default function LocalPlayer() {
   const triggerReady = useRef(true);
   const burstShotsLeft = useRef(0);
   const currentSpread = useRef(0);
+  const bobTime = useRef(0);
 
   const direction = useRef(new THREE.Vector3());
   const frontVector = useRef(new THREE.Vector3());
@@ -153,14 +155,30 @@ export default function LocalPlayer() {
       camera.position.z += direction.current.z;
 
       currentSpread.current = Math.min(currentSpread.current + delta * 30, 15);
-    }
 
-    // let the camera fall with gravity based on the server's physics Y
-    camera.position.y = currentEyeLevel;
+      bobTime.current += delta;
+
+      const bobOffset = calculateHeadbobOffset(
+        bobTime.current,
+        movementState.sprint,
+      );
+
+      camera.position.y = currentEyeLevel + bobOffset;
+    } else {
+      // recovery when stopping
+      bobTime.current = 0; // reset timer
+
+      // lerp the camera back to resting eye-level so it doesn't snap abruptly
+      camera.position.y = THREE.MathUtils.lerp(
+        camera.position.y,
+        currentEyeLevel,
+        0.1,
+      );
+    }
 
     const now = performance.now();
 
-    // --- READ FROM COMBAT STATE ---
+    // combat state
     if (me && !me.isDead && !me.isReloading && me.ammo > 0) {
       const weapon = WEAPONS[me.currentWeapon];
 
