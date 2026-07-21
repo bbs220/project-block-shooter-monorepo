@@ -8,7 +8,12 @@ import {
 import { matchData, players } from "../state/gameState.js";
 import { logger } from "../utils/logger.js";
 import { world } from "../index.js";
-import { WEAPONS, PHYSICS_CONFIG, PLAYER_CONFIG } from "@block-shooter/shared";
+import {
+  WEAPONS,
+  PHYSICS_CONFIG,
+  PLAYER_CONFIG,
+  WINNING_RULES,
+} from "@block-shooter/shared";
 
 // --- UTILS ---
 
@@ -255,6 +260,14 @@ export function handleShoot(id: string, data: any, io: GeckosServer) {
 
           if (matchData.mode === "tdm") {
             matchData.teamScores[shooter.team] += 1;
+          }
+
+          const scoreLimit = WINNING_RULES.tdmScoreLimit;
+          if (matchData.teamScores[shooter.team] >= scoreLimit) {
+            logger.info(
+              `mercy Rule: team ${shooter.team.toUpperCase()} hit ${scoreLimit} kills!`,
+            );
+            matchData.timeRemaining = 0; // instantly triggers the match reset loop in index.ts
           }
 
           logger.info(

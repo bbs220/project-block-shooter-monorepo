@@ -11,3 +11,7 @@ export const PLAYER_CONFIG = {
   HALF_HEIGHT: 0.5, // rapier measures from center to the start of the curved cap. (Total height = 2.0 units)
   EYE_LEVEL_OFFSET: 0.5, // distance from the center of the body up to the camera/shooter raycast
 };
+
+export const WINNING_RULES = {
+  tdmScoreLimit: 30,
+};
