@@ -253,6 +253,8 @@ export function handleShoot(id: string, data: any, io: GeckosServer) {
           `${shooter.name} hit ${hitPlayer.name} with ${weapon.name}! hp: ${hitPlayer.health}`,
         );
 
+        io.emit("hit_confirm", id);
+
         if (hitPlayer.health <= 0) {
           hitPlayer.isDead = true;
           shooter.kills += 1;
@@ -277,6 +279,7 @@ export function handleShoot(id: string, data: any, io: GeckosServer) {
           io.emit("kill_feed", {
             id: Math.random().toString(36).substring(2, 9),
             shooter: shooter.name,
+            shooterId: id,
             target: hitPlayer.name,
             weapon: weapon.name,
             shooterTeam: shooter.team,

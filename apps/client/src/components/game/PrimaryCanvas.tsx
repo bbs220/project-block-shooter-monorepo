@@ -19,6 +19,7 @@ import RemotePlayers from "./RemotePlayers";
 import LoadingScreen from "./LoadingScreen";
 import { GRAVITY } from "@block-shooter/shared";
 import { FOV } from "../../utils/tunablesClient";
+import SoundManager from "./SoundManager";
 
 const PrimaryScene = () => {
   const { showPhyDebug, showGizmo } = useTweakpane({
@@ -66,6 +67,8 @@ const PrimaryCanvas = () => {
       <KillFeedUI />
       {/* network manager runs silently outside the 3d canvas */}
       <NetworkManager />
+      {/* responsible for all 2d and ui sounds */}
+      <SoundManager />
       {/* main 3d viewport */}
       <Canvas shadows="variance">
         <color attach="background" args={["#404040"]} />
