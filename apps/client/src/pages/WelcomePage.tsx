@@ -1,7 +1,10 @@
 import { useNavigate } from "react-router";
 import { Monitor } from "lucide-react";
+import useSound from "use-sound";
+import { soundBank } from "../utils/assetPaths";
 
 const WelcomePage = () => {
+  const [playClick] = useSound(soundBank.click, { volume: 0.5 });
   const navigate = useNavigate();
 
   return (
@@ -15,7 +18,10 @@ const WelcomePage = () => {
         </p>
 
         <button
-          onClick={() => navigate("/play")}
+          onClick={() => {
+            navigate("/play");
+            playClick();
+          }}
           className="w-full py-5 bg-blue-600 hover:bg-blue-500 text-white text-xl font-black tracking-widest uppercase rounded-lg transition-colors shadow-lg shadow-blue-900/20 cursor-pointer"
         >
           Join Match

@@ -1,25 +1,25 @@
-import { Canvas } from "@react-three/fiber";
+import { GRAVITY } from "@block-shooter/shared";
 import {
   GizmoHelper,
   GizmoViewport,
   Loader,
   PerspectiveCamera,
 } from "@react-three/drei";
-import LocalPlayer from "./LocalPlayer";
-import Ground from "./Ground";
-import { NetworkManager } from "./NetworkManager";
-import CrosshairUI from "./CrosshairUI";
+import { Canvas } from "@react-three/fiber";
 import { Physics } from "@react-three/rapier";
 import { useTweakpane } from "../../hooks/useTweakPane";
-import PlayButtonUI from "./PlayButtonUI";
-import MatchTimerUI from "./MatchTimerUI";
-import ScoreboardUI from "./ScoreboardUI";
-import KillFeedUI from "./KillFeedUI";
-import RemotePlayers from "./RemotePlayers";
-import LoadingScreen from "./LoadingScreen";
-import { GRAVITY } from "@block-shooter/shared";
 import { FOV } from "../../utils/tunablesClient";
-import SoundManager from "./SoundManager";
+import CrosshairUI from "./CrosshairUI";
+import Ground from "./Ground";
+import KillFeedUI from "./KillFeedUI";
+import LoadingScreen from "./LoadingScreen";
+import LocalPlayer from "./LocalPlayer";
+import MatchTimerUI from "./MatchTimerUI";
+import { NetworkManager } from "./NetworkManager";
+import PlayButtonUI from "./PlayButtonUI";
+import RemotePlayers from "./RemotePlayers";
+import ScoreboardUI from "./ScoreboardUI";
+import { SoundManager } from "./SoundManager";
 
 const PrimaryScene = () => {
   const { showPhyDebug, showGizmo } = useTweakpane({
