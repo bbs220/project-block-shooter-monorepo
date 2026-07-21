@@ -20,11 +20,13 @@
 | **Score Sync** | Finished | Live team score updates linked to player kills. |
 | **World Boundaries** | Finished | Added -50y Death Zone sensor checking with reusable respawn function. |
 | **Teleport Sync** | Finished | Client-side distance threshold check to prevent rubberbanding ghosts. |
+| **TDM Score Limits** | Finished | "Mercy Rule" immediately ends match if a team hits 30 kills. |
+| **Camera Headbob** | Finished | Tuned client-side sine-wave camera bobbing for walk/sprint. |
+| **Aim Down Sights** | Finished | Hybrid client-side FOV zoom with weapon-specific movement penalties. |
 
 ## ⏳ Remaining Tasks (The Final Stretch)
 | Feature | Details |
 | :--- | :--- |
 | **Capture the Point** | Define a physical capture zone; track player presence and award periodic points. |
 | **3D Assets** | Swap placeholder geometry with actual 3D weapon models (GLTF/GLB) attached to the viewport. |
-| **Aim Down Sights (ADS)**| Right-click purely client-side state for FOV zoom and weapon centering. |
 | **Audio Architecture** | Implement hybrid system: `use-sound` for UI/2D feedback and `<PositionalAudio>` for 3D environment sounds. |

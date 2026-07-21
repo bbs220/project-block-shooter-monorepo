@@ -18,6 +18,7 @@ import KillFeedUI from "./KillFeedUI";
 import RemotePlayers from "./RemotePlayers";
 import LoadingScreen from "./LoadingScreen";
 import { GRAVITY } from "@block-shooter/shared";
+import { FOV } from "../../utils/tunablesClient";
 
 const PrimaryScene = () => {
   const { showPhyDebug, showGizmo } = useTweakpane({
@@ -29,7 +30,7 @@ const PrimaryScene = () => {
     <>
       {/* rapier physics */}
       <Physics debug={showPhyDebug} gravity={[GRAVITY.x, GRAVITY.y, GRAVITY.z]}>
-        <PerspectiveCamera makeDefault fov={60} />
+        <PerspectiveCamera makeDefault fov={FOV} />
         <GizmoHelper alignment="top-left" margin={[450, 100]}>
           <GizmoViewport labelColor="white" visible={showGizmo} />
         </GizmoHelper>

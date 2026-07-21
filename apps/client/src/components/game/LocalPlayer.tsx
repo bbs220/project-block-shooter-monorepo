@@ -11,6 +11,7 @@ import {
   PHYSICS_CONFIG,
 } from "@block-shooter/shared";
 import { calculateHeadbobOffset } from "../../utils/headbob";
+import { FOV } from "../../utils/tunablesClient";
 
 export default function LocalPlayer() {
   const localId = useGameStore((state) => state.localId);
@@ -71,6 +72,9 @@ export default function LocalPlayer() {
       if (e.button === 0 && useGameStore.getState().isLocked) {
         combatState.isShooting = true;
       }
+      if (e.button === 2 && useGameStore.getState().isLocked) {
+        combatState.isAiming = true;
+      }
     };
 
     const handleMouseUp = (e: MouseEvent) => {
@@ -78,14 +82,23 @@ export default function LocalPlayer() {
         combatState.isShooting = false;
         triggerReady.current = true;
       }
+      if (e.button === 2) {
+        combatState.isAiming = false;
+      }
     };
 
+    const handleContextMenu = (e: MouseEvent) => {
+      e.preventDefault();
+    };
+
+    window.addEventListener("contextmenu", handleContextMenu);
     window.addEventListener("mousedown", handleMouseDown);
     window.addEventListener("mouseup", handleMouseUp);
     window.addEventListener("keydown", handleKeyDown);
     window.addEventListener("keyup", handleKeyUp);
 
     return () => {
+      window.removeEventListener("contextmenu", handleContextMenu);
       window.removeEventListener("mousedown", handleMouseDown);
       window.removeEventListener("mouseup", handleMouseUp);
       window.removeEventListener("keydown", handleKeyDown);
@@ -96,7 +109,7 @@ export default function LocalPlayer() {
   useFrame((state, delta) => {
     if (!localId) return;
 
-    const camera = state.camera;
+    const camera = state.camera as THREE.PerspectiveCamera;
     const me = players[localId];
 
     // Read the physics Y from the server and add the eye-level offset (+0.5)
@@ -124,17 +137,29 @@ export default function LocalPlayer() {
       if (currentSpread.current < 0) currentSpread.current = 0;
     }
 
-    // --- READ FROM MOVEMENT STATE ---
+    const targetFov = combatState.isAiming ? FOV / 2 : FOV;
+    camera.fov = THREE.MathUtils.lerp(camera.fov, targetFov, 0.15);
+    camera.updateProjectionMatrix();
+
+    // read from movement state
     const forward =
       (movementState.forward ? 1 : 0) - (movementState.backward ? 1 : 0);
     const right = (movementState.left ? 1 : 0) - (movementState.right ? 1 : 0);
 
     if (forward !== 0 || right !== 0) {
-      // Sprint logic
+      let aimPenalty = 1.0;
+
+      if (combatState.isAiming && me) {
+        // Pistol stays at 1.0 (0% penalty - Full speed!)
+        if (me.currentWeapon === "assaultRifle") aimPenalty = 0.85; // 15% slower
+        if (me.currentWeapon === "burstRifle") aimPenalty = 0.6; // 40% slower (Tactical)
+      }
+
+      // Apply the penalty to the base speed
       const baseSpeed = movementState.sprint
         ? PHYSICS_CONFIG.SPRINT_SPEED
         : PHYSICS_CONFIG.WALK_SPEED;
-      const speed = baseSpeed * delta;
+      const speed = baseSpeed * aimPenalty * delta;
 
       camera.getWorldDirection(frontVector.current);
       frontVector.current.y = 0;
