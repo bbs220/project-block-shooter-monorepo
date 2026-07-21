@@ -18,11 +18,11 @@
 | **Match Timers** | Finished | 1Hz server loop handling 4-minute rounds and 5-second resets. |
 | **Playlist Logic** | Finished | Server-side random mode rotation (TDM/CTP) on match restart. |
 | **Score Sync** | Finished | Live team score updates linked to player kills. |
+| **World Boundaries** | Finished | Added -50y Death Zone sensor checking with reusable respawn function. |
 
 ## ⏳ Remaining Tasks (The Final Stretch)
 | Feature | Details |
 | :--- | :--- |
-| **World Boundaries** | Add invisible perimeter walls/fall-out triggers to prevent players from wandering off the finite map. |
 | **TDM Score Limits** | Add "Mercy Rule": End the match immediately if a team hits 30 kills. |
 | **Capture the Point** | Define a physical capture zone; track player presence and award periodic points. |
 | **3D Assets** | Swap placeholder geometry with actual 3D weapon models (GLTF/GLB) attached to the viewport. |

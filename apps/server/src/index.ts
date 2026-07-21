@@ -11,6 +11,7 @@ import {
   handleSwitchWeapon,
   handleReload,
   handleJump,
+  scheduleRespawn,
 } from "./events/playerEvents.js";
 import { getRandomSpawn } from "./utils/helpers.js";
 import { envValid } from "./utils/envValid.js";
@@ -20,6 +21,8 @@ const PORT = Number(envValid.PORT);
 
 // export world so playerEvents can import it
 export let world: RAPIER.World;
+
+const deathZoneY = -50.0;
 
 const io = geckos();
 
@@ -102,9 +105,32 @@ async function startServer() {
 
     const statePayload = getFullState();
 
-    players.forEach((p) => {
+    // Grab the 'id' as the second parameter in the forEach!
+    players.forEach((p, id) => {
       if (!p.isDead && p.body) {
         const pos = p.body.translation();
+
+        // --- DEATH ZONE CHECK ---
+        if (pos.y < deathZoneY) {
+          logger.warn(`🚨 PLAYER FELL OUT OF BOUNDS: ${p.name}`);
+
+          p.health = 0;
+          p.isDead = true;
+          p.deaths += 1; // Punish them with a death on the scoreboard!
+
+          // funny kill feed message so everyone knows they fell
+          io.emit("kill_feed", {
+            id: Math.random().toString(36).substring(2, 9),
+            shooter: "Environment",
+            target: p.name,
+            weapon: "Gravity",
+            shooterTeam: "none",
+            targetTeam: p.team,
+          });
+
+          // Trigger our brand new reusable function
+          scheduleRespawn(id, 3000);
+        }
 
         // We now trust the physics engine as the ultimate source of truth
         p.x = pos.x;
@@ -116,9 +142,9 @@ async function startServer() {
     debugTickCounter++;
     if (debugTickCounter % 60 === 0) {
       // very heavy logs do not run this for long time
-      // logger.info(
-      //   "📡 GECKOS PAYLOAD SNAPSHOT:\n" + JSON.stringify(statePayload, null, 2),
-      // );
+      logger.info(
+        "📡 GECKOS PAYLOAD SNAPSHOT:\n" + JSON.stringify(statePayload, null, 2),
+      );
     }
 
     // broadcast the clean serialized state

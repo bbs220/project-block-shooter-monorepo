@@ -8,30 +8,61 @@ import {
 import { matchData, players } from "../state/gameState.js";
 import { logger } from "../utils/logger.js";
 import { world } from "../index.js";
-import { PHYSICS_CONFIG, PLAYER_CONFIG, WEAPONS } from "@block-shooter/shared";
+import { WEAPONS, PHYSICS_CONFIG, PLAYER_CONFIG } from "@block-shooter/shared";
+
+// --- UTILS ---
 
 export function isPlayerOnGround(playerBody: RAPIER.RigidBody): boolean {
   const position = playerBody.translation();
 
-  // capsule center is at Y. The bottom is at Y - 1.0.
-  // start the laser slightly below the capsule (-1.01) so it doesn't hit the player.
-  const rayOrigin = { x: position.x, y: position.y - 1.01, z: position.z };
+  // Start ray just below the capsule so it doesn't hit the player's own body
+  const rayOrigin = {
+    x: position.x,
+    y: position.y - (PLAYER_CONFIG.HALF_HEIGHT + 0.01),
+    z: position.z,
+  };
   const rayDirection = { x: 0, y: -1.0, z: 0 };
   const ray = new RAPIER.Ray(rayOrigin, rayDirection);
 
-  // need to shoot the laser a tiny distance (0.1 units) downwards
-  // if it hits anything within that 0.1 gap, we are standing on the floor.
   const hit = world.castRay(ray, 0.1, true);
-
   return hit !== null;
 }
+
+export function scheduleRespawn(id: string, delayMs: number = 3000) {
+  setTimeout(() => {
+    const p = players.get(id);
+    if (p) {
+      p.health = 100;
+      p.isDead = false;
+
+      // Refill ammo on respawn
+      const weapon = WEAPONS[p.currentWeapon];
+      if (weapon) {
+        p.ammo = weapon.magSize;
+        p.magazines[p.currentWeapon] = weapon.magSize;
+      }
+
+      const newSpawn = getRandomSpawn(p.team);
+      p.x = newSpawn.x;
+      p.y = 10.0;
+      p.z = newSpawn.z;
+
+      p.body.setTranslation(
+        { x: newSpawn.x, y: 10.0, z: newSpawn.z },
+        true, // wake up physics body
+      );
+
+      logger.info(`${p.name} respawned!`);
+    }
+  }, delayMs);
+}
+
+// --- EVENT HANDLERS ---
 
 export function handleConnection(channel: ServerChannel) {
   if (!channel.id) return;
 
   const playerName = getRandomName();
-
-  // count existing players to balance the lobby
   let redCount = 0;
   let blueCount = 0;
 
@@ -40,12 +71,8 @@ export function handleConnection(channel: ServerChannel) {
     if (p.team === "blue") blueCount++;
   });
 
-  // assign to the smaller team (default to red on ties)
   const assignedTeam = redCount <= blueCount ? "red" : "blue";
-
   const spawnPoint = getRandomSpawn(assignedTeam);
-
-  // assign distinct hex colors so players can visually identify enemies
   const teamColor = assignedTeam === "red" ? "#ef4444" : "#3b82f6";
 
   const bodyDesc = RAPIER.RigidBodyDesc.dynamic()
@@ -58,7 +85,7 @@ export function handleConnection(channel: ServerChannel) {
   const colliderDesc = RAPIER.ColliderDesc.capsule(
     PLAYER_CONFIG.HALF_HEIGHT,
     PLAYER_CONFIG.RADIUS,
-  ); // Total height = 2 units
+  );
   world.createCollider(colliderDesc, body);
 
   players.set(channel.id, {
@@ -66,7 +93,7 @@ export function handleConnection(channel: ServerChannel) {
     color: teamColor,
     team: assignedTeam,
     x: spawnPoint.x,
-    y: 10.0, // Match the initial drop height
+    y: 10.0,
     z: spawnPoint.z,
     yaw: 0,
     pitch: 0,
@@ -95,7 +122,6 @@ export function handleConnection(channel: ServerChannel) {
 export function handlePlayerInput(id: string, data: any) {
   const player = players.get(id);
 
-  // block movement if dead so they can't run around as a ghost
   if (player && !player.isDead) {
     player.yaw = data.yaw ?? player.yaw;
     player.pitch = data.pitch ?? player.pitch;
@@ -106,7 +132,6 @@ export function handlePlayerInput(id: string, data: any) {
     player.z = data.z ?? player.z;
     player.y = currentPos.y; // Trust the server for Y!
 
-    // Teleport the X/Z to match client input, but preserve the physics Y
     player.body.setTranslation(
       {
         x: player.x,
@@ -123,7 +148,6 @@ export function handleJump(id: string) {
 
   if (player && !player.isDead) {
     if (isPlayerOnGround(player.body)) {
-      // Apply an upward velocity impulse
       player.body.setLinvel({ x: 0, y: PHYSICS_CONFIG.JUMP_FORCE, z: 0 }, true);
     }
   }
@@ -134,7 +158,6 @@ export function handleSwitchWeapon(
   weaponId: "assaultRifle" | "pistol" | "burstRifle",
 ) {
   const player = players.get(id);
-
   if (!player || player.isDead) return;
 
   if (player.isReloading) {
@@ -190,20 +213,15 @@ export function handleShoot(id: string, data: any, io: GeckosServer) {
   shooter.ammo = shooter.magazines[shooter.currentWeapon];
   shooter.lastShotTime = now;
 
-  // origin: exactly at the shooter's camera level (center 1.0 + 0.5 = 1.5)
+  // origin: exactly at the shooter's camera level
   const origin = {
     x: shooter.x,
     y: shooter.y + PLAYER_CONFIG.EYE_LEVEL_OFFSET,
     z: shooter.z,
   };
-
-  // direction: use the exact 3d vector sent by the client
   const direction = { x: data.dirX, y: data.dirY, z: data.dirZ };
-
-  // fire the true physics raycast
   const ray = new RAPIER.Ray(origin, direction);
 
-  // castray ignores the shooter's own body so they don't shoot themselves
   const hit = world.castRay(
     ray,
     range,
@@ -215,17 +233,14 @@ export function handleShoot(id: string, data: any, io: GeckosServer) {
   );
 
   if (hit && hit.collider) {
-    // extract the id of the hit player
     const hitId = hit.collider.parent()?.userData?.id;
 
     if (hitId && hitId !== id) {
       const hitPlayer = players.get(hitId);
 
       if (hitPlayer && !hitPlayer.isDead) {
-        // prevent friendly fire (block damage if on the same team)
-        if (shooter.team === hitPlayer.team) {
-          return;
-        }
+        // prevent friendly fire
+        if (shooter.team === hitPlayer.team) return;
 
         hitPlayer.health -= weapon.damage;
 
@@ -238,7 +253,6 @@ export function handleShoot(id: string, data: any, io: GeckosServer) {
           shooter.kills += 1;
           hitPlayer.deaths += 1;
 
-          // update tdm match specific scores
           if (matchData.mode === "tdm") {
             matchData.teamScores[shooter.team] += 1;
           }
@@ -248,7 +262,7 @@ export function handleShoot(id: string, data: any, io: GeckosServer) {
           );
 
           io.emit("kill_feed", {
-            id: Math.random().toString(36).substring(2, 9), // unique key
+            id: Math.random().toString(36).substring(2, 9),
             shooter: shooter.name,
             target: hitPlayer.name,
             weapon: weapon.name,
@@ -256,29 +270,8 @@ export function handleShoot(id: string, data: any, io: GeckosServer) {
             targetTeam: hitPlayer.team,
           });
 
-          // respawn logic
-          setTimeout(() => {
-            if (players.has(hitId)) {
-              const p = players.get(hitId)!;
-              p.health = 100;
-              p.isDead = false;
-              const newSpawn = getRandomSpawn(p.team);
-              p.x = newSpawn.x;
-              p.z = newSpawn.z;
-
-              // use setTranslation for dynamic bodies and drop from sky!
-              p.body.setTranslation(
-                {
-                  x: newSpawn.x,
-                  y: 10.0,
-                  z: newSpawn.z,
-                },
-                true,
-              );
-
-              logger.info(`${p.name} respawned!`);
-            }
-          }, 3000);
+          // CLEAN RESPawn Logic
+          scheduleRespawn(hitId, 3000);
         }
       }
     }
@@ -293,8 +286,6 @@ export function handleDisconnect(id: string, reason: string) {
   const player = players.get(id);
   if (player) {
     logger.info(`user disconnected: ${player.name} (${reason})`);
-
-    // clean up the physics body so ghost colliders don't block bullets
     if (player.body) {
       world.removeRigidBody(player.body);
     }
