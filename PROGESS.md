@@ -6,7 +6,7 @@
 | **Networking** | Finished | Authoritative Node.js server using Geckos.io. |
 | **Physics & Tick** | Finished | 60Hz server heartbeat using Rapier3D. |
 | **Movement** | Finished | Client-side prediction with true FPS camera math. |
-| **Advanced Movement**| Finished | Server-side gravity, jumping, sprint tracking, and client headbob. |
+| **Advanced Movement**| Finished | Server-side gravity, jumping, and sprint tracking. |
 | **Combat Loop** | Finished | Authoritative raycasting, team balancing, and kill tracking. |
 | **Weapon System** | Finished | Stats tree (Assault Rifle, Pistol, Burst Rifle) with icon support. |
 | **Client UI** | Finished | Crosshair, HUD, Loading Screen, Kill Feed, Scoreboard, and Top-Bar. |
@@ -28,4 +28,5 @@
 | **Capture the Point** | Define a physical capture zone; track player presence and award periodic points. |
 | **3D Assets** | Swap placeholder geometry with actual 3D weapon models (GLTF/GLB) attached to the viewport. |
 | **Aim Down Sights (ADS)**| Right-click purely client-side state for FOV zoom and weapon centering. |
+| **Camera Headbob** | Tune and hardcode the client-side sine-wave camera bobbing for walk/sprint. |
 | **Audio Architecture** | Implement hybrid system: `use-sound` for UI/2D feedback and `<PositionalAudio>` for 3D environment sounds. |
