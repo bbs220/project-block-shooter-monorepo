@@ -177,6 +177,8 @@ async function startServer() {
     // tick the clock down if we are actively playing
     if (matchData.matchState === "playing") {
       matchData.timeRemaining -= 1;
+      // clamp
+      if (matchData.timeRemaining < 0) matchData.timeRemaining = 0;
 
       if (matchData.timeRemaining <= 0) {
         matchData.matchState = "ended";
