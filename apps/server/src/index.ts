@@ -112,7 +112,7 @@ async function startServer() {
 
         // --- DEATH ZONE CHECK ---
         if (pos.y < deathZoneY) {
-          logger.warn(`🚨 PLAYER FELL OUT OF BOUNDS: ${p.name}`);
+          logger.warn(`player fell out of bounds: ${p.name}, respawing...`);
 
           p.health = 0;
           p.isDead = true;
@@ -143,7 +143,7 @@ async function startServer() {
     if (debugTickCounter % 60 === 0) {
       // very heavy logs do not run this for long time
       // logger.info(
-      //   "📡 GECKOS PAYLOAD SNAPSHOT:\n" + JSON.stringify(statePayload, null, 2),
+      //   "GECKOS PAYLOAD SNAPSHOT:\n" + JSON.stringify(statePayload, null, 2),
       // );
     }
 
