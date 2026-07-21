@@ -1,17 +1,13 @@
 import { InfinityIcon } from "lucide-react";
 import { useGameStore } from "../stores/useGameStore";
 import { WEAPONS } from "@block-shooter/shared";
-import {
-  iconAssaultRifle,
-  iconBurstRifle,
-  iconPistol,
-} from "../utils/assetPaths";
+import { iconBank } from "../utils/assetPaths";
 
 // helper to grab the right image based on the weapon key
 const getWeaponIcon = (weaponKey: string) => {
-  if (weaponKey === "burstRifle") return iconBurstRifle;
-  if (weaponKey === "pistol") return iconPistol;
-  return iconAssaultRifle;
+  if (weaponKey === "burstRifle") return iconBank.burstRifle;
+  if (weaponKey === "pistol") return iconBank.pistol;
+  return iconBank.assaultRifle;
 };
 
 const NavBar = () => {

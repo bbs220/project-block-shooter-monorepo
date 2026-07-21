@@ -2,17 +2,13 @@ import { useEffect, useRef } from "react";
 import { useGameStore } from "../../stores/useGameStore";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
-import {
-  iconAssaultRifle,
-  iconBurstRifle,
-  iconPistol,
-} from "../../utils/assetPaths";
+import { iconBank } from "../../utils/assetPaths";
 
 const getKillFeedIcon = (weaponName: string) => {
   const name = weaponName.toLowerCase();
-  if (name.includes("burst")) return iconBurstRifle;
-  if (name.includes("pistol")) return iconPistol;
-  return iconAssaultRifle;
+  if (name.includes("burst")) return iconBank.burstRifle;
+  if (name.includes("pistol")) return iconBank.pistol;
+  return iconBank.assaultRifle;
 };
 
 // component for the Overwatch-style snap
