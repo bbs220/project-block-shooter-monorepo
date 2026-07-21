@@ -142,9 +142,9 @@ async function startServer() {
     debugTickCounter++;
     if (debugTickCounter % 60 === 0) {
       // very heavy logs do not run this for long time
-      logger.info(
-        "📡 GECKOS PAYLOAD SNAPSHOT:\n" + JSON.stringify(statePayload, null, 2),
-      );
+      // logger.info(
+      //   "📡 GECKOS PAYLOAD SNAPSHOT:\n" + JSON.stringify(statePayload, null, 2),
+      // );
     }
 
     // broadcast the clean serialized state

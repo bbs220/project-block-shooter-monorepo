@@ -104,7 +104,14 @@ export default function LocalPlayer() {
       : 1.0 + PLAYER_CONFIG.EYE_LEVEL_OFFSET;
 
     if (me) {
-      if (!initialized.current || me.isDead) {
+      // calculate the 2D distance between your local camera and the server's true position
+      const dist = Math.sqrt(
+        Math.pow(me.x - camera.position.x, 2) +
+          Math.pow(me.z - camera.position.z, 2),
+      );
+
+      // snap the camera if: initializing, dead, OR violently teleported (> 10 units away)
+      if (!initialized.current || me.isDead || dist > 10.0) {
         camera.position.set(me.x, currentEyeLevel, me.z);
         initialized.current = true;
       }
