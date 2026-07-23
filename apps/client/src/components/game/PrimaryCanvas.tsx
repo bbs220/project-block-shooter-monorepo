@@ -1,5 +1,6 @@
 import { GRAVITY } from "@block-shooter/shared";
 import {
+  Environment,
   GizmoHelper,
   GizmoViewport,
   Loader,
@@ -20,6 +21,8 @@ import PlayButtonUI from "./PlayButtonUI";
 import RemotePlayers from "./RemotePlayers";
 import ScoreboardUI from "./ScoreboardUI";
 import { SoundManager } from "./SoundManager";
+import WeaponViewmodel from "./WeaponViewModel";
+import { hdriBank } from "../../utils/assetPaths";
 
 const PrimaryScene = () => {
   const { showPhyDebug, showGizmo } = useTweakpane({
@@ -31,12 +34,19 @@ const PrimaryScene = () => {
     <>
       {/* rapier physics */}
       <Physics debug={showPhyDebug} gravity={[GRAVITY.x, GRAVITY.y, GRAVITY.z]}>
-        <PerspectiveCamera makeDefault fov={FOV} />
+        <PerspectiveCamera makeDefault fov={FOV}>
+          <WeaponViewmodel />
+        </PerspectiveCamera>
         <GizmoHelper alignment="top-left" margin={[450, 100]}>
           <GizmoViewport labelColor="white" visible={showGizmo} />
         </GizmoHelper>
         <ambientLight color="#ffffff" intensity={0.8} />
         <directionalLight position={[0, 5, 0]} intensity={1} castShadow />
+        <Environment
+          files={hdriBank.pureSky1}
+          background
+          backgroundBlurriness={0.8}
+        />
         <>
           {/* captures mouse and moves camera for local player */}
           <LocalPlayer />

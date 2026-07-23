@@ -137,7 +137,7 @@ export default function LocalPlayer() {
       if (currentSpread.current < 0) currentSpread.current = 0;
     }
 
-    const targetFov = combatState.isAiming ? FOV / 2 : FOV;
+    const targetFov = combatState.isAiming ? FOV / 1.5 : FOV;
     camera.fov = THREE.MathUtils.lerp(camera.fov, targetFov, 0.15);
     camera.updateProjectionMatrix();
 
