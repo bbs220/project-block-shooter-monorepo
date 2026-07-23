@@ -39,15 +39,14 @@ const PlayerInfoUI = () => {
             {Array.from({ length: healthSegments }).map((_, i) => {
               const isActive = i * (maxHealth / healthSegments) < displayHealth;
               const isLowHealth = displayHealth <= 30;
+
+              if (!isActive) return null;
+
               return (
                 <div
                   key={i}
                   className={`h-5 w-6 border-b-4 border-black/40 transition-colors duration-200 ${
-                    isActive
-                      ? isLowHealth
-                        ? "bg-red-500"
-                        : "bg-white"
-                      : "bg-black/40"
+                    isLowHealth ? "bg-red-500" : "bg-white"
                   }`}
                 />
               );
@@ -72,49 +71,60 @@ const PlayerInfoUI = () => {
 
             return (
               <div
-                key={wpn.id}
+                key={index}
                 className={`flex items-center justify-between px-4 bg-black/40 border-r-4 transition-all duration-300 ease-out w-64 ${
                   isActive
                     ? "h-20 border-white opacity-100"
                     : "h-12 border-transparent opacity-60"
                 }`}
               >
-                <div className="flex flex-col items-start justify-center h-full">
-                  <span
-                    className={`uppercase font-black tracking-wider ${
-                      isActive
-                        ? "text-sm text-gray-300"
-                        : "text-xs text-gray-400"
-                    }`}
-                  >
-                    <span className="text-gray-500 mr-1">[{wpn.keybind}]</span>
-                    {WEAPONS[wpn.id].name}
-                  </span>
-
-                  {isActive && (
-                    <div
-                      className={`flex items-baseline gap-1 text-white transition-opacity duration-200 ${
-                        isReloadingActiveWeapon
-                          ? "opacity-30 animate-pulse"
-                          : "opacity-100"
+                <div
+                  key={wpn.id}
+                  className="flex items-center justify-between w-full h-full"
+                >
+                  <div className="flex flex-col items-start justify-center h-full">
+                    <span
+                      className={`font-mono uppercase font-black tracking-wider ${
+                        isActive
+                          ? "text-sm text-gray-300"
+                          : "text-xs text-gray-400"
                       }`}
                     >
-                      <span className="text-3xl font-black tabular-nums tracking-tighter leading-none mt-1">
-                        {String(me.ammo).padStart(2, "0")}
+                      <span className="text-gray-500 mr-2">
+                        [{wpn.keybind}]
                       </span>
-                      <span className="text-sm font-bold text-gray-400 tabular-nums">
-                        / {String(WEAPONS[wpn.id].magSize).padStart(2, "0")}
-                      </span>
-                    </div>
-                  )}
+                      {WEAPONS[wpn.id as keyof typeof WEAPONS].name}
+                    </span>
+
+                    {isActive && (
+                      <div
+                        className={`flex items-baseline gap-1 text-white transition-opacity duration-200 ${
+                          isReloadingActiveWeapon
+                            ? "opacity-30 animate-pulse"
+                            : "opacity-100"
+                        }`}
+                      >
+                        <span className="text-3xl font-black tabular-nums tracking-tighter leading-none mt-1">
+                          {String(me.ammo).padStart(2, "0")}
+                        </span>
+                        <span className="text-sm font-bold text-gray-400 tabular-nums">
+                          /{" "}
+                          {String(
+                            WEAPONS[wpn.id as keyof typeof WEAPONS].magSize,
+                          ).padStart(2, "0")}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+
+                  <img
+                    src={getWeaponIcon(wpn.id)}
+                    alt={wpn.id}
+                    className={`object-contain transition-all duration-300 ${
+                      isActive ? "h-10" : "h-6 opacity-80"
+                    }`}
+                  />
                 </div>
-                <img
-                  src={getWeaponIcon(wpn.id)}
-                  alt={wpn.id}
-                  className={`object-contain transition-all duration-300 ${
-                    isActive ? "h-10" : "h-6 opacity-80"
-                  }`}
-                />
               </div>
             );
           })}
