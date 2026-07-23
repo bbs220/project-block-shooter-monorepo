@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { useGameStore } from "../../stores/useGameStore";
+import { useGameStore, type KillEvent } from "../../stores/useGameStore";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { iconBank } from "../../utils/assetPaths";
@@ -12,7 +12,7 @@ const getKillFeedIcon = (weaponName: string) => {
 };
 
 // component for the Overwatch-style snap
-const KillFeedItem = ({ kill }: { kill: any }) => {
+const KillFeedItem = ({ kill }: { kill: KillEvent }) => {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useGSAP(
