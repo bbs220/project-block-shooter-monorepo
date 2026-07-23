@@ -14,9 +14,9 @@ export const soundBank = {
 };
 
 export const modelsBank: Record<string, string> = {
-  assaultRifle: "/models/blaster-a.glb",
-  burstRifle: "/models/blaster-b.glb",
-  pistol: "/models/blaster-c.glb",
+  assaultRifle: "/models/assault_rifle_00.glb",
+  burstRifle: "/models/burst_rifle_00.glb",
+  pistol: "/models/pistol_00.glb",
 };
 
 export const hdriBank = {

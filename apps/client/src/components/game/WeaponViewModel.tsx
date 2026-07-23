@@ -21,13 +21,13 @@ export default function WeaponViewModel() {
 
   // Controls for fine-tuning resting transform
   const { posX, posY, posZ, rotX, rotY, rotZ, scale } = useTweakpane({
-    posX: 0.3,
-    posY: -0.1,
-    posZ: -0.5,
+    posX: 0.29,
+    posY: -0.09,
+    posZ: -0.52,
     rotX: 0,
     rotY: 0,
     rotZ: 0,
-    scale: 0.4,
+    scale: 0.16,
   });
 
   // 1. Vertical offset tracker for the equip animation (starts dropped down)
