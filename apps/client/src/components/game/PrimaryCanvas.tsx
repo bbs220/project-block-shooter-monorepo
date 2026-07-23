@@ -5,6 +5,7 @@ import {
   GizmoViewport,
   Loader,
   PerspectiveCamera,
+  Stats,
 } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
 import { Physics } from "@react-three/rapier";
@@ -42,8 +43,7 @@ const PrimaryScene = () => {
         <GizmoHelper alignment="top-left" margin={[450, 100]}>
           <GizmoViewport labelColor="white" visible={showGizmo} />
         </GizmoHelper>
-        <ambientLight color="#ffffff" intensity={0.8} />
-        <directionalLight position={[0, 5, 0]} intensity={1} castShadow />
+        <Stats showPanel={0} />
         <Environment
           files={hdriBank.pureSky1}
           background
