@@ -29,8 +29,8 @@ export default function WeaponViewModel() {
 
       // ads
       adsX: 0.0,
-      adsY: -0.6,
-      adsZ: -0.4,
+      adsY: -0.06,
+      adsZ: -0.31,
 
       rotX: 0,
       rotY: 0,
