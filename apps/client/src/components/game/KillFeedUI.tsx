@@ -34,10 +34,10 @@ const KillFeedItem = ({ kill }: { kill: any }) => {
       tl.to(
         containerRef.current,
         {
-          x: 50, // Slide back out to the right
+          x: 50, // slide back out to the right
           opacity: 0,
           duration: 0.3,
-          ease: "power2.in", // Snaps out cleanly
+          ease: "power2.in", // snaps out cleanly
         },
         "+=4.5",
       );
@@ -48,7 +48,7 @@ const KillFeedItem = ({ kill }: { kill: any }) => {
   return (
     <div
       ref={containerRef}
-      className="bg-black/60 backdrop-blur-md px-4 py-2 rounded-lg border border-white/10 shadow-lg text-sm font-bold flex items-center gap-2"
+      className="bg-black/60 px-4 py-2 rounded-lg border border-white/10 shadow-lg text-sm font-bold flex items-center gap-2"
     >
       <span
         className={
@@ -88,7 +88,7 @@ const KillFeedUI = () => {
 
   return (
     // gap-2 back so GSAP just animates the entry, not the margins
-    <div className="absolute bottom-4 right-4 flex flex-col gap-2 z-40 pointer-events-none items-end">
+    <div className="absolute bottom-1/2 right-4 flex flex-col gap-2 z-40 pointer-events-none items-end">
       {killFeed.map((kill) => (
         <KillFeedItem key={kill.id} kill={kill} />
       ))}
