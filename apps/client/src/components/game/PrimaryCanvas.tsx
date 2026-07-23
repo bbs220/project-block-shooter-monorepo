@@ -23,7 +23,8 @@ import ScoreboardUI from "./ScoreboardUI";
 import { SoundManager } from "./SoundManager";
 import WeaponViewmodel from "./WeaponViewModel";
 import { hdriBank } from "../../utils/assetPaths";
-import AdsVignette from "./ADSVigette";
+import AdsVignette from "./AdsVigette";
+import PlayerInfoUI from "./PlayerInfoUI";
 
 const PrimaryScene = () => {
   const { showPhyDebug, showGizmo } = useTweakpane({
@@ -76,6 +77,8 @@ const PrimaryCanvas = () => {
       <ScoreboardUI />
       {/* tiny kill feed of the match in a corner */}
       <KillFeedUI />
+      {/* stuff like health and ammo */}
+      <PlayerInfoUI />
       {/* network manager runs silently outside the 3d canvas */}
       <NetworkManager />
       {/* responsible for all 2d and ui sounds */}
