@@ -23,6 +23,7 @@ import ScoreboardUI from "./ScoreboardUI";
 import { SoundManager } from "./SoundManager";
 import WeaponViewmodel from "./WeaponViewModel";
 import { hdriBank } from "../../utils/assetPaths";
+import AdsVignette from "./ADSVigette";
 
 const PrimaryScene = () => {
   const { showPhyDebug, showGizmo } = useTweakpane({
@@ -81,8 +82,8 @@ const PrimaryCanvas = () => {
       <SoundManager />
       {/* main 3d viewport */}
       <Canvas shadows="variance">
-        <color attach="background" args={["#404040"]} />
         <PrimaryScene />
+        <AdsVignette />
       </Canvas>
       {/* loading screen */}
       <Loader
