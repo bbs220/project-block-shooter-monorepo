@@ -8,7 +8,9 @@ import { modelsBank } from "../../utils/assetPaths";
 import { combatState } from "@block-shooter/shared";
 import {
   useEquipAnimation,
+  useIdleSway,
   useMouseSway,
+  useRecoil,
   useStrafeSway,
 } from "../../hooks/useWeaponAnimations";
 
@@ -41,36 +43,48 @@ export default function WeaponViewModel() {
   const getEquipOffset = useEquipAnimation(currentWeapon);
   const getStrafeRoll = useStrafeSway(combatState.isAiming);
   const getMouseSway = useMouseSway(combatState.isAiming);
+  const getIdleSway = useIdleSway(combatState.isAiming);
+  const getRecoil = useRecoil();
 
-  useFrame(() => {
+  useFrame((_state, delta) => {
     if (!groupRef.current) return;
 
-    // calculate Targets
+    // calculate base targets
     const targetX = combatState.isAiming ? adsX : posX;
     const targetY = combatState.isAiming ? adsY : posY;
     const targetZ = combatState.isAiming ? adsZ : posZ;
 
-    // fetch modular animation offsets
+    // fetch modular offsets
     const equipOffset = getEquipOffset();
     const strafeRoll = getStrafeRoll();
     const mouseSway = getMouseSway();
 
-    // add mouseSway to the X position so the gun shifts slightly left/right on screen
+    const idleSway = getIdleSway(delta);
+    const recoil = getRecoil();
+
+    // apply final blended transforms
+
     groupRef.current.position.set(
       MathUtils.lerp(
         groupRef.current.position.x,
-        targetX + mouseSway * 0.5,
+        targetX + mouseSway * 0.5 + idleSway.x,
         0.15,
       ),
-      MathUtils.lerp(groupRef.current.position.y, targetY + equipOffset, 0.15),
-      MathUtils.lerp(groupRef.current.position.z, targetZ, 0.15),
+      MathUtils.lerp(
+        groupRef.current.position.y,
+        targetY + equipOffset + idleSway.y,
+        0.15,
+      ),
+
+      // add recoil.z so the gun kicks BACK towards the camera when fired
+      MathUtils.lerp(groupRef.current.position.z, targetZ + recoil.z, 0.15),
     );
 
-    // apply mouseSway to the Y rotation (yaw) and blend it with strafeRoll on the Z rotation (roll)
     groupRef.current.rotation.set(
-      rotX,
-      rotY - mouseSway, // yaw lag: gun points slightly away from the turn direction
-      rotZ + strafeRoll + mouseSway * 0.5, // roll tilt: blend A/D tilt with mouse tilt
+      // subtract recoil.rotX so the muzzle climbs UP when fired
+      rotX - recoil.rotX,
+      rotY - mouseSway,
+      rotZ + strafeRoll + mouseSway * 0.5,
     );
   });
 
