@@ -9,9 +9,15 @@ import {
   combatState,
   PLAYER_CONFIG,
   PHYSICS_CONFIG,
+  MAPS, // <-- Imported MAPS here
 } from "@block-shooter/shared";
 import { calculateHeadbobOffset } from "../../utils/headbob";
 import { FOV } from "../../utils/tunablesClient";
+
+// pre-calculate bounds same as server
+const currentMap = MAPS.arena_01;
+const maxBoundX = currentMap.floor.width / 2 - 1.5;
+const maxBoundZ = currentMap.floor.depth / 2 - 1.5;
 
 export default function LocalPlayer() {
   const localId = useGameStore((state) => state.localId);
@@ -176,8 +182,17 @@ export default function LocalPlayer() {
         .normalize()
         .multiplyScalar(speed);
 
-      camera.position.x += direction.current.x;
-      camera.position.z += direction.current.z;
+      // calculate where the camera WANTS to go
+      let nextX = camera.position.x + direction.current.x;
+      let nextZ = camera.position.z + direction.current.z;
+
+      // force the camera to stop exactly at the wall's inner edge
+      nextX = THREE.MathUtils.clamp(nextX, -maxBoundX, maxBoundX);
+      nextZ = THREE.MathUtils.clamp(nextZ, -maxBoundZ, maxBoundZ);
+
+      // apply the clamped position
+      camera.position.x = nextX;
+      camera.position.z = nextZ;
 
       currentSpread.current = Math.min(currentSpread.current + delta * 30, 15);
 

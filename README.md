@@ -34,6 +34,6 @@ A low-poly, 8-player multiplayer arena FPS built with React Three Fiber and a se
 
 ## 🚀 Getting Started
 1. **Install dependencies**: 
-   `npm install` (in both client and server directories)
+   `npm install` installs deps for both server and client.
 2. **Run the project**: 
-   `npm run both` in server directory (uses concurrently to start the server and client simultaneously)
+   `npm run dev` runs both server and client.

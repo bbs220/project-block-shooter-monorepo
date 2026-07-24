@@ -23,6 +23,12 @@ const PORT = Number(envValid.PORT);
 export let world: RAPIER.World;
 
 const deathZoneY = -50.0;
+const currentMap = MAPS["arena_01"];
+
+// calculate the maximum safe X and Z bounds OUTSIDE the loop to save CPU.
+// subtract 1.5 meters from the edge to account for the wall thickness + player radius.
+const maxBoundX = currentMap.floor.width / 2 - 1.5;
+const maxBoundZ = currentMap.floor.depth / 2 - 1.5;
 
 const io = geckos();
 
@@ -34,28 +40,30 @@ async function startServer() {
   world = new RAPIER.World(GRAVITY);
   logger.info("physics world initialized");
 
-  const currentMap = MAPS["arena_01"];
-  const thickness = currentMap.floor.thickness;
+  // create a single fixed RigidBody for the whole arena
+  const arenaBodyDesc = RAPIER.RigidBodyDesc.fixed();
+  const arenaBody = world.createRigidBody(arenaBodyDesc);
 
-  // static rigid body for the floor.
-  // shift it down by half the thickness (-0.5) so the top surface sits perfectly at Y = 0.
-  const groundBodyDesc = RAPIER.RigidBodyDesc.fixed().setTranslation(
-    0,
-    -thickness / 2,
-    0,
-  );
-  const groundBody = world.createRigidBody(groundBodyDesc);
-
-  // cuboid collider.
-  // rapier uses half-extents. A 100x1x100 floor needs half-extents of 50x0.5x50.
-  const groundColliderDesc = RAPIER.ColliderDesc.cuboid(
+  // floor Collider
+  const floorDesc = RAPIER.ColliderDesc.cuboid(
     currentMap.floor.width / 2,
-    thickness / 2,
+    currentMap.floor.thickness / 2,
     currentMap.floor.depth / 2,
-  );
-  world.createCollider(groundColliderDesc, groundBody);
+  ).setTranslation(currentMap.floor.x, currentMap.floor.y, currentMap.floor.z);
+  world.createCollider(floorDesc, arenaBody);
 
-  logger.info(`Loaded Map: ${currentMap.name}`);
+  // dynamic wall colliders
+  currentMap.walls.forEach((wall) => {
+    const wallDesc = RAPIER.ColliderDesc.cuboid(
+      wall.width / 2,
+      wall.height / 2,
+      wall.depth / 2,
+    ).setTranslation(wall.x, wall.y, wall.z);
+
+    world.createCollider(wallDesc, arenaBody);
+  });
+
+  logger.info(`Loaded Physical Map Colliders: ${currentMap.name}`);
 
   // now safe to listen for connections
   io.listen(PORT);
@@ -103,22 +111,19 @@ async function startServer() {
     // step the physics simulation forward
     world.step();
 
-    const statePayload = getFullState();
-
-    // Grab the 'id' as the second parameter in the forEach!
+    // the 'id' as the second parameter in the forEach
     players.forEach((p, id) => {
       if (!p.isDead && p.body) {
         const pos = p.body.translation();
 
-        // --- DEATH ZONE CHECK ---
+        // death zone check aka falling below map
         if (pos.y < deathZoneY) {
           logger.warn(`player fell out of bounds: ${p.name}, respawing...`);
 
           p.health = 0;
           p.isDead = true;
-          p.deaths += 1; // Punish them with a death on the scoreboard!
+          p.deaths += 1;
 
-          // funny kill feed message so everyone knows they fell
           io.emit("kill_feed", {
             id: Math.random().toString(36).substring(2, 9),
             shooter: "Environment",
@@ -128,11 +133,42 @@ async function startServer() {
             targetTeam: p.team,
           });
 
-          // Trigger our brand new reusable function
           scheduleRespawn(id, 3000);
+        } else {
+          // hard boundary check aka anti tunneling / map escapes
+          let isOutOfBounds = false;
+          let safeX = pos.x;
+          let safeZ = pos.z;
+
+          if (pos.x > maxBoundX) {
+            safeX = maxBoundX;
+            isOutOfBounds = true;
+          } else if (pos.x < -maxBoundX) {
+            safeX = -maxBoundX;
+            isOutOfBounds = true;
+          }
+
+          if (pos.z > maxBoundZ) {
+            safeZ = maxBoundZ;
+            isOutOfBounds = true;
+          } else if (pos.z < -maxBoundZ) {
+            safeZ = -maxBoundZ;
+            isOutOfBounds = true;
+          }
+
+          // if they broke the limits, rubber-band them back inside and kill their velocity
+          if (isOutOfBounds) {
+            p.body.setTranslation({ x: safeX, y: pos.y, z: safeZ }, true);
+            p.body.setLinvel({ x: 0, y: 0, z: 0 }, true);
+            logger.warn(`Player ${p.name} clamped inside arena bounds.`);
+
+            // overwrite our local pos variable for the rest of the tick
+            pos.x = safeX;
+            pos.z = safeZ;
+          }
         }
 
-        // We now trust the physics engine as the ultimate source of truth
+        // now trust the physics engine as the ultimate source of truth
         p.x = pos.x;
         p.y = pos.y;
         p.z = pos.z;
@@ -143,7 +179,7 @@ async function startServer() {
     if (debugTickCounter % 60 === 0) {
       // very heavy logs do not run this for long time
       // logger.info(
-      //   "GECKOS PAYLOAD SNAPSHOT:\n" + JSON.stringify(statePayload, null, 2),
+      //   "GECKOS PAYLOAD SNAPSHOT:\n" + JSON.stringify(getFullState(), null, 2),
       // );
     }
 

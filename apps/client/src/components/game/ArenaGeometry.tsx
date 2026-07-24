@@ -1,5 +1,5 @@
 import { useLoader } from "@react-three/fiber";
-import { TextureLoader, RepeatWrapping } from "three";
+import { TextureLoader, RepeatWrapping, Texture } from "three";
 import { useMemo } from "react";
 import { gridTextures } from "../../utils/assetPaths";
 import { RigidBody } from "@react-three/rapier";
@@ -11,75 +11,78 @@ const ArenaGeometry = () => {
     gridTextures.dark2,
   ]);
 
-  const width = MAPS.arena_01.floor.width; // 100
-  const depth = MAPS.arena_01.floor.depth; // 100
-  const floorThick = MAPS.arena_01.floor.thickness; // 1
+  const currentMap = MAPS.arena_01;
 
-  const wallHeight = 10;
-  const wallThick = 1;
-  const halfHeight = wallHeight / 2;
+  // helper function to easily clone, wrap, and scale textures
+  const setupTexture = (tex: Texture, repeatX: number, repeatY: number) => {
+    const cloned = tex.clone();
+    cloned.wrapS = cloned.wrapT = RepeatWrapping;
+    cloned.anisotropy = 16;
+    cloned.repeat.set(repeatX, repeatY);
+    cloned.needsUpdate = true;
+    return cloned;
+  };
 
-  // floor Map
-  const floorMap = useMemo(() => {
-    const tex = greenTexture.clone();
-    tex.wrapS = tex.wrapT = RepeatWrapping;
-    tex.anisotropy = 16;
-    tex.repeat.set(width / 2, depth / 2);
-    tex.needsUpdate = true;
-    return tex;
-  }, [greenTexture, width, depth]);
+  const floorMap = useMemo(
+    () =>
+      setupTexture(
+        greenTexture,
+        currentMap.floor.width / 2,
+        currentMap.floor.depth / 2,
+      ),
+    [greenTexture, currentMap.floor.width, currentMap.floor.depth],
+  );
 
-  // north/south wall map
-  const nsWallMap = useMemo(() => {
-    const tex = darkTexture.clone();
-    tex.wrapS = tex.wrapT = RepeatWrapping;
-    tex.anisotropy = 16;
-    tex.repeat.set(width / 2, wallHeight / 2);
-    tex.needsUpdate = true;
-    return tex;
-  }, [darkTexture, width, wallHeight]);
+  const nsWallMap = useMemo(
+    () =>
+      setupTexture(
+        darkTexture,
+        currentMap.floor.width / 2,
+        currentMap.walls[0].height / 2,
+      ),
+    [darkTexture, currentMap.floor.width, currentMap.walls],
+  );
 
-  // east/west wall map
-  const ewWallMap = useMemo(() => {
-    const tex = darkTexture.clone();
-    tex.wrapS = tex.wrapT = RepeatWrapping;
-    tex.anisotropy = 16;
-    tex.repeat.set(depth / 2, wallHeight / 2);
-    tex.needsUpdate = true;
-    return tex;
-  }, [darkTexture, depth, wallHeight]);
+  const ewWallMap = useMemo(
+    () =>
+      setupTexture(
+        darkTexture,
+        currentMap.floor.depth / 2,
+        currentMap.walls[2].height / 2,
+      ),
+    [darkTexture, currentMap.floor.depth, currentMap.walls],
+  );
 
   return (
     <RigidBody type="fixed">
-      {/* floor */}
-      <mesh position={[0, -floorThick / 2, 0]} receiveShadow>
-        <boxGeometry args={[width, floorThick, depth]} />
+      <mesh
+        position={[currentMap.floor.x, currentMap.floor.y, currentMap.floor.z]}
+        receiveShadow
+      >
+        <boxGeometry
+          args={[
+            currentMap.floor.width,
+            currentMap.floor.thickness,
+            currentMap.floor.depth,
+          ]}
+        />
         <meshStandardMaterial map={floorMap} />
       </mesh>
 
-      {/* north wall */}
-      <mesh position={[0, halfHeight, -depth / 2]} receiveShadow castShadow>
-        <boxGeometry args={[width, wallHeight, wallThick]} />
-        <meshStandardMaterial map={nsWallMap} />
-      </mesh>
-
-      {/* south wall */}
-      <mesh position={[0, halfHeight, depth / 2]} receiveShadow castShadow>
-        <boxGeometry args={[width, wallHeight, wallThick]} />
-        <meshStandardMaterial map={nsWallMap} />
-      </mesh>
-
-      {/* east wall */}
-      <mesh position={[width / 2, halfHeight, 0]} receiveShadow castShadow>
-        <boxGeometry args={[wallThick, wallHeight, depth]} />
-        <meshStandardMaterial map={ewWallMap} />
-      </mesh>
-
-      {/* west wall */}
-      <mesh position={[-width / 2, halfHeight, 0]} receiveShadow castShadow>
-        <boxGeometry args={[wallThick, wallHeight, depth]} />
-        <meshStandardMaterial map={ewWallMap} />
-      </mesh>
+      {currentMap.walls.map((wall) => {
+        const isNorthSouth = wall.name === "north" || wall.name === "south";
+        return (
+          <mesh
+            key={wall.name}
+            position={[wall.x, wall.y, wall.z]}
+            receiveShadow
+            castShadow
+          >
+            <boxGeometry args={[wall.width, wall.height, wall.depth]} />
+            <meshStandardMaterial map={isNorthSouth ? nsWallMap : ewWallMap} />
+          </mesh>
+        );
+      })}
     </RigidBody>
   );
 };
