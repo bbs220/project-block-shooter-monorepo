@@ -5,7 +5,7 @@ import type { ClientChannel } from "@geckos.io/client";
 export type WeaponType = "assaultRifle" | "pistol" | "burstRifle";
 export type TeamType = "red" | "blue" | "none";
 export type MatchState = "waiting" | "playing" | "ended";
-export type GameMode = "tdm" | "ctp";
+export type GameMode = "tdm";
 
 export interface PlayerState {
   // identity

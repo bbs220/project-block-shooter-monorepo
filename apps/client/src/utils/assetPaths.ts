@@ -1,5 +1,6 @@
 export const gridTextures = {
   green2: "/images/prototypeTextures/green/green_texture2_text.png",
+  dark2: "/images/prototypeTextures/dark/dark_texture2_text.png",
 };
 
 export const iconBank = {

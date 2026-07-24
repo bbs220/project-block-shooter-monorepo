@@ -16,7 +16,7 @@
 | Feature | Status | Details |
 | :--- | :--- | :--- |
 | **Match Timers** | Finished | 1Hz server loop handling 4-minute rounds and 5-second resets. |
-| **Playlist Logic** | Finished | Server-side random mode rotation (TDM/CTP) on match restart. |
+| **Playlist Logic** | Finished | Server-side random mode rotation (TDM for now) on match restart. |
 | **Score Sync** | Finished | Live team score updates linked to player kills. |
 | **TDM Score Limits** | Finished | "Mercy Rule" immediately ends match if a team hits 30 kills. |
 | **Aim Down Sights** | Finished | Hybrid client-side FOV zoom with weapon-specific movement penalties. |

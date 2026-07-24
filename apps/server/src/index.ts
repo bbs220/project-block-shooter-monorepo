@@ -191,7 +191,7 @@ async function startServer() {
           matchData.timeRemaining = 240;
           matchData.teamScores = { red: 0, blue: 0 };
 
-          const modes = ["tdm", "ctp"];
+          const modes = ["tdm"];
           matchData.mode = modes[Math.floor(Math.random() * modes.length)];
           logger.info(
             `server selected new mode: ${matchData.mode.toUpperCase()}`,
