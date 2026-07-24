@@ -155,73 +155,33 @@ export function useRecoil() {
   return update;
 }
 
-export function useReloadAnimation(isReloading: boolean) {
-  const targetPos = useRef({ x: 0, y: 0, z: 0 });
-  const targetRot = useRef({ x: 0, y: 0, z: 0 });
-
-  const currentPos = useRef({ x: 0, y: 0, z: 0 });
-  const currentRot = useRef({ x: 0, y: 0, z: 0 });
-
-  const reloadTimer = useRef(0);
+export function useMagazineReload(isReloading: boolean) {
+  const magOffset = useRef(0);
+  const reloadPhase = useRef(0);
 
   const update = (delta: number) => {
     if (isReloading) {
-      reloadTimer.current += delta;
+      reloadPhase.current += delta;
 
-      // dDrop the gun down, pull it back, and roll it heavily to the side
-      targetPos.current = { x: 0.1, y: -0.4, z: 0.2 };
-      targetRot.current = {
-        x: -0.2, // Pitch barrel up
-        y: 0.4, // Yaw left
-        z: 0.8, // Roll heavily to the right (exposing the side/bottom)
-      };
-
-      // add a mechanical "clicking" shake using high-frequency sine waves
-      // makes it feel like you are physically shoving a new magazine in off-screen
-      const fidget = Math.sin(reloadTimer.current * 20) * 0.015;
-      targetPos.current.y += fidget;
+      // pulling the mag out (0.0s to 0.4s)
+      if (reloadPhase.current < 0.4) {
+        magOffset.current = MathUtils.lerp(magOffset.current, -0.6, 0.15);
+      }
+      // mag is off-screen, snap it lower to prepare the "slam" (0.4s to 0.6s)
+      else if (reloadPhase.current < 0.6) {
+        magOffset.current = -1.2;
+      }
+      // slam the new mag in! (0.6s+)
+      else {
+        magOffset.current = MathUtils.lerp(magOffset.current, 0, 0.3); // faster lerp for a hard slam
+      }
     } else {
-      // reset when done reloading
-      reloadTimer.current = 0;
-      targetPos.current = { x: 0, y: 0, z: 0 };
-      targetRot.current = { x: 0, y: 0, z: 0 };
+      // reset
+      reloadPhase.current = 0;
+      magOffset.current = MathUtils.lerp(magOffset.current, 0, 0.2);
     }
 
-    // smoothly towards our target positions
-    // use a slightly slower lerp (0.1) so the gun feels heavy when dropping
-    currentPos.current.x = MathUtils.lerp(
-      currentPos.current.x,
-      targetPos.current.x,
-      0.1,
-    );
-    currentPos.current.y = MathUtils.lerp(
-      currentPos.current.y,
-      targetPos.current.y,
-      0.1,
-    );
-    currentPos.current.z = MathUtils.lerp(
-      currentPos.current.z,
-      targetPos.current.z,
-      0.1,
-    );
-
-    currentRot.current.x = MathUtils.lerp(
-      currentRot.current.x,
-      targetRot.current.x,
-      0.1,
-    );
-    currentRot.current.y = MathUtils.lerp(
-      currentRot.current.y,
-      targetRot.current.y,
-      0.1,
-    );
-    currentRot.current.z = MathUtils.lerp(
-      currentRot.current.z,
-      targetRot.current.z,
-      0.1,
-    );
-
-    return { pos: currentPos.current, rot: currentRot.current };
+    return magOffset.current;
   };
 
   return update;

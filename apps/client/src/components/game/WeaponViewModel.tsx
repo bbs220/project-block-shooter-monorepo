@@ -1,6 +1,6 @@
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { useGLTF } from "@react-three/drei";
-import { Group, MathUtils } from "three";
+import { Group, MathUtils, Object3D, Vector3 } from "three";
 import { useFrame } from "@react-three/fiber";
 import { useGameStore } from "../../stores/useGameStore";
 import { useTweakpane } from "../../hooks/useTweakPane";
@@ -11,7 +11,7 @@ import {
   useIdleSway,
   useMouseSway,
   useRecoil,
-  useReloadAnimation,
+  useMagazineReload,
   useStrafeSway,
 } from "../../hooks/useWeaponAnimations";
 
@@ -27,6 +27,25 @@ export default function WeaponViewModel() {
   const { scene } = useGLTF(
     modelsBank[currentWeapon] || modelsBank.assaultRifle,
   );
+
+  const magNodeRef = useRef<Object3D | null>(null);
+  const originalMagPos = useRef(new Vector3());
+
+  useEffect(() => {
+    let found: Object3D | null = null;
+
+    scene.traverse((child) => {
+      if (child.name.toLowerCase().includes("mag")) {
+        found = child;
+      }
+    });
+
+    magNodeRef.current = found;
+
+    if (found) {
+      originalMagPos.current.copy(found.position);
+    }
+  }, [scene]);
 
   const { posX, posY, posZ, adsX, adsY, adsZ, rotX, rotY, rotZ, scale } =
     useTweakpane({
@@ -47,7 +66,7 @@ export default function WeaponViewModel() {
   const getMouseSway = useMouseSway(combatState.isAiming);
   const getIdleSway = useIdleSway(combatState.isAiming);
   const getRecoil = useRecoil();
-  const getReloadAnim = useReloadAnimation(isReloading);
+  const getMagDrop = useMagazineReload(isReloading);
 
   useFrame((_state, delta) => {
     if (!groupRef.current) return;
@@ -56,34 +75,36 @@ export default function WeaponViewModel() {
     const targetY = combatState.isAiming ? adsY : posY;
     const targetZ = combatState.isAiming ? adsZ : posZ;
 
-    // fetch modular offsets
     const equipOffset = getEquipOffset();
     const strafeRoll = getStrafeRoll();
     const mouseSway = getMouseSway();
     const idleSway = getIdleSway(delta);
     const recoil = getRecoil();
-    const reloadAnim = getReloadAnim(delta);
+    const magOffset = getMagDrop(delta);
 
-    // apply final blended transforms
+    if (magNodeRef.current) {
+      magNodeRef.current.position.y = originalMagPos.current.y + magOffset;
+    }
+
+    // final blended transforms without any main-weapon reload dip
     groupRef.current.position.set(
       MathUtils.lerp(
         groupRef.current.position.x,
         targetX + mouseSway * 0.5 + idleSway.x,
         0.15,
-      ) + reloadAnim.pos.x,
+      ),
       MathUtils.lerp(
         groupRef.current.position.y,
         targetY + equipOffset + idleSway.y + recoil.y,
         0.15,
-      ) + reloadAnim.pos.y,
-      MathUtils.lerp(groupRef.current.position.z, targetZ + recoil.z, 0.15) +
-        reloadAnim.pos.z,
+      ),
+      MathUtils.lerp(groupRef.current.position.z, targetZ + recoil.z, 0.15),
     );
 
     groupRef.current.rotation.set(
-      rotX - recoil.rotX + reloadAnim.rot.x,
-      rotY - mouseSway + reloadAnim.rot.y,
-      rotZ + strafeRoll + mouseSway * 0.5 + reloadAnim.rot.z,
+      rotX - recoil.rotX,
+      rotY - mouseSway,
+      rotZ + strafeRoll + mouseSway * 0.5,
     );
   });
 
