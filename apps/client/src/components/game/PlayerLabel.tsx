@@ -2,25 +2,40 @@ import { Html } from "@react-three/drei";
 import type { PlayerState } from "../../stores/useGameStore";
 
 export default function PlayerLabel({ player }: { player: PlayerState }) {
+  const displayHealth = Math.max(0, player.health);
+  const maxHealth = 100;
+  const healthSegments = 10;
+
   return (
     <Html position={[0, 2.8, 0]} center transform sprite>
-      <div className="flex flex-col items-center pointer-events-none select-none w-24">
-        {/* player name with a drop shadow for visibility */}
-        <span className="text-white text-xs font-bold drop-shadow-md mb-1 whitespace-nowrap">
-          {player.name}
-        </span>
-
-        {/* health bar container */}
-        <div className="w-full h-2 bg-gray-900 rounded overflow-hidden border border-gray-700">
-          {/* dynamic health fill */}
-          <div
-            className="h-full bg-green-500 transition-all duration-200 ease-out"
-            style={{
-              width: `${Math.max(0, player.health)}%`,
-              // change color to red if health is low
-              backgroundColor: player.health <= 25 ? "#ef4444" : "#22c55e",
-            }}
+      <div className="flex flex-col items-center gap-1 pointer-events-none select-none">
+        <div className="flex items-center gap-1.5">
+          <span
+            className="w-2 h-2 rounded-full border border-black"
+            style={{ backgroundColor: player.color }}
           />
+          <span className="text-white text-[10px] font-black tracking-wide uppercase [text-shadow:-1px_-1px_0_#000,1px_-1px_0_#000,-1px_1px_0_#000,1px_1px_0_#000] whitespace-nowrap">
+            {player.name}
+          </span>
+        </div>
+
+        <div className="flex gap-0.5">
+          {Array.from({ length: healthSegments }).map((_, i) => {
+            const isActive = i * (maxHealth / healthSegments) < displayHealth;
+            const isLowHealth = displayHealth <= 30;
+            return (
+              <div
+                key={i}
+                className={`h-2 w-2 border-b-2 transition-colors duration-200 ${
+                  isActive
+                    ? isLowHealth
+                      ? "bg-red-500 border-black/40"
+                      : "bg-white border-black/40"
+                    : "opacity-0"
+                }`}
+              />
+            );
+          })}
         </div>
       </div>
     </Html>
