@@ -22,13 +22,12 @@
 | **Aim Down Sights** | Finished | Hybrid client-side FOV zoom with weapon-specific movement penalties. |
 | **ADS Vignette** | Finished | Pure WebGL full-screen shader quad for high-performance tactical shadows. |
 | **3D Weapon Models** | Finished | Integrated GLTF/GLB viewmodels directly attached to the FPS camera. |
-| **Viewmodel Motion** | Finished | Procedural weapon sway, walk bobbing, and smooth equip/holster animations. |
+| **Procedural Animations**| Finished | Independent hooks for Idle breathing, Strafe tilt, inverted Mouse Sway, heavy Z-axis Recoil, and isolated Magazine drop reloads. |
 | **2D Audio** | Finished | Native HTML5 audio implementation for zero-latency hit markers and kill sounds. |
 
 ## ⏳ Remaining Tasks (The Final Stretch)
 | Feature | Details |
 | :--- | :--- |
-| **Capture the Point (CTP)** | Define a physical capture zone; build server logic to track player presence, resolve team contests, and award periodic score ticks. |
-| **Shoot & Reload Polish** | Add procedural viewmodel kickback (recoil) when firing, muzzle flashes, and visual weapon reload motions. |
+| **Arena Geometry** | Upgrade the flat server/client ground plane into an enclosed "bucket" shape with 4 solid boundary walls to keep players contained. |
 | **3D Positional Audio** | Implement spatial sounds for footsteps, enemy gunshots, and environment using Three.js `<PositionalAudio>`. |
 | **Player Models** | Swap the capsule pill meshes with actual 3D character models for the remote players. |
