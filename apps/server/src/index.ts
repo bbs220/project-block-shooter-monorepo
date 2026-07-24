@@ -133,7 +133,7 @@ async function startServer() {
             targetTeam: p.team,
           });
 
-          scheduleRespawn(id, 3000);
+          scheduleRespawn(id, 1000);
         } else {
           // hard boundary check aka anti tunneling / map escapes
           let isOutOfBounds = false;

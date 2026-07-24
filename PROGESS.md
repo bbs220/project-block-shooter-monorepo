@@ -11,6 +11,7 @@
 | **Weapon System** | Finished | Stats tree (Assault Rifle, Pistol, Burst Rifle) with icon support. |
 | **Advanced Player HUD**| Finished | Competitive flat-design UI with segmented health, inline ammo, and a dynamic weapon loadout stack. |
 | **Dynamic Crosshair** | Finished | GSAP-powered recoil spread animations and fading center reload spinner. |
+| **Arena Geometry** | Finished | Enclosed "bucket" map with single-source-of-truth mathematical boundaries and server/client anti-tunneling clamps. |
 
 ## ✅ Completed: Aesthetics & Game Feel
 | Feature | Status | Details |
@@ -28,6 +29,5 @@
 ## ⏳ Remaining Tasks (The Final Stretch)
 | Feature | Details |
 | :--- | :--- |
-| **Arena Geometry** | Upgrade the flat server/client ground plane into an enclosed "bucket" shape with 4 solid boundary walls to keep players contained. |
 | **3D Positional Audio** | Implement spatial sounds for footsteps, enemy gunshots, and environment using Three.js `<PositionalAudio>`. |
 | **Player Models** | Swap the capsule pill meshes with actual 3D character models for the remote players. |
