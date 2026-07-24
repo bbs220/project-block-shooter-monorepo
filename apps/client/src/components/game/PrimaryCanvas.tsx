@@ -84,7 +84,7 @@ const PrimaryCanvas = () => {
       {/* responsible for all 2d and ui sounds */}
       <SoundManager />
       {/* main 3d viewport */}
-      <Canvas shadows="variance">
+      <Canvas shadows="variance" dpr={0.8}>
         <PrimaryScene />
         <AdsVignette />
       </Canvas>
