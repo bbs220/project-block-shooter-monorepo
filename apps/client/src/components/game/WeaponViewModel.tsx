@@ -11,6 +11,7 @@ import {
   useIdleSway,
   useMouseSway,
   useRecoil,
+  useReloadAnimation,
   useStrafeSway,
 } from "../../hooks/useWeaponAnimations";
 
@@ -21,6 +22,7 @@ export default function WeaponViewModel() {
   const players = useGameStore((state) => state.players);
   const me = localId ? players[localId] : null;
   const currentWeapon = me?.currentWeapon || "assaultRifle";
+  const isReloading = me?.isReloading || false;
 
   const { scene } = useGLTF(
     modelsBank[currentWeapon] || modelsBank.assaultRifle,
@@ -45,11 +47,11 @@ export default function WeaponViewModel() {
   const getMouseSway = useMouseSway(combatState.isAiming);
   const getIdleSway = useIdleSway(combatState.isAiming);
   const getRecoil = useRecoil();
+  const getReloadAnim = useReloadAnimation(isReloading);
 
   useFrame((_state, delta) => {
     if (!groupRef.current) return;
 
-    // calculate base targets
     const targetX = combatState.isAiming ? adsX : posX;
     const targetY = combatState.isAiming ? adsY : posY;
     const targetZ = combatState.isAiming ? adsZ : posZ;
@@ -58,41 +60,30 @@ export default function WeaponViewModel() {
     const equipOffset = getEquipOffset();
     const strafeRoll = getStrafeRoll();
     const mouseSway = getMouseSway();
-
     const idleSway = getIdleSway(delta);
     const recoil = getRecoil();
+    const reloadAnim = getReloadAnim(delta);
 
     // apply final blended transforms
-
     groupRef.current.position.set(
       MathUtils.lerp(
         groupRef.current.position.x,
         targetX + mouseSway * 0.5 + idleSway.x,
         0.15,
-      ),
-
-      // recoil.y to lift the gun slightly when firing
+      ) + reloadAnim.pos.x,
       MathUtils.lerp(
         groupRef.current.position.y,
         targetY + equipOffset + idleSway.y + recoil.y,
         0.15,
-      ),
-
-      // heavy Z-axis shoulder thump
-      MathUtils.lerp(groupRef.current.position.z, targetZ + recoil.z, 0.15),
+      ) + reloadAnim.pos.y,
+      MathUtils.lerp(groupRef.current.position.z, targetZ + recoil.z, 0.15) +
+        reloadAnim.pos.z,
     );
 
     groupRef.current.rotation.set(
-      rotX - recoil.rotX, // Muzzle climb
-      rotY - mouseSway,
-      rotZ + strafeRoll + mouseSway * 0.5,
-    );
-
-    groupRef.current.rotation.set(
-      // subtract recoil.rotX so the muzzle climbs UP when fired
-      rotX - recoil.rotX,
-      rotY - mouseSway,
-      rotZ + strafeRoll + mouseSway * 0.5,
+      rotX - recoil.rotX + reloadAnim.rot.x,
+      rotY - mouseSway + reloadAnim.rot.y,
+      rotZ + strafeRoll + mouseSway * 0.5 + reloadAnim.rot.z,
     );
   });
 
