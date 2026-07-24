@@ -12,7 +12,7 @@ import { Physics } from "@react-three/rapier";
 import { useTweakpane } from "../../hooks/useTweakPane";
 import { FOV } from "../../utils/tunablesClient";
 import CrosshairUI from "./CrosshairUI";
-import Ground from "./Ground";
+import ArenaGeometry from "./ArenaGeometry";
 import KillFeedUI from "./KillFeedUI";
 import LoadingScreen from "./LoadingScreen";
 import LocalPlayer from "./LocalPlayer";
@@ -55,7 +55,7 @@ const PrimaryScene = () => {
           {/* render all players EXCEPT the local one */}
           <RemotePlayers />
           {/* something to stand on */}
-          <Ground />
+          <ArenaGeometry />
         </>
       </Physics>
     </>

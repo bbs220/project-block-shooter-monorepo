@@ -1,5 +1,6 @@
-export const gridColorPath =
-  "/images/prototypeTextures/normal/green/green_texture2_text.png";
+export const gridTextures = {
+  green2: "/images/prototypeTextures/green/green_texture2_text.png",
+};
 
 export const iconBank = {
   assaultRifle: "/images/assault_rifle.png",
