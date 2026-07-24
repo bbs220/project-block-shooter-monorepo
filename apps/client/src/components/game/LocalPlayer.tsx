@@ -207,48 +207,46 @@ export default function LocalPlayer() {
     if (me && !me.isDead && !me.isReloading && me.ammo > 0) {
       const weapon = WEAPONS[me.currentWeapon];
 
-      if (combatState.isShooting && channel) {
-        if (now - lastShotClient.current >= weapon.fireRate) {
-          if (weapon.mode === "auto" || triggerReady.current) {
-            if (weapon.mode === "burst") {
-              burstShotsLeft.current = Math.min(3, me.ammo);
-            } else {
-              const dir = new THREE.Vector3();
-              camera.getWorldDirection(dir);
-
-              channel.emit("shoot", {
-                dirX: dir.x,
-                dirY: dir.y,
-                dirZ: dir.z,
-              });
-
-              window.dispatchEvent(new Event("weapon-fired"));
-
-              lastShotClient.current = now;
-              currentSpread.current = Math.min(currentSpread.current + 15, 40);
-            }
-
-            if (weapon.mode !== "auto") {
-              triggerReady.current = false;
-            }
-          }
-        }
-      }
-
-      if (burstShotsLeft.current > 0 && channel) {
+      // burst override: If we are in the middle of a burst, finish it
+      if (burstShotsLeft.current > 0) {
         if (now - lastShotClient.current >= weapon.fireRate) {
           const dir = new THREE.Vector3();
           camera.getWorldDirection(dir);
 
-          channel.emit("shoot", {
-            dirX: dir.x,
-            dirY: dir.y,
-            dirZ: dir.z,
-          });
+          if (channel)
+            channel.emit("shoot", { dirX: dir.x, dirY: dir.y, dirZ: dir.z });
+          window.dispatchEvent(new Event("weapon-fired"));
 
           lastShotClient.current = now;
           burstShotsLeft.current -= 1;
           currentSpread.current = Math.min(currentSpread.current + 15, 40);
+        }
+      }
+      // handle standard shooting
+      else if (combatState.isShooting && channel) {
+        if (now - lastShotClient.current >= weapon.fireRate) {
+          if (weapon.mode === "auto" || triggerReady.current) {
+            // fire the first shot immediately regardless of weapon mode
+            const dir = new THREE.Vector3();
+            camera.getWorldDirection(dir);
+
+            channel.emit("shoot", { dirX: dir.x, dirY: dir.y, dirZ: dir.z });
+            window.dispatchEvent(new Event("weapon-fired"));
+
+            lastShotClient.current = now;
+            currentSpread.current = Math.min(currentSpread.current + 15, 40);
+
+            // if it's a burst weapon, queue up the remaining shots
+            if (weapon.mode === "burst") {
+              // queue (Max Shots - 1) because just fired the first one above
+              burstShotsLeft.current = Math.min(3, me.ammo) - 1;
+            }
+
+            // lock the trigger for non-auto weapons so you can't hold it down
+            if (weapon.mode !== "auto") {
+              triggerReady.current = false;
+            }
+          }
         }
       }
     }
