@@ -222,6 +222,8 @@ export default function LocalPlayer() {
                 dirZ: dir.z,
               });
 
+              window.dispatchEvent(new Event("weapon-fired"));
+
               lastShotClient.current = now;
               currentSpread.current = Math.min(currentSpread.current + 15, 40);
             }

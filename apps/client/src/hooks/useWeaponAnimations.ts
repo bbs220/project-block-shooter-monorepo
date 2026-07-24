@@ -119,15 +119,18 @@ export function useIdleSway(isAiming: boolean) {
 }
 
 export function useRecoil() {
-  const recoilZ = useRef(0); // kickback towards camera
-  const recoilRotX = useRef(0); // muzzle climb upwards
+  const recoilZ = useRef(0); // hard push back into camera
+  const recoilY = useRef(0); // slight vertical lift to prevent seesawing
+  const recoilRotX = useRef(0); // muzzle climb
 
   useEffect(() => {
-    // listen for a custom event that we will fire when clicking the mouse
     const onShoot = () => {
-      // impulse on shoot. Math.min prevents the gun from flying through your face if you spam click
-      recoilZ.current = Math.min(recoilZ.current + 0.06, 0.15);
-      recoilRotX.current = Math.min(recoilRotX.current + 0.08, 0.25);
+      // drastically increased Z-kickback for a heavy "thump"
+      recoilZ.current = Math.min(recoilZ.current + 0.15, 0.3);
+      // add a tiny bit of vertical lift
+      recoilY.current = Math.min(recoilY.current + 0.02, 0.05);
+      // keep muzzle climb moderate
+      recoilRotX.current = Math.min(recoilRotX.current + 0.06, 0.12);
     };
 
     window.addEventListener("weapon-fired", onShoot);
@@ -135,11 +138,18 @@ export function useRecoil() {
   }, []);
 
   const update = () => {
-    // smoothly spring the weapon back to 0 resting position every frame
+    // snaps back to shoulder quickly
     recoilZ.current = MathUtils.lerp(recoilZ.current, 0, 0.15);
-    recoilRotX.current = MathUtils.lerp(recoilRotX.current, 0, 0.1);
+    recoilY.current = MathUtils.lerp(recoilY.current, 0, 0.15);
 
-    return { z: recoilZ.current, rotX: recoilRotX.current };
+    // muzzle climb recovers slightly slower than the physical kick
+    recoilRotX.current = MathUtils.lerp(recoilRotX.current, 0, 0.08);
+
+    return {
+      z: recoilZ.current,
+      y: Math.max(0, recoilY.current),
+      rotX: recoilRotX.current,
+    };
   };
 
   return update;

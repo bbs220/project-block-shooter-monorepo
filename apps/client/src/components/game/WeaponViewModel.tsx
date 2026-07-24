@@ -70,14 +70,22 @@ export default function WeaponViewModel() {
         targetX + mouseSway * 0.5 + idleSway.x,
         0.15,
       ),
+
+      // recoil.y to lift the gun slightly when firing
       MathUtils.lerp(
         groupRef.current.position.y,
-        targetY + equipOffset + idleSway.y,
+        targetY + equipOffset + idleSway.y + recoil.y,
         0.15,
       ),
 
-      // add recoil.z so the gun kicks BACK towards the camera when fired
+      // heavy Z-axis shoulder thump
       MathUtils.lerp(groupRef.current.position.z, targetZ + recoil.z, 0.15),
+    );
+
+    groupRef.current.rotation.set(
+      rotX - recoil.rotX, // Muzzle climb
+      rotY - mouseSway,
+      rotZ + strafeRoll + mouseSway * 0.5,
     );
 
     groupRef.current.rotation.set(
