@@ -163,20 +163,20 @@ export function useMagazineReload(isReloading: boolean) {
     if (isReloading) {
       reloadPhase.current += delta;
 
-      // pulling the mag out (0.0s to 0.4s)
+      // pulling the mag out (Drop it to -1.2 instead of -0.6)
       if (reloadPhase.current < 0.4) {
-        magOffset.current = MathUtils.lerp(magOffset.current, -0.6, 0.15);
+        magOffset.current = MathUtils.lerp(magOffset.current, -1.4, 0.15);
       }
-      // mag is off-screen, snap it lower to prepare the "slam" (0.4s to 0.6s)
+      // mag is off-screen, snap it WAY lower (to -3.0)
       else if (reloadPhase.current < 0.6) {
-        magOffset.current = -1.2;
+        magOffset.current = -3.0;
       }
-      // slam the new mag in! (0.6s+)
+      // slam the new mag in
       else {
-        magOffset.current = MathUtils.lerp(magOffset.current, 0, 0.3); // faster lerp for a hard slam
+        magOffset.current = MathUtils.lerp(magOffset.current, 0, 0.3);
       }
     } else {
-      // reset
+      // Reset
       reloadPhase.current = 0;
       magOffset.current = MathUtils.lerp(magOffset.current, 0, 0.2);
     }
