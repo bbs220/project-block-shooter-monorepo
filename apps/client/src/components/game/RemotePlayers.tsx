@@ -36,7 +36,7 @@ const RemotePlayers = () => {
               </mesh>
               <Clone
                 object={scene}
-                scale={2}
+                scale={1}
                 position={[0, -0.8, 0]}
                 castShadow
               />
