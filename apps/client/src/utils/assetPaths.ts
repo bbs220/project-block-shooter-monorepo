@@ -19,6 +19,7 @@ export const modelsBank: Record<string, string> = {
   assaultRifle: "/models/assault_rifle_00.glb",
   burstRifle: "/models/burst_rifle_00.glb",
   pistol: "/models/pistol_00.glb",
+  robot: "/models/robot.glb",
 };
 
 export const hdriBank = {

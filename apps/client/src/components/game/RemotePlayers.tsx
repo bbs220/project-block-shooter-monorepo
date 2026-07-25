@@ -2,10 +2,14 @@ import { RigidBody } from "@react-three/rapier";
 import { useGameStore } from "../../stores/useGameStore";
 import PlayerLabel from "./PlayerLabel";
 import { PLAYER_CONFIG } from "@block-shooter/shared";
+import { Clone, useGLTF } from "@react-three/drei";
+import { modelsBank } from "../../utils/assetPaths";
 
 const RemotePlayers = () => {
   const players = useGameStore((state) => state.players);
   const localId = useGameStore((state) => state.localId);
+
+  const { scene } = useGLTF(modelsBank.robot);
 
   return (
     <>
@@ -19,7 +23,7 @@ const RemotePlayers = () => {
           >
             <group rotation={[0, pos.yaw, 0]}>
               {/* removed the Y=1 offset! Center is center! */}
-              <mesh castShadow position={[0, 0, 0]}>
+              <mesh castShadow>
                 <capsuleGeometry
                   args={[
                     PLAYER_CONFIG.RADIUS,
@@ -28,8 +32,14 @@ const RemotePlayers = () => {
                     16,
                   ]}
                 />
-                <meshStandardMaterial color={pos.color} />
+                <meshStandardMaterial color={pos.color} wireframe />
               </mesh>
+              <Clone
+                object={scene}
+                scale={2}
+                position={[0, -0.8, 0]}
+                castShadow
+              />
               <PlayerLabel player={pos} />
             </group>
           </RigidBody>
