@@ -40,7 +40,7 @@ const PrimaryScene = () => {
         <PerspectiveCamera makeDefault fov={FOV}>
           <WeaponViewmodel />
         </PerspectiveCamera>
-        <GizmoHelper alignment="top-left" margin={[450, 100]}>
+        <GizmoHelper alignment="top-left" margin={[60, 120]}>
           <GizmoViewport labelColor="white" visible={showGizmo} />
         </GizmoHelper>
         <Stats showPanel={0} />
@@ -84,7 +84,7 @@ const PrimaryCanvas = () => {
       {/* responsible for all 2d and ui sounds */}
       <SoundManager />
       {/* main 3d viewport */}
-      <Canvas shadows="variance" dpr={0.8}>
+      <Canvas shadows="variance" dpr={1}>
         <PrimaryScene />
         <AdsVignette />
       </Canvas>

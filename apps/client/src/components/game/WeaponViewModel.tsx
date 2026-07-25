@@ -3,9 +3,8 @@ import { useGLTF } from "@react-three/drei";
 import { Group, MathUtils, Object3D, Vector3 } from "three";
 import { useFrame } from "@react-three/fiber";
 import { useGameStore } from "../../stores/useGameStore";
-import { useTweakpane } from "../../hooks/useTweakPane";
 import { modelsBank } from "../../utils/assetPaths";
-import { combatState } from "@block-shooter/shared";
+import { combatState, type WeaponId } from "@block-shooter/shared";
 import {
   useEquipAnimation,
   useIdleSway,
@@ -15,13 +14,52 @@ import {
   useStrafeSway,
 } from "../../hooks/useWeaponAnimations";
 
+const WEAPON_TRANSFORMS = {
+  assaultRifle: {
+    posX: 0.29,
+    posY: -0.09,
+    posZ: -0.52,
+    adsX: 0.0,
+    adsY: -0.12,
+    adsZ: -0.4,
+    rotX: 0,
+    rotY: 0,
+    rotZ: 0,
+    scale: 0.16,
+  },
+  pistol: {
+    posX: 0.29,
+    posY: -0.09,
+    posZ: -0.52,
+    adsX: 0.0,
+    adsY: -0.12,
+    adsZ: -0.4,
+    rotX: 0,
+    rotY: 0,
+    rotZ: 0,
+    scale: 0.16,
+  },
+  burstRifle: {
+    posX: 0.29,
+    posY: -0.09,
+    posZ: -0.52,
+    adsX: 0.0,
+    adsY: -0.12,
+    adsZ: -0.4,
+    rotX: 0,
+    rotY: 0,
+    rotZ: 0,
+    scale: 0.16,
+  },
+};
+
 export default function WeaponViewModel() {
   const groupRef = useRef<Group>(null);
 
   const localId = useGameStore((state) => state.localId);
   const players = useGameStore((state) => state.players);
   const me = localId ? players[localId] : null;
-  const currentWeapon = me?.currentWeapon || "assaultRifle";
+  const currentWeapon = (me?.currentWeapon as WeaponId) || "assaultRifle";
   const isReloading = me?.isReloading || false;
 
   const { scene } = useGLTF(
@@ -47,19 +85,9 @@ export default function WeaponViewModel() {
     }
   }, [scene]);
 
+  // read transforms directly from our static config based on the current weapon
   const { posX, posY, posZ, adsX, adsY, adsZ, rotX, rotY, rotZ, scale } =
-    useTweakpane({
-      posX: 0.29,
-      posY: -0.09,
-      posZ: -0.52,
-      adsX: 0.0,
-      adsY: -0.12,
-      adsZ: -0.4,
-      rotX: 0,
-      rotY: 0,
-      rotZ: 0,
-      scale: 0.16,
-    });
+    WEAPON_TRANSFORMS[currentWeapon] || WEAPON_TRANSFORMS.assaultRifle;
 
   const getEquipOffset = useEquipAnimation(currentWeapon);
   const getStrafeRoll = useStrafeSway(combatState.isAiming);
