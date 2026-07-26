@@ -12,6 +12,7 @@
 | **Advanced Player HUD**| Finished | Competitive flat-design UI with segmented health, inline ammo, and a dynamic weapon loadout stack. |
 | **Dynamic Crosshair** | Finished | GSAP-powered recoil spread animations and fading center reload spinner. |
 | **Arena Geometry** | Finished | Enclosed "bucket" map with single-source-of-truth mathematical boundaries and server/client anti-tunneling clamps. |
+| **Build Infrastructure**| Finished | Unified monorepo hoisting, strict mode duplicate fixes, and zero-config `tsup` shared package bundling. |
 
 ## ✅ Completed: Aesthetics & Game Feel
 | Feature | Status | Details |
@@ -25,9 +26,12 @@
 | **3D Weapon Models** | Finished | Integrated GLTF/GLB viewmodels directly attached to the FPS camera. |
 | **Procedural Animations**| Finished | Independent hooks for Idle breathing, Strafe tilt, inverted Mouse Sway, heavy Z-axis Recoil, and isolated Magazine drop reloads. |
 | **2D Audio** | Finished | Native HTML5 audio implementation for zero-latency hit markers and kill sounds. |
+| **3D Player Models** | Finished | Integrated remote HoverBot models with emissive team colors and procedural hovering. |
+| **Network Transforms** | Finished | Bulletproof YXZ Euler data sync solving Blender axis mismatches, Gimbal lock, and head-spin clipping. |
 
 ## ⏳ Remaining Tasks (The Final Stretch)
 | Feature | Details |
 | :--- | :--- |
-| **3D Positional Audio** | Implement spatial sounds for footsteps, enemy gunshots, and environment using Three.js `<PositionalAudio>`. |
-| **Player Models** | Swap the capsule pill meshes with actual 3D character models for the remote players. |
+| **Remote Weapons** | Snap the 3D weapon models onto the `hand_right_pivot` of the remote HoverBots so players can see what the enemy is holding. |
+| **3D Positional Audio** | Implement spatial sounds for thrusters and enemy gunshots using Three.js `<PositionalAudio>`. |
+| **Deployment** | Split-host production deployment (Vercel/Netlify for CDN static client, Linux VPS/Fly.io for UDP-enabled Node server). |
