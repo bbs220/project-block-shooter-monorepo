@@ -14,7 +14,20 @@ import {
   useStrafeSway,
 } from "../../hooks/useWeaponAnimations";
 
-const WEAPON_TRANSFORMS = {
+type WeaponTransform = {
+  posX: number;
+  posY: number;
+  posZ: number;
+  adsX: number;
+  adsY: number;
+  adsZ: number;
+  rotX: number;
+  rotY: number;
+  rotZ: number;
+  scale: number;
+};
+
+const WEAPON_TRANSFORMS: Record<WeaponId, WeaponTransform> = {
   assaultRifle: {
     posX: 0.29,
     posY: -0.09,
@@ -81,7 +94,7 @@ export default function WeaponViewModel() {
     magNodeRef.current = found;
 
     if (found) {
-      originalMagPos.current.copy(found.position);
+      originalMagPos.current.copy((found as Object3D).position);
     }
   }, [scene]);
 
