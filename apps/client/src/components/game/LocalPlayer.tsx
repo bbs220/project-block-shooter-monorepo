@@ -14,6 +14,8 @@ import {
 import { calculateHeadbobOffset } from "../../utils/headbob";
 import { FOV } from "../../utils/tunablesClient";
 
+const euler = new THREE.Euler(0, 0, 0, "YXZ");
+
 // pre-calculate bounds same as server
 const currentMap = MAPS.arena_01;
 const maxBoundX = currentMap.floor.width / 2 - 1.5;
@@ -269,9 +271,12 @@ export default function LocalPlayer() {
     setCrosshairSpread(currentSpread.current);
 
     if (channel && now - lastEmit.current > 50) {
+      // safely extract yaw and pitch without gimbal lock
+      euler.setFromQuaternion(camera.quaternion);
+
       channel.emit("playerInput", {
-        yaw: camera.rotation.y,
-        pitch: camera.rotation.x,
+        yaw: euler.y,
+        pitch: euler.x,
         x: camera.position.x,
         z: camera.position.z,
         // no need to emit Y anymore! the server handles it.

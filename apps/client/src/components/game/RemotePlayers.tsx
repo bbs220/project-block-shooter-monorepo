@@ -23,15 +23,23 @@ const HoverBotModel = ({
   const { nodes, materials } = useGLTF(modelsBank.robot) as any;
 
   useFrame((_state, delta) => {
-    // invert pitch by making it negative
-    const targetPitch = -(pos.pitch || 0);
+    // clamp pitch to max 85 degrees to prevent neck snapping
+    const maxPitch = Math.PI / 2.2;
+    const targetPitch = THREE.MathUtils.clamp(
+      -(pos.pitch || 0),
+      -maxPitch,
+      maxPitch,
+    );
 
+    // lock Y and Z to 0 so the head never does a barrel roll
     if (headRef.current) {
-      headRef.current.rotation.x = THREE.MathUtils.lerp(
-        headRef.current.rotation.x,
+      const currentPitch = headRef.current.rotation.x;
+      const nextPitch = THREE.MathUtils.lerp(
+        currentPitch,
         targetPitch,
         delta * 15,
       );
+      headRef.current.rotation.set(nextPitch, 0, 0);
     }
 
     // hover effect
