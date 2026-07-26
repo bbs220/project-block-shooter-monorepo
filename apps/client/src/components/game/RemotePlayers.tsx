@@ -1,51 +1,285 @@
+import { useRef } from "react";
+import * as THREE from "three";
+import { useFrame } from "@react-three/fiber";
+import { useGLTF } from "@react-three/drei";
 import { RigidBody } from "@react-three/rapier";
-import { useGameStore } from "../../stores/useGameStore";
+import { useGameStore, type PlayerState } from "../../stores/useGameStore";
 import PlayerLabel from "./PlayerLabel";
-import { PLAYER_CONFIG } from "@block-shooter/shared";
-import { Clone, useGLTF } from "@react-three/drei";
 import { modelsBank } from "../../utils/assetPaths";
 
+// pure visual robot component
+const HoverBotModel = ({
+  pos,
+  mainColor,
+  glowColor,
+}: {
+  pos: PlayerState;
+  mainColor: string;
+  glowColor: string;
+}) => {
+  const headRef = useRef<THREE.Group>(null);
+  const hoverRootRef = useRef<THREE.Group>(null);
+
+  const { nodes, materials } = useGLTF(modelsBank.robot) as any;
+
+  useFrame((_state, delta) => {
+    // invert pitch by making it negative
+    const targetPitch = -(pos.pitch || 0);
+
+    if (headRef.current) {
+      headRef.current.rotation.x = THREE.MathUtils.lerp(
+        headRef.current.rotation.x,
+        targetPitch,
+        delta * 15,
+      );
+    }
+
+    // hover effect
+    if (hoverRootRef.current) {
+      hoverRootRef.current.position.y =
+        -0.8 + Math.sin(performance.now() * 0.003 + pos.x) * 0.05;
+    }
+  });
+
+  return (
+    // axis correction
+    <group ref={hoverRootRef} rotation={[0, Math.PI, 0]}>
+      <group name="origin">
+        <mesh castShadow receiveShadow geometry={nodes.body.geometry}>
+          <meshPhysicalMaterial
+            copy={materials.White_Glossy}
+            color={mainColor}
+          />
+
+          <mesh castShadow receiveShadow geometry={nodes.bottom.geometry}>
+            <meshPhysicalMaterial
+              copy={materials.White_Glossy}
+              color={mainColor}
+            />
+            <mesh
+              castShadow
+              receiveShadow
+              geometry={nodes.bottom_emissive.geometry}
+            >
+              <meshStandardMaterial
+                copy={materials.Blue_Light}
+                color={glowColor}
+                emissive={glowColor}
+                emissiveIntensity={2}
+              />
+            </mesh>
+          </mesh>
+
+          <mesh castShadow receiveShadow geometry={nodes.chest.geometry}>
+            <meshPhysicalMaterial
+              copy={materials.White_Glossy}
+              color={mainColor}
+            />
+            <mesh
+              castShadow
+              receiveShadow
+              geometry={nodes.chest_emissive.geometry}
+            >
+              <meshStandardMaterial
+                copy={materials.Blue_Light}
+                color={glowColor}
+                emissive={glowColor}
+                emissiveIntensity={2}
+              />
+            </mesh>
+          </mesh>
+
+          <group name="hand_left_pivot" position={[0.363, 0.932, 0]}>
+            <mesh
+              castShadow
+              receiveShadow
+              geometry={nodes.hand_left.geometry}
+              position={[-0.363, -0.932, 0]}
+            >
+              <meshPhysicalMaterial
+                copy={materials.White_Glossy}
+                color={mainColor}
+              />
+            </mesh>
+          </group>
+
+          <group name="hand_right_pivot" position={[-0.363, 0.932, 0]}>
+            <mesh
+              castShadow
+              receiveShadow
+              geometry={nodes.hand_right.geometry}
+              position={[0.363, -0.932, 0]}
+            >
+              <meshPhysicalMaterial
+                copy={materials.White_Glossy}
+                color={mainColor}
+              />
+            </mesh>
+          </group>
+
+          <mesh castShadow receiveShadow geometry={nodes.neck.geometry}>
+            <meshPhysicalMaterial
+              copy={materials.White_Glossy}
+              color={mainColor}
+            />
+            <mesh
+              castShadow
+              receiveShadow
+              geometry={nodes.neck_emissive.geometry}
+            >
+              <meshStandardMaterial
+                copy={materials.Blue_Light}
+                color={glowColor}
+                emissive={glowColor}
+                emissiveIntensity={2}
+              />
+            </mesh>
+          </mesh>
+        </mesh>
+
+        <group ref={headRef} name="head_pivot" position={[0, 1.384, -0.042]}>
+          <mesh castShadow receiveShadow geometry={nodes.head.geometry}>
+            <meshPhysicalMaterial
+              copy={materials.White_Glossy}
+              color={mainColor}
+            />
+
+            <mesh
+              castShadow
+              receiveShadow
+              geometry={nodes.antenna_left_emissive.geometry}
+              position={[0, -1.384, 0.042]}
+            >
+              <meshStandardMaterial
+                copy={materials.Blue_Light}
+                color={glowColor}
+                emissive={glowColor}
+                emissiveIntensity={2}
+              />
+            </mesh>
+            <mesh
+              castShadow
+              receiveShadow
+              geometry={nodes.antenna_right_emissive.geometry}
+              position={[0, -1.384, 0.042]}
+            >
+              <meshStandardMaterial
+                copy={materials.Blue_Light}
+                color={glowColor}
+                emissive={glowColor}
+                emissiveIntensity={2}
+              />
+            </mesh>
+            <mesh
+              castShadow
+              receiveShadow
+              geometry={nodes.ear_left_emissive.geometry}
+              position={[0, -1.384, 0.042]}
+            >
+              <meshStandardMaterial
+                copy={materials.Blue_Light}
+                color={glowColor}
+                emissive={glowColor}
+                emissiveIntensity={2}
+              />
+            </mesh>
+            <mesh
+              castShadow
+              receiveShadow
+              geometry={nodes.ear_right_emissive.geometry}
+              position={[0, -1.384, 0.042]}
+            >
+              <meshStandardMaterial
+                copy={materials.Blue_Light}
+                color={glowColor}
+                emissive={glowColor}
+                emissiveIntensity={2}
+              />
+            </mesh>
+
+            <mesh
+              castShadow
+              receiveShadow
+              geometry={nodes.ears.geometry}
+              position={[0, -1.384, 0.042]}
+              material={materials.Black_Matt}
+            />
+
+            <mesh
+              castShadow
+              receiveShadow
+              geometry={nodes.face_visor.geometry}
+              position={[0, -1.384, 0.042]}
+              material={materials.Black_Matt}
+            >
+              <mesh castShadow receiveShadow geometry={nodes.eyes.geometry}>
+                <meshStandardMaterial
+                  copy={materials.Blue_Light}
+                  color={glowColor}
+                  emissive={glowColor}
+                  emissiveIntensity={2}
+                />
+              </mesh>
+              <mesh castShadow receiveShadow geometry={nodes.mouth.geometry}>
+                <meshStandardMaterial
+                  copy={materials.Blue_Light}
+                  color={glowColor}
+                  emissive={glowColor}
+                  emissiveIntensity={2}
+                />
+              </mesh>
+            </mesh>
+          </mesh>
+        </group>
+      </group>
+    </group>
+  );
+};
+
+// individual network entity wrapper
+const RemotePlayerItem = ({ pos }: { pos: PlayerState }) => {
+  const mainColor =
+    pos.team === "red"
+      ? "#ff4444"
+      : pos.team === "blue"
+        ? "#4444ff"
+        : pos.color;
+  const glowColor =
+    pos.team === "red"
+      ? "#ff8888"
+      : pos.team === "blue"
+        ? "#8888ff"
+        : "#00ffff";
+
+  return (
+    <RigidBody type="kinematicPosition" position={[pos.x, pos.y, pos.z]}>
+      <group rotation={[0, pos.yaw, 0]}>
+        <HoverBotModel pos={pos} mainColor={mainColor} glowColor={glowColor} />
+
+        <group position={[0, 1.4, 0]}>
+          <PlayerLabel player={pos} />
+        </group>
+      </group>
+    </RigidBody>
+  );
+};
+
+// main render loop
 const RemotePlayers = () => {
   const players = useGameStore((state) => state.players);
   const localId = useGameStore((state) => state.localId);
-
-  const { scene } = useGLTF(modelsBank.robot);
 
   return (
     <>
       {Object.entries(players)
         .filter(([id, pos]) => id !== localId && !pos.isDead)
         .map(([id, pos]) => (
-          <RigidBody
-            key={id}
-            type="kinematicPosition"
-            position={[pos.x, pos.y, pos.z]}
-          >
-            <group rotation={[0, pos.yaw, 0]}>
-              {/* removed the Y=1 offset! Center is center! */}
-              <mesh castShadow>
-                <capsuleGeometry
-                  args={[
-                    PLAYER_CONFIG.RADIUS,
-                    PLAYER_CONFIG.HALF_HEIGHT * 2,
-                    4,
-                    16,
-                  ]}
-                />
-                <meshStandardMaterial color={pos.color} wireframe />
-              </mesh>
-              <Clone
-                object={scene}
-                scale={1}
-                position={[0, -0.8, 0]}
-                castShadow
-              />
-              <PlayerLabel player={pos} />
-            </group>
-          </RigidBody>
+          <RemotePlayerItem key={id} pos={pos} />
         ))}
     </>
   );
 };
 
 export default RemotePlayers;
+
+useGLTF.preload(modelsBank.robot);
