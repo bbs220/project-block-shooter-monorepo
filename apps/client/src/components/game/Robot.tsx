@@ -40,138 +40,154 @@ export function Model(props: JSX.IntrinsicElements["group"]) {
   return (
     <group {...props} dispose={null}>
       <group name="Scene">
-        <mesh
-          name="body"
-          castShadow
-          receiveShadow
-          geometry={nodes.body.geometry}
-          material={materials.White_Glossy}
-        >
+        <group name="origin">
           <mesh
-            name="bottom"
+            name="body"
             castShadow
             receiveShadow
-            geometry={nodes.bottom.geometry}
+            geometry={nodes.body.geometry}
             material={materials.White_Glossy}
           >
             <mesh
-              name="bottom_emissive"
+              name="bottom"
               castShadow
               receiveShadow
-              geometry={nodes.bottom_emissive.geometry}
-              material={materials.Blue_Light}
-            />
-          </mesh>
-          <mesh
-            name="chest"
-            castShadow
-            receiveShadow
-            geometry={nodes.chest.geometry}
-            material={materials.White_Glossy}
-          >
+              geometry={nodes.bottom.geometry}
+              material={materials.White_Glossy}
+            >
+              <mesh
+                name="bottom_emissive"
+                castShadow
+                receiveShadow
+                geometry={nodes.bottom_emissive.geometry}
+                material={materials.Blue_Light}
+              />
+            </mesh>
             <mesh
-              name="chest_emissive"
+              name="chest"
               castShadow
               receiveShadow
-              geometry={nodes.chest_emissive.geometry}
-              material={materials.Blue_Light}
-            />
-          </mesh>
-          <mesh
-            name="hand_left"
-            castShadow
-            receiveShadow
-            geometry={nodes.hand_left.geometry}
-            material={materials.White_Glossy}
-          />
-          <mesh
-            name="hand_right"
-            castShadow
-            receiveShadow
-            geometry={nodes.hand_right.geometry}
-            material={materials.White_Glossy}
-          />
-          <mesh
-            name="neck"
-            castShadow
-            receiveShadow
-            geometry={nodes.neck.geometry}
-            material={materials.White_Glossy}
-          >
+              geometry={nodes.chest.geometry}
+              material={materials.White_Glossy}
+            >
+              <mesh
+                name="chest_emissive"
+                castShadow
+                receiveShadow
+                geometry={nodes.chest_emissive.geometry}
+                material={materials.Blue_Light}
+              />
+            </mesh>
+            <group name="hand_left_pivot" position={[0.363, 0.932, 0]}>
+              <mesh
+                name="hand_left"
+                castShadow
+                receiveShadow
+                geometry={nodes.hand_left.geometry}
+                material={materials.White_Glossy}
+                position={[-0.363, -0.932, 0]}
+              />
+            </group>
+            <group name="hand_right_pivot" position={[-0.363, 0.932, 0]}>
+              <mesh
+                name="hand_right"
+                castShadow
+                receiveShadow
+                geometry={nodes.hand_right.geometry}
+                material={materials.White_Glossy}
+                position={[0.363, -0.932, 0]}
+              />
+            </group>
             <mesh
-              name="neck_emissive"
+              name="neck"
               castShadow
               receiveShadow
-              geometry={nodes.neck_emissive.geometry}
-              material={materials.Blue_Light}
-            />
+              geometry={nodes.neck.geometry}
+              material={materials.White_Glossy}
+            >
+              <mesh
+                name="neck_emissive"
+                castShadow
+                receiveShadow
+                geometry={nodes.neck_emissive.geometry}
+                material={materials.Blue_Light}
+              />
+            </mesh>
           </mesh>
-        </mesh>
-        <mesh
-          name="head"
-          castShadow
-          receiveShadow
-          geometry={nodes.head.geometry}
-          material={materials.White_Glossy}
-        >
-          <mesh
-            name="antenna_left_emissive"
-            castShadow
-            receiveShadow
-            geometry={nodes.antenna_left_emissive.geometry}
-            material={materials.Blue_Light}
-          />
-          <mesh
-            name="antenna_right_emissive"
-            castShadow
-            receiveShadow
-            geometry={nodes.antenna_right_emissive.geometry}
-            material={materials.Blue_Light}
-          />
-          <mesh
-            name="ear_left_emissive"
-            castShadow
-            receiveShadow
-            geometry={nodes.ear_left_emissive.geometry}
-            material={materials.Blue_Light}
-          />
-          <mesh
-            name="ear_right_emissive"
-            castShadow
-            receiveShadow
-            geometry={nodes.ear_right_emissive.geometry}
-            material={materials.Blue_Light}
-          />
-          <mesh
-            name="ears"
-            castShadow
-            receiveShadow
-            geometry={nodes.ears.geometry}
-            material={materials.Black_Matt}
-          />
-          <mesh
-            name="face_visor"
-            castShadow
-            receiveShadow
-            geometry={nodes.face_visor.geometry}
-            material={materials.Black_Matt}
-          >
+          <group name="head_pivot" position={[0, 1.384, -0.042]}>
             <mesh
-              name="eyes"
+              name="head"
               castShadow
               receiveShadow
-              geometry={nodes.eyes.geometry}
-              material={materials.Blue_Light}
-            />
-            <mesh
-              name="mouth"
-              castShadow
-              receiveShadow
-              geometry={nodes.mouth.geometry}
-              material={materials.Blue_Light}
-            />
-          </mesh>
-        </mesh>
+              geometry={nodes.head.geometry}
+              material={materials.White_Glossy}
+            >
+              <mesh
+                name="antenna_left_emissive"
+                castShadow
+                receiveShadow
+                geometry={nodes.antenna_left_emissive.geometry}
+                material={materials.Blue_Light}
+                position={[0, -1.384, 0.042]}
+              />
+              <mesh
+                name="antenna_right_emissive"
+                castShadow
+                receiveShadow
+                geometry={nodes.antenna_right_emissive.geometry}
+                material={materials.Blue_Light}
+                position={[0, -1.384, 0.042]}
+              />
+              <mesh
+                name="ear_left_emissive"
+                castShadow
+                receiveShadow
+                geometry={nodes.ear_left_emissive.geometry}
+                material={materials.Blue_Light}
+                position={[0, -1.384, 0.042]}
+              />
+              <mesh
+                name="ear_right_emissive"
+                castShadow
+                receiveShadow
+                geometry={nodes.ear_right_emissive.geometry}
+                material={materials.Blue_Light}
+                position={[0, -1.384, 0.042]}
+              />
+              <mesh
+                name="ears"
+                castShadow
+                receiveShadow
+                geometry={nodes.ears.geometry}
+                material={materials.Black_Matt}
+                position={[0, -1.384, 0.042]}
+              />
+              <mesh
+                name="face_visor"
+                castShadow
+                receiveShadow
+                geometry={nodes.face_visor.geometry}
+                material={materials.Black_Matt}
+                position={[0, -1.384, 0.042]}
+              >
+                <mesh
+                  name="eyes"
+                  castShadow
+                  receiveShadow
+                  geometry={nodes.eyes.geometry}
+                  material={materials.Blue_Light}
+                />
+                <mesh
+                  name="mouth"
+                  castShadow
+                  receiveShadow
+                  geometry={nodes.mouth.geometry}
+                  material={materials.Blue_Light}
+                />
+              </mesh>
+            </mesh>
+          </group>
+        </group>
       </group>
     </group>
   );
