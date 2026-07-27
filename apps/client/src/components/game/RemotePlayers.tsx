@@ -18,6 +18,7 @@ const HoverBotModel = ({
   glowColor: string;
 }) => {
   const headRef = useRef<THREE.Group>(null);
+  const rightArmRef = useRef<THREE.Group>(null);
   const hoverRootRef = useRef<THREE.Group>(null);
 
   const { nodes, materials } = useGLTF(modelsBank.robot) as any;
@@ -40,6 +41,19 @@ const HoverBotModel = ({
         delta * 15,
       );
       headRef.current.rotation.set(nextPitch, 0, 0);
+    }
+
+    if (rightArmRef.current) {
+      // bring the resting position of arm from down to forward
+      const armTargetPitch = targetPitch - Math.PI / 2;
+
+      const currentPitch = rightArmRef.current.rotation.x;
+      const nextPitch = THREE.MathUtils.lerp(
+        currentPitch,
+        armTargetPitch,
+        delta * 15,
+      );
+      rightArmRef.current.rotation.set(nextPitch, 0, 0);
     }
 
     // hover effect
@@ -111,7 +125,11 @@ const HoverBotModel = ({
             </mesh>
           </group>
 
-          <group name="hand_right_pivot" position={[-0.363, 0.932, 0]}>
+          <group
+            name="hand_right_pivot"
+            ref={rightArmRef}
+            position={[-0.363, 0.932, 0]}
+          >
             <mesh
               castShadow
               receiveShadow
