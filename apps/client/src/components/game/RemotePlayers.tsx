@@ -1,11 +1,61 @@
 import { useRef } from "react";
 import * as THREE from "three";
 import { useFrame } from "@react-three/fiber";
-import { useGLTF } from "@react-three/drei";
+import { Clone, useGLTF } from "@react-three/drei";
 import { RigidBody } from "@react-three/rapier";
 import { useGameStore, type PlayerState } from "../../stores/useGameStore";
 import PlayerLabel from "./PlayerLabel";
 import { modelsBank } from "../../utils/assetPaths";
+
+// plug your dialled-in numbers here
+const REMOTE_WEAPON_TRANSFORMS: Record<
+  string,
+  {
+    position: [number, number, number];
+    rotation: [number, number, number];
+    scale: number;
+  }
+> = {
+  assaultRifle: {
+    position: [0, -0.4, 0.1],
+    rotation: [-90, 0, 180],
+    scale: 0.3,
+  },
+  pistol: {
+    position: [0, -0.4, 0.1],
+    rotation: [-90, 0, 180],
+    scale: 0.3,
+  },
+  burstRifle: {
+    position: [0, -0.4, 0.1],
+    rotation: [-90, 0, 180],
+    scale: 0.3,
+  },
+};
+
+const RemoteWeapon = ({ weaponId }: { weaponId: string }) => {
+  // fallback to assault rifle if weaponid is invalid
+  const safeWeaponId = modelsBank[weaponId] ? weaponId : "assaultRifle";
+  const { scene } = useGLTF(modelsBank[safeWeaponId]);
+
+  const transform =
+    REMOTE_WEAPON_TRANSFORMS[safeWeaponId] ||
+    REMOTE_WEAPON_TRANSFORMS.assaultRifle;
+
+  return (
+    <group
+      position={transform.position}
+      rotation={[
+        THREE.MathUtils.degToRad(transform.rotation[0]),
+        THREE.MathUtils.degToRad(transform.rotation[1]),
+        THREE.MathUtils.degToRad(transform.rotation[2]),
+      ]}
+      scale={transform.scale}
+    >
+      <Clone object={scene} castShadow />
+    </group>
+  );
+};
 
 // pure visual robot component
 const HoverBotModel = ({
@@ -141,6 +191,7 @@ const HoverBotModel = ({
                 color={mainColor}
               />
             </mesh>
+            <RemoteWeapon weaponId={pos.currentWeapon || "assaultRifle"} />
           </group>
 
           <mesh castShadow receiveShadow geometry={nodes.neck.geometry}>

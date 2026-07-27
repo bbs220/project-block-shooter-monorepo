@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { useGLTF } from "@react-three/drei";
+import { Clone, useGLTF } from "@react-three/drei";
 import { Group, MathUtils, Object3D, Vector3 } from "three";
 import { useFrame } from "@react-three/fiber";
 import { useGameStore } from "../../stores/useGameStore";
@@ -150,8 +150,8 @@ export default function WeaponViewModel() {
   });
 
   return (
-    <group ref={groupRef}>
-      <primitive object={scene} scale={[scale, scale, scale]} />
+    <group ref={groupRef} scale={[scale, scale, scale]}>
+      <Clone object={scene} />
     </group>
   );
 }

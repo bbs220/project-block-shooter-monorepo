@@ -28,10 +28,10 @@
 | **2D Audio** | Finished | Native HTML5 audio implementation for zero-latency hit markers and kill sounds. |
 | **3D Player Models** | Finished | Integrated remote HoverBot models with emissive team colors and procedural hovering. |
 | **Network Transforms** | Finished | Bulletproof YXZ Euler data sync solving Blender axis mismatches, Gimbal lock, and head-spin clipping. |
+| **Remote Weapons** | Finished | Snapped 3D weapons to `hand_right_pivot` with protected clone caching and dynamic scale offsets. |
 
 ## ⏳ Remaining Tasks (The Final Stretch)
 | Feature | Details |
 | :--- | :--- |
-| **Remote Weapons** | Snap the 3D weapon models onto the `hand_right_pivot` of the remote HoverBots so players can see what the enemy is holding. |
 | **3D Positional Audio** | Implement spatial sounds for thrusters and enemy gunshots using Three.js `<PositionalAudio>`. |
 | **Deployment** | Split-host production deployment (Vercel/Netlify for CDN static client, Linux VPS/Fly.io for UDP-enabled Node server). |
