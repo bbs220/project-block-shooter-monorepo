@@ -1,10 +1,10 @@
 import { GRAVITY } from "@block-shooter/shared";
 import {
-  Environment,
   GizmoHelper,
   GizmoViewport,
   Loader,
   PerspectiveCamera,
+  Sky,
   Stats,
 } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
@@ -14,7 +14,6 @@ import { FOV } from "../../utils/tunablesClient";
 import CrosshairUI from "./CrosshairUI";
 import ArenaGeometry from "./ArenaGeometry";
 import KillFeedUI from "./KillFeedUI";
-import LoadingScreen from "./LoadingScreen";
 import LocalPlayer from "./LocalPlayer";
 import MatchTimerUI from "./MatchTimerUI";
 import { NetworkManager } from "./NetworkManager";
@@ -23,7 +22,6 @@ import RemotePlayers from "./RemotePlayers";
 import ScoreboardUI from "./ScoreboardUI";
 import { SoundManager } from "./SoundManager";
 import WeaponViewmodel from "./WeaponViewModel";
-import { hdriBank } from "../../utils/assetPaths";
 import AdsVignette from "./AdsVigette";
 import PlayerInfoUI from "./PlayerInfoUI";
 
@@ -44,10 +42,12 @@ const PrimaryScene = () => {
           <GizmoViewport labelColor="white" visible={showGizmo} />
         </GizmoHelper>
         <Stats showPanel={0} />
-        <Environment
-          files={hdriBank.pureSky1}
-          background
-          backgroundBlurriness={0.8}
+        <ambientLight intensity={1} color={"#ffffff"} />
+        <Sky
+          distance={450000}
+          sunPosition={[0, 1, 0]}
+          inclination={0}
+          azimuth={0.25}
         />
         <>
           {/* captures mouse and moves camera for local player */}
@@ -65,8 +65,6 @@ const PrimaryScene = () => {
 const PrimaryCanvas = () => {
   return (
     <>
-      {/* sits on top until player data exists */}
-      <LoadingScreen />
       {/* cursor for aim */}
       <CrosshairUI />
       {/* container for pointer controls */}

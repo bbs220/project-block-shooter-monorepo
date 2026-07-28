@@ -22,8 +22,3 @@ export const modelsBank: Record<string, string> = {
   pistol: "/models/pistol_00.glb",
   robot: "/models/robot.glb",
 };
-
-export const hdriBank = {
-  pureSky0: "/hdri/citrus_orchard_road_puresky_2k.hdr",
-  pureSky1: "/hdri/kloppenheim_06_puresky_2k.hdr",
-};
