@@ -13,6 +13,7 @@ export const soundBank = {
   click: "/sounds/click.mp3",
   hit: "/sounds/hit.mp3",
   kill: "/sounds/kill.mp3",
+  thunder: "/sounds/thunder.mp3",
 };
 
 export const modelsBank: Record<string, string> = {

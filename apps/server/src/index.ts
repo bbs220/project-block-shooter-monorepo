@@ -16,7 +16,6 @@ import {
 import { getRandomSpawn } from "./utils/helpers.js";
 import { envValid } from "./utils/envValid.js";
 import { GRAVITY, MAPS } from "@block-shooter/shared";
-
 const PORT = Number(envValid.PORT);
 
 // export world so playerEvents can import it
