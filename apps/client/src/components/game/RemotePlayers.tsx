@@ -1,11 +1,11 @@
 import { useRef } from "react";
 import * as THREE from "three";
 import { useFrame } from "@react-three/fiber";
-import { Clone, useGLTF } from "@react-three/drei";
+import { Clone, PositionalAudio, useGLTF } from "@react-three/drei";
 import { RigidBody } from "@react-three/rapier";
 import { useGameStore, type PlayerState } from "../../stores/useGameStore";
 import PlayerLabel from "./PlayerLabel";
-import { modelsBank } from "../../utils/assetPaths";
+import { modelsBank, soundBank } from "../../utils/assetPaths";
 
 // plug your dialled-in numbers here
 const REMOTE_WEAPON_TRANSFORMS: Record<
@@ -116,6 +116,7 @@ const HoverBotModel = ({
   return (
     // axis correction
     <group ref={hoverRootRef} rotation={[0, Math.PI, 0]}>
+      <PositionalAudio url={soundBank.thunder} distance={3} loop />
       <group name="origin">
         <mesh castShadow receiveShadow geometry={nodes.body.geometry}>
           <meshPhysicalMaterial

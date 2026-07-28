@@ -68,6 +68,7 @@ const WEAPON_TRANSFORMS: Record<WeaponId, WeaponTransform> = {
 
 export default function WeaponViewModel() {
   const groupRef = useRef<Group>(null);
+  const cloneRef = useRef<Group>(null);
 
   const localId = useGameStore((state) => state.localId);
   const players = useGameStore((state) => state.players);
@@ -85,18 +86,21 @@ export default function WeaponViewModel() {
   useEffect(() => {
     let found: Object3D | null = null;
 
-    scene.traverse((child) => {
-      if (child.name.toLowerCase().includes("mag")) {
-        found = child;
-      }
-    });
+    // traverse the clone, not the master scene!
+    if (cloneRef.current) {
+      cloneRef.current.traverse((child) => {
+        if (child.name.toLowerCase().includes("mag")) {
+          found = child;
+        }
+      });
+    }
 
     magNodeRef.current = found;
 
     if (found) {
       originalMagPos.current.copy((found as Object3D).position);
     }
-  }, [scene]);
+  }, [currentWeapon, scene]); // re-run when the weapon changes
 
   // read transforms directly from our static config based on the current weapon
   const { posX, posY, posZ, adsX, adsY, adsZ, rotX, rotY, rotZ, scale } =
@@ -123,6 +127,7 @@ export default function WeaponViewModel() {
     const recoil = getRecoil();
     const magOffset = getMagDrop(delta);
 
+    // apply animation to the clone's magazine
     if (magNodeRef.current) {
       magNodeRef.current.position.y = originalMagPos.current.y + magOffset;
     }
@@ -151,7 +156,7 @@ export default function WeaponViewModel() {
 
   return (
     <group ref={groupRef} scale={[scale, scale, scale]}>
-      <Clone object={scene} />
+      <Clone ref={cloneRef} object={scene} />
     </group>
   );
 }
