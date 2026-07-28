@@ -24,6 +24,7 @@ import { SoundManager } from "./SoundManager";
 import WeaponViewmodel from "./WeaponViewModel";
 import AdsVignette from "./AdsVigette";
 import PlayerInfoUI from "./PlayerInfoUI";
+import ControlsInfo from "./ControlsInfo";
 
 const PrimaryScene = () => {
   const { showPhyDebug, showGizmo } = useTweakpane({
@@ -65,6 +66,8 @@ const PrimaryScene = () => {
 const PrimaryCanvas = () => {
   return (
     <>
+      {/* what buttons to press */}
+      <ControlsInfo />
       {/* cursor for aim */}
       <CrosshairUI />
       {/* container for pointer controls */}
