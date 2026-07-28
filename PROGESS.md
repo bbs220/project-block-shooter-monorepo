@@ -34,4 +34,6 @@
 | Feature | Details |
 | :--- | :--- |
 | **3D Positional Audio** | Implement spatial sounds for thrusters and enemy gunshots using Three.js `<PositionalAudio>`. |
-| **Deployment** | Split-host production deployment (Vercel/Netlify for CDN static client, Linux VPS/Fly.io for UDP-enabled Node server). |
+| **Deployment: Phase 1 (IN PROGRESS)** | Commit monorepo `Dockerfile`. Provision free-tier GCP `e2-micro` server (Ubuntu) and open network firewall for UDP/TCP `9208`. |
+| **Deployment: Phase 2** | Setup GitHub Actions CD pipeline (GHCR) and SSH keys to automatically build and push image updates to the GCP server. |
+| **Deployment: Phase 3** | Deploy the static Vite React client to Vercel global CDN pointing to the new GCP external IP. |
