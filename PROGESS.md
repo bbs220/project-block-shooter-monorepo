@@ -32,8 +32,8 @@
 
 ## ⏳ Remaining Tasks (The Final Stretch)
 | Feature | Details |
-| :--- | :--- |
-| **3D Positional Audio** | Implement spatial sounds for thrusters and enemy gunshots using Three.js `<PositionalAudio>`. |
-| **Deployment: Phase 1 (IN PROGRESS)** | Commit monorepo `Dockerfile`. Provision free-tier GCP `e2-micro` server (Ubuntu) and open network firewall for UDP/TCP `9208`. |
-| **Deployment: Phase 2** | Setup GitHub Actions CD pipeline (GHCR) and SSH keys to automatically build and push image updates to the GCP server. |
-| **Deployment: Phase 3** | Deploy the static Vite React client to Vercel global CDN pointing to the new GCP external IP. |
+|:-- |:-- |
+| 3D Positional Audio | Implement spatial sounds for thrusters and enemy gunshots using Three.js <PositionalAudio> |
+| Deployment: Phase 1 (COMPLETED) | Created unified monorepo Dockerfile, integrated Express server, and verified local builds |
+| Deployment: Phase 2 (COMPLETED) | Set up GitHub Actions CI/CD workflow pulling/pushing via PR merge to GitHub Container Registry (GHCR) |
+| Deployment: Phase 3 (READY) | Follow the VPS [Deployment](./DEPLOYMENT.md) Guide to provision a Linux server, open TCP/UDP 9208, and run the container |
