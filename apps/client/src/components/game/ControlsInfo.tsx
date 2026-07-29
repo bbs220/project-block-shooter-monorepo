@@ -1,6 +1,6 @@
 const ControlsInfo = () => {
   return (
-    <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 text-white/60 font-mono text-[10px] sm:text-xs pointer-events-none bg-black/60 px-6 py-2 backdrop-blur-md border-t border-white/10 whitespace-nowrap z-50">
+    <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 text-white/60 font-mono text-[10px] sm:text-xs pointer-events-none bg-black/60 px-6 py-2 backdrop-blur-md border-t border-white/10 whitespace-nowrap z-1">
       <div className="flex gap-3 items-center">
         <span>
           <strong className="text-white">WASD</strong> Move

@@ -2,6 +2,8 @@ import "dotenv/config";
 import { logger } from "./utils/logger.js";
 import geckos from "@geckos.io/server";
 import RAPIER from "@dimforge/rapier3d-compat";
+import http from "http";
+import { expressApp } from "./expressApp.js";
 import { getFullState, matchData, players } from "./state/gameState.js";
 import {
   handleConnection,
@@ -16,15 +18,16 @@ import {
 import { getRandomSpawn } from "./utils/helpers.js";
 import { envValid } from "./utils/envValid.js";
 import { GRAVITY, MAPS } from "@block-shooter/shared";
+
 const PORT = Number(envValid.PORT);
 
-// export world so playerEvents can import it
+// export world so playerevents can import it
 export let world: RAPIER.World;
 
 const deathZoneY = -50.0;
 const currentMap = MAPS["arena_01"];
 
-// calculate the maximum safe X and Z bounds OUTSIDE the loop to save CPU.
+// calculate the maximum safe x and z bounds outside the loop to save cpu.
 // subtract 1.5 meters from the edge to account for the wall thickness + player radius.
 const maxBoundX = currentMap.floor.width / 2 - 1.5;
 const maxBoundZ = currentMap.floor.depth / 2 - 1.5;
@@ -39,11 +42,11 @@ async function startServer() {
   world = new RAPIER.World(GRAVITY);
   logger.info("physics world initialized");
 
-  // create a single fixed RigidBody for the whole arena
+  // create a single fixed rigidbody for the whole arena
   const arenaBodyDesc = RAPIER.RigidBodyDesc.fixed();
   const arenaBody = world.createRigidBody(arenaBodyDesc);
 
-  // floor Collider
+  // floor collider
   const floorDesc = RAPIER.ColliderDesc.cuboid(
     currentMap.floor.width / 2,
     currentMap.floor.thickness / 2,
@@ -62,10 +65,16 @@ async function startServer() {
     world.createCollider(wallDesc, arenaBody);
   });
 
-  logger.info(`Loaded Physical Map Colliders: ${currentMap.name}`);
+  logger.info(`loaded physical map colliders: ${currentMap.name}`);
 
-  // now safe to listen for connections
-  io.listen(PORT);
+  // setup unified http and geckos server
+  const expressServer = http.createServer(expressApp);
+  io.addServer(expressServer);
+
+  // listen on the http server instead of direct io listen
+  expressServer.listen(PORT, () => {
+    logger.info(`🚀 server is live`);
+  });
 
   io.onConnection((channel) => {
     if (!channel.id) return;
@@ -159,7 +168,7 @@ async function startServer() {
           if (isOutOfBounds) {
             p.body.setTranslation({ x: safeX, y: pos.y, z: safeZ }, true);
             p.body.setLinvel({ x: 0, y: 0, z: 0 }, true);
-            logger.warn(`Player ${p.name} clamped inside arena bounds.`);
+            logger.warn(`player ${p.name} clamped inside arena bounds.`);
 
             // overwrite our local pos variable for the rest of the tick
             pos.x = safeX;
