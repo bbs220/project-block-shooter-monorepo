@@ -36,4 +36,4 @@
 | **3D Positional Audio** | Implement spatial sounds for thrusters and enemy gunshots using Three.js `<PositionalAudio>`. |
 | **Deployment: Phase 1 (COMPLETED)** | Created unified monorepo `Dockerfile`, integrated Express server, and verified local builds. |
 | **Deployment: Phase 2 (COMPLETED)** | Set up GitHub Actions CI/CD workflow pushing to GitHub Container Registry (GHCR) on PR merge. |
-| **Deployment: Phase 3 (READY)** | Follow the [VPS Deployment](./DEPLOYMENT.md) to provision a Linux server, open TCP/UDP `9208`, and run the container. |
+| **Deployment: Phase 3 (READY)** | Follow the [VPS Deployment](./DEPLOY.md) to provision a Linux server, open TCP/UDP `9208`, and run the container. |
