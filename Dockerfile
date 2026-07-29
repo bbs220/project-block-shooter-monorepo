@@ -1,25 +1,29 @@
-# Use a lightweight Node image
+# use a lightweight Node image
 FROM node:20-alpine
 
-# Set the working directory inside the container
+# set the working directory inside the container
 WORKDIR /app
 
-# Copy the root package.json files (for workspaces)
+# copy the root package.json files (for workspaces)
 COPY package*.json ./
 
-# Copy only the server and the shared logic (ignore the client)
+# copy the newly renamed folders
 COPY packages/shared ./packages/shared
 COPY apps/appServer ./apps/appServer
+COPY apps/appClient ./apps/appClient
 
-# Install all dependencies (npm workspaces will auto-link the shared folder)
+# install all dependencies across the monorepo
 RUN npm install
 
-# Build the server using tsup
+# build the client (CRITICAL: Express needs the dist folder!)
+RUN npm run build -w appClient
+
+# build the server
 RUN npm run build -w appServer
 
-# Open the exact port Geckos uses (UDP is critical!)
+# open the exact ports (UDP is critical for Geckos!)
 EXPOSE 9208/udp
 EXPOSE 9208/tcp
 
-# Boot the server
+# boot the server
 CMD ["npm", "run", "start", "-w", "appServer"]
