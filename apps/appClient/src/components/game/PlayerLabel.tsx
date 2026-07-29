@@ -7,7 +7,7 @@ export default function PlayerLabel({ player }: { player: PlayerState }) {
   const healthSegments = 10;
 
   return (
-    <Html position={[0, 2.8, 0]} center transform sprite>
+    <Html position={[0, 1.4, 0]} center transform sprite scale={0.5}>
       <div className="flex flex-col items-center gap-1 pointer-events-none select-none">
         <div className="flex items-center gap-1.5">
           <span

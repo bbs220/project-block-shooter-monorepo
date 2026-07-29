@@ -1,5 +1,5 @@
 {
-  "name": "block-shooter-workspace",
+  "name": "project_block_shooter",
   "private": true,
   "workspaces": [
     "apps/*",

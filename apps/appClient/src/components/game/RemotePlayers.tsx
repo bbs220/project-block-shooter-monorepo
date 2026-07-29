@@ -333,10 +333,7 @@ const RemotePlayerItem = ({ pos }: { pos: PlayerState }) => {
     <RigidBody type="kinematicPosition" position={[pos.x, pos.y, pos.z]}>
       <group rotation={[0, pos.yaw, 0]}>
         <HoverBotModel pos={pos} mainColor={mainColor} glowColor={glowColor} />
-
-        <group position={[0, 1.4, 0]}>
-          <PlayerLabel player={pos} />
-        </group>
+        <PlayerLabel player={pos} />
       </group>
     </RigidBody>
   );
